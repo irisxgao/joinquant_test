@@ -143,9 +143,23 @@
     font-size: 13px;
   }
 
-  #readall-btn {
+  #readall-btn,
+  #toggle-pinyin-btn {
     background: var(--accent);
     color: #fff;
+  }
+
+  #toggle-pinyin-btn.hidden-pinyin {
+    background: #999;
+  }
+
+  body.pinyin-hidden .study-jp,
+  body.pinyin-hidden .ic-jp,
+  body.pinyin-hidden .vocab-jp,
+  body.pinyin-hidden .number-jp,
+  body.pinyin-hidden .tone-jp,
+  body.pinyin-hidden .phrase-seg-pinyin {
+    display: none;
   }
 
   #status {
@@ -452,6 +466,7 @@
 <main id="main">
   <div id="readbar">
     <button id="readall-btn" type="button">朗读本章</button>
+    <button id="toggle-pinyin-btn" type="button">隐藏拼音</button>
     <span id="status"></span>
   </div>
 
@@ -2704,6 +2719,528 @@
 
 </section>
 
+<section class="chapter" id="ch-2_04" data-part="PART 2 生活口语" data-nav-label="2-04 电话"><h2 class="chapter-title">2-04 电话</h2>
+
+<div class="sub-tabs">
+  <button class="sub-tab-btn active" data-tab="phrases" onclick="showSubTab('ch-2_04','phrases')">常用短语</button>
+  <button class="sub-tab-btn" data-tab="dialogues" onclick="showSubTab('ch-2_04','dialogues')">实用对话</button>
+  <button class="sub-tab-btn" data-tab="vocab" onclick="showSubTab('ch-2_04','vocab')">词汇及语法</button>
+  <button class="sub-tab-btn" data-tab="grammar" onclick="showSubTab('ch-2_04','grammar')">语法解析</button>
+</div>
+
+<!-- 常用短语 -->
+<div class="sub-section active" data-tab="phrases">
+<div class="phrase-list">
+
+<div class="phrase-card" data-row-no="01">
+  <div class="study-jp">wei2, m4 goi1 hei3 mei3 bing2 xing6 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂,唔该系咪炳胜啊?</span>
+  </div>
+  <div class="study-zh">喂,请问是炳胜酒家啊?</div>
+</div>
+
+<div class="phrase-card" data-row-no="02">
+  <div class="study-jp">néi5 hou2, néi1 dou6 hei6 gem1 bou2 gung1 xi1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你好,呢度系金宝公司。</span>
+  </div>
+  <div class="study-zh">您好,这里是金宝公司。</div>
+</div>
+
+<div class="phrase-card" data-row-no="03">
+  <div class="study-jp">qing2 men6 yeo5 mé1 ho2 yi3 bong1 dou2 néi3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">请问有咩可以帮到你?</span>
+  </div>
+  <div class="study-zh">请问有什么可以帮助您啊?</div>
+</div>
+
+<div class="phrase-card" data-row-no="04">
+  <div class="study-jp">néi5 hou2, m4 goi1 wen2 cêu4 ging1 léi5 a</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你好,唔该温徐经理吖!</span>
+  </div>
+  <div class="study-zh">您好,请找徐经理。</div>
+</div>
+
+<div class="phrase-card" data-row-no="05">
+  <div class="study-jp">m4 hou2 yi3 xi1, kêu5 ngam1 ngam1 hang4 hoi zo2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔好意思,佢啱啱行开咗。</span>
+  </div>
+  <div class="study-zh">不好意思,他刚刚走开了。</div>
+</div>
+
+<div class="phrase-card" data-row-no="06">
+  <div class="study-jp">néi5 yeo5 mé1 xi6 wen2 kêu5 lé1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你有咩事温佢咧?</span>
+  </div>
+  <div class="study-zh">您有什么事情要找他呢?</div>
+</div>
+
+<div class="phrase-card" data-row-no="07">
+  <div class="study-jp">fong1 m4 fong1 bin6 leo4 dei1 go3 heo2 sên3 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">方唔方便留低个口信啊?</span>
+  </div>
+  <div class="study-zh">方便留下口信吗?</div>
+</div>
+
+<div class="phrase-card" data-row-no="08">
+  <div class="study-jp">deng2 cêu4 ging1 léi5 fan1 léi4 ngo5 zoi3 da2 guo3 léi4 a1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">等徐经理翻来我再打过嚟吖。</span>
+  </div>
+  <div class="study-zh">等徐经理回来我再打过来吧。</div>
+</div>
+
+<div class="phrase-card" data-row-no="09">
+  <div class="study-jp">ngo5 hei6 cêu4 biu1, bin1 wei2 wen2 ngo5</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我系徐彪,边位温我?</span>
+  </div>
+  <div class="study-zh">我是徐彪,哪位找我?</div>
+</div>
+
+<div class="phrase-card" data-row-no="10">
+  <div class="study-jp">m4 goi1 néi5 deng2 do1 zen6 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔该你等多阵啦!</span>
+  </div>
+  <div class="study-zh">麻烦您再等会儿。</div>
+</div>
+
+</div><!-- /.phrase-list -->
+</div><!-- /.sub-section phrases -->
+
+<!-- 实用对话 -->
+<div class="sub-section" data-tab="dialogues">
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景A 早上,徐家明生病了,母亲高敏向学校打电话请假</div>
+<div class="dialogue-line">
+  <div class="study-jp">wei2 néi5 hou2, m4 goi hei6 mei3 seb3 lug3 zung1 co1 sam1 ban6 gung1 sed1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂你好,唔该系咪十六中初三办公室啊?</span>
+  </div>
+  <div class="study-zh">高敏：喂,您好,请问是第十六中学初三办公室吗?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">ngo5 sêng2 wen2 co1 sam1 sam1 ban1 yêng4 lou xi1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我想揾初三三班杨老师。</span>
+  </div>
+  <div class="study-zh">高敏：我想找初三三班的杨老师。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">m4 hou2 yi3 xi1, yêng4 lou5 xi1 méi6 fan1. néi5 yeo5 mé1 xi6 wen2 kêu5 lé1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔好意思,杨老师未翻。你有咩事揾佢咧?</span>
+  </div>
+  <div class="study-zh">接线员：不好意思,杨老师还没回来,您有什么事情找她吗?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">o6. hei6 gem2 gé2, ngo5 hei hog6 sang1 gé3 ga1 zêng2. ngo5 go3 zei2 hei6 co1 sam1 sam1 ban6 gé3 cêu4 ga1 ming4, kêu5 gem1 yed6 m4 xü1 fug6 yiu3 céng2 yed1 yed6 ga3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哦。系咁嘅,我系学生嘅家长。我个仔系初三三班嘅徐家明,佢今日唔舒服要请一日假。</span>
+  </div>
+  <div class="study-zh">高敏：哦。是这样的,我是学生的家长。我的儿子是初三三班的徐家明,他今天不舒服要请一天假。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">O6, ming4 zei2 gem1 yed6 yiu3 céng2 ga3 a4? ngo5 hei6 gao3 sou3 hog6 gé3 yeo1 lou5 xi1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哦,明仔今日要请假啊?我系教数学嘅邱老师,</span>
+  </div>
+  <div class="study-zh">邱老师：哦,小明今天要请假吗?我是教数学的邱老师,</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">Zen6 gan1 yêng4 lou3 xi1 fan1 lei4, ngo5 giu3 kêu5 fug1 néi5 din6 wa2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">阵间杨老师翻嚟,我叫佢复你电话!</span>
+  </div>
+  <div class="study-zh">邱老师：等会儿杨老师回来了,我让她回您电话。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">hou2, m4 goi1 sai3 yeo1 lou3 xi1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">好,唔该晒邱老师。</span>
+  </div>
+  <div class="study-zh">高敏：好的,谢谢邱老师。</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景B 上午,办公室,刘薇打电话到餐厅订座</div>
+<div class="dialogue-line">
+  <div class="study-jp">Néi5 hou2, néi1 dou6 hei6 fug1 lem4 mun4 zeo2 ga1, qing2 men6 yeo5 mé1 ho2 yi3 bong1 dou2 néi5</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你好,呢度系福临门酒家,请问有咩可以帮到你?</span>
+  </div>
+  <div class="study-zh">接线员：您好,这里是福临门酒家,请问有什么可以帮您?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">néi5 hou2, ngo5 sêng2 déng6 gem1 man1 gé3 dai6 fong2, dai6 koi3 seb6 yi6 go3 yen4 zo2 yeo2. m4 goi yeo5 mou1 fong2 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你好,我想订今晚嘅大房,大概12个人左右。唔该有房啊?</span>
+  </div>
+  <div class="study-zh">刘薇：你好,我想预订今天晚上的大房,大概12个人左右,请问有房间吗?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">M4 hou2 yi3 xi1, gem1 man1 gé3 fong4 gan1 yi5 ging1 qün4 bou6 déng6 mun3 lag3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔好意思,今晚嘅房间已经全部订满嘞。</span>
+  </div>
+  <div class="study-zh">接线员：不好意思,今晚的房间已经全部订满了。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">gem2 dai3 téng1 lé1? Yeo6 wag6 zé2 kéi4 ta1 fen1 dim3 lé1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咁大厅呢?又或者其他分店呢?</span>
+  </div>
+  <div class="study-zh">刘薇：那么大厅呢?又或者其他分店呢?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">fu6 gen6 tin1 ho4 lou6 fen1 dim3 zung6 yeo5 yed1 gan1 dai6 fong2, sei2 m4 sei2 Bong1 néi5 yü6 déng6 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">附近天河路分店仲有一间大房,使唔使帮你预订啊?</span>
+  </div>
+  <div class="study-zh">接线员：附近天河路分店还有一间大房,需要帮您预订吗?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">m4 goi1 bong1 ngo5 yü6 déng6 a1, sé2 leo4 xiu2 zé2 leo4 jig6 zeo6 deg1 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔该帮我预定吖,写刘小姐留席就得喇。</span>
+  </div>
+  <div class="study-zh">刘薇：请帮我预定吧,写刘小姐预订就可以了。</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景C 下午,办公室,客户致电徐彪</div>
+<div class="dialogue-line">
+  <div class="study-jp">wei2, néi5 hou2, m4 goi1 wen2 cêu4 ging1 léi5 a1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂,你好,唔该温徐经理吖。</span>
+  </div>
+  <div class="study-zh">客户：喂,您好,麻烦找一下徐经理。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">m4 hou2 yi3 xi1, cêu4 ging1 léi5 ngam1 ngam1 hang4 hoi1 zo2, néi5 fong m4 fong1 bin6 leo4 dei1 go3 heo2 sên3 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔好意思,徐经理啱啱行开咗,你放唔方便留低个口信啊?</span>
+  </div>
+  <div class="study-zh">前台：不好意思,徐经理刚刚走开了,您方便留下口信吗?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">m4 sei2 leg3, deng2 cêu4 ging1 léi5 fan1 léi4 ngo5 zoi3 da2 guo3 léi4 a1, m4 goi1 sai3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔使嘞,等徐经理翻来我再打过嚟吖,唔该晒。</span>
+  </div>
+  <div class="study-zh">客户：不用了,等徐经理回来我再打过来吧,谢谢。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">m3 sei2 hag3 héi3 ... a1, cêu ging1 léi5 fan1 léi4 leg3, néi5 deng2 zen6, kêu5 léi4 téng1 din6 wa2 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔使客气 …… 吖,徐经理翻来嘞,你等阵,佢来听电话喇。</span>
+  </div>
+  <div class="study-zh">前台：不客气 …… 啊,徐经理回来了,您稍等,他过来接电话了。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">hou2 a3, m4 goi1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">好啊,唔该。</span>
+  </div>
+  <div class="study-zh">客户：好的,谢谢。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">wei2 néi5 hou2, ngo5 hei cêu4 biu1, bin1 wei2 wen2 ngo5</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂你好,我系徐彪,边位温我?</span>
+  </div>
+  <div class="study-zh">徐彪：喂你好,我是徐彪,哪位找我?</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景D 下午,王新杰打电话联系旅游公司</div>
+<div class="dialogue-line">
+  <div class="study-jp">wei2, m4 goi1 hei mei6 gem1 bou2 sêng1 mou3 lêu5 yeo4 gung1 xi1 a3?</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂,唔该系咪金宝商务旅游公司啊?</span>
+  </div>
+  <div class="study-zh">王新杰：喂,请问是金宝商务旅游公司吗?</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">Ngo5 sêng2 ji1 sên1 ha5 dim2 yêng2 ban6 léi5 yed6 bun2 qim1 jing3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我想咨询吓点样办理日本签证。</span>
+  </div>
+  <div class="study-zh">王新杰：我想咨询一下怎样办理日本签证。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">o6, néi5 deng2 zen6 a1. wei3, yin3 zé1, néi5 tou4 xin1 go2 go3 hag3 fad3 zo2 qün4 zen1 léi4 la3, néi seo1 ha5 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哦,你等阵吖。喂,燕姐,你头先嗰个客发咗传真嚟喇,你收吓啦!</span>
+  </div>
+  <div class="study-zh">接线员：哦,你等一下。哎,燕姐,你刚才那个客户发了传真过来,你收一下吧。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">wei2? yeo5 mou5 yen4 a3? ngo5 sêng2 ji1 sên1 yed6 bun2 qim1 jing3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂?有有人啊?我想咨询日本签证。</span>
+  </div>
+  <div class="study-zh">王新杰：喂?有没有人啊?我想咨询日本签证。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">m4 goi1 néi5 deng2 do1 zen6 la1. yin3 zé1 a3, néi5 fen6 qün4 zen1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔该你等多阵啦。燕姐啊,你份传真啊!</span>
+  </div>
+  <div class="study-zh">接线员：麻烦您再等会儿。燕姐啊,你的传真!</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">néi5 yeo5 mou5 gao2 co3, zung6 zou6 m4 zou6 sang1 yi3? fug6 mou6 tai3 dou6gem6 ca1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你有有搞错,仲做唔做生意?服务态度咁差!</span>
+  </div>
+  <div class="study-zh">王新杰：你有没有搞错,还做不做生意?服务态度这么差!</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">a3 sang1 néi5 deng2 do1 zen6 la1, mong4 a1 ma3 yi4 ga1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">阿生你等多阵啦,忙吖嘛宜家。</span>
+  </div>
+  <div class="study-zh">接线员：先生您再等会儿吧,现在很忙啊。</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">néi5 sên3 m3 sên3 ngo5 teo4 sou3 néi5 a1 la4? ngo5 men6 guo3 dei6 gan1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你信唔信我投诉你吖喇?我问过第间!</span>
+  </div>
+  <div class="study-zh">王新杰：你信不信我投诉你?我到别家问去!</div>
+</div>
+
+<div class="dialogue-line">
+  <div class="study-jp">gem2 gé3 fug mou6 tai3 dou6 néi5 déi6 ting3 zeb1 leb1 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咁嘅服务态度你哋听执笠啦!</span>
+  </div>
+  <div class="study-zh">王新杰：这样的服务态度你们等着关门大吉吧!</div>
+</div>
+</div>
+
+</div><!-- /.sub-section dialogues -->
+
+<!-- 词汇及语法 -->
+<div class="sub-section" data-tab="vocab">
+<div class="page-block">
+  <div class="vocab-section-title">生词联想与扩展</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>拼音</th>
+          <th>类比及联想词汇</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">电话</td>
+          <td class="vocab-jp">din6 waa2</td>
+          <td>手机 sau2 gei1、座机 zo6 gei1、打电话 daa2 din6 waa2、接电话 zip3 din6 waa2</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">请假</td>
+          <td class="vocab-jp">céng2 ga3</td>
+          <td>病假 beng6 ga3、年假 nin4 ga3、事假 si6 ga3、婚假 fun1 ga3</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">订座</td>
+          <td class="vocab-jp">ding6 zo6</td>
+          <td>预订 jyu6 ding6、定房 ding6 fong2、定位 ding6 wai6</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">口信</td>
+          <td class="vocab-jp">hau2 seon3</td>
+          <td>留言 lau4 jin4、便条 bin1 tiu4、短信 dun2 seon3</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">经理</td>
+          <td class="vocab-jp">ging1 léi5</td>
+          <td>主管 zu2 gun2、总监 zung2 gaam1、副经理 fu6 ging1 léi5</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">旅游</td>
+          <td class="vocab-jp">léu5 jau4</td>
+          <td>旅行 léu5 hang4、出游 cêu1 jau4、观光 gun1 gwong1</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">签证</td>
+          <td class="vocab-jp">qim1 jing3</td>
+          <td>护照 woo6 ziu3、证件 zing3 gin6、入境 yab6 ging3</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">服务态度</td>
+          <td class="vocab-jp">fug6 mou6 toi3 dou6</td>
+          <td>客户服务 haak3 woo6 fug6 mou6、专业 zyun1 jip6</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="page-block">
+  <div class="vocab-section-title">重点词汇释义与例句</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>普通话释义</th>
+          <th>例句（翻译）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">sêng2 wen2<br>想揾</td>
+          <td class="vocab-mean">想找</td>
+          <td class="vocab-ex">我想揾陈经理。<br><span class="vocab-translation">（我想找陈经理。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">m4 hou2 yi3 xi1<br>唔好意思</td>
+          <td class="vocab-mean">不好意思</td>
+          <td class="vocab-ex">唔好意思,佢唔在度。<br><span class="vocab-translation">（不好意思,他不在这里。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">leo4 dei1 go3 heo2 sên3<br>留低个口信</td>
+          <td class="vocab-mean">留下口信</td>
+          <td class="vocab-ex">你方唔方便留低个口信?<br><span class="vocab-translation">（你方便留下口信吗?）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">déng6<br>订</td>
+          <td class="vocab-mean">预订</td>
+          <td class="vocab-ex">我想订今晚嘅大房。<br><span class="vocab-translation">（我想预订今晚的大房。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">ji1 sên1<br>咨询</td>
+          <td class="vocab-mean">征询意见,提出问题</td>
+          <td class="vocab-ex">我想咨询吓办证程序。<br><span class="vocab-translation">（我想咨询一下办证程序。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">gan1 yi5<br>已经</td>
+          <td class="vocab-mean">已经</td>
+          <td class="vocab-ex">房间已经订满嘞。<br><span class="vocab-translation">（房间已经订满了。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">fug mou6<br>服务</td>
+          <td class="vocab-mean">提供帮助或服务</td>
+          <td class="vocab-ex">有咩可以帮到你?<br><span class="vocab-translation">（有什么可以帮助您吗?）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">tou4 sou3<br>投诉</td>
+          <td class="vocab-mean">向有关部门说明不满</td>
+          <td class="vocab-ex">我会投诉你嘅服务态度。<br><span class="vocab-translation">（我会投诉你的服务态度。）</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- 语法解析 -->
+<div class="sub-section" data-tab="grammar">
+<div class="page-block">
+  <div class="phrase-list">
+    <div class="phrase-card" data-row-no="01">
+      <div class="study-jp">m4 goi1 hei6 mei6 leo4 sang1 a3, ngo4 hei6 zêng1 xiu2 zé2 a3?</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">唔该系咪刘生啊,我系张小姐啊。</span>
+      </div>
+      <div class="study-zh">句式：唔该系咪……啊……系……啊。用于电话中的身份确认。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="02">
+      <div class="study-jp">néi3 hou2, ngo5 hei6 xing3 wa4 gung1 xi1 gé3 hag3 fug6 doi6 biu2</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">你好,我系胜华公司嘅客服代表。</span>
+      </div>
+      <div class="study-zh">句式：我系……公司嘅客服代表。用于电话中的身份介绍。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="03">
+      <div class="study-jp">qing2 men6 zêng sang1 hei2 m4 hei? dou6 a3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">请问张生喺唔喺度啊?</span>
+      </div>
+      <div class="study-zh">句式：请问……喺唔喺度啊?用于询问对方是否在场。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="04">
+      <div class="study-jp">m4 goi1 ngo5 wen2 leo4 xiu2 zé2 a1</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">唔该我揾刘小姐吖!</span>
+      </div>
+      <div class="study-zh">句式：唔该我揾……。用于电话中礼貌地要求找某人。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="05">
+      <div class="study-jp"></div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">明仔啊?我系杨老师啊。</span>
+      </div>
+      <div class="study-zh"></div>
+    </div>
+
+      <div class="phrase-card" data-row-no="06">
+      <div class="study-jp"></div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">喂,Mark,今晚得唔得闲啊?</span>
+      </div>
+      <div class="study-zh"></div>
+
+      <div class="phrase-card" data-row-no="07">
+      <div class="study-jp"></div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">知唔知我系边个啊?</span>
+      </div>
+      <div class="study-zh"></div>
+
+      <div class="phrase-card" data-row-no="08">
+      <div class="study-jp"></div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">好耐有打电话俾你嘞,仲记唔记得我啊?</span>
+      </div>
+      <div class="study-zh"></div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+</section>
+
       </div>
 </main>
 
@@ -3726,9 +4263,26 @@ function showSubTab(chapterId, tabName) {
   if (button) button.classList.add('active');
 }
 
+function togglePinyin() {
+  const btn = document.getElementById('toggle-pinyin-btn');
+  const body = document.body;
+  if (body.classList.contains('pinyin-hidden')) {
+    body.classList.remove('pinyin-hidden');
+    btn.textContent = '隐藏拼音';
+    btn.classList.remove('hidden-pinyin');
+    localStorage.setItem('pinyinHidden', 'false');
+  } else {
+    body.classList.add('pinyin-hidden');
+    btn.textContent = '显示拼音';
+    btn.classList.add('hidden-pinyin');
+    localStorage.setItem('pinyinHidden', 'true');
+  }
+}
+
 function bindShellEvents() {
   document.getElementById('stop-btn').addEventListener('click', stopSpeech);
   document.getElementById('readall-btn').addEventListener('click', readCurrentChapter);
+  document.getElementById('toggle-pinyin-btn').addEventListener('click', togglePinyin);
   document.getElementById('speed-slider').addEventListener('input', updateSpeedDisplay);
 
   document.addEventListener('click', function(event) {
@@ -3754,6 +4308,15 @@ function bindDynamicEvents() {
 async function initApp() {
   initPreferredVoice();
   window.speechSynthesis.addEventListener('voiceschanged', initPreferredVoice);
+
+  // 恢复拼音隐藏状态
+  const pinyinHidden = localStorage.getItem('pinyinHidden') === 'true';
+  if (pinyinHidden) {
+    document.body.classList.add('pinyin-hidden');
+    const btn = document.getElementById('toggle-pinyin-btn');
+    btn.textContent = '显示拼音';
+    btn.classList.add('hidden-pinyin');
+  }
 
   bindShellEvents();
   updateSpeedDisplay();
