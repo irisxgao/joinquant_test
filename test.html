@@ -1,131 +1,3798 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-HK">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>测试页面</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            padding: 40px;
-            max-width: 600px;
-            width: 100%;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 30px;
-        }
-        
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background-color: #667eea;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #5568d3;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background-color: #f0f0f0;
-            color: #333;
-            border: 1px solid #ddd;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #e0e0e0;
-        }
-        
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-left: 4px solid #667eea;
-            border-radius: 5px;
-            display: none;
-        }
-        
-        #result.show {
-            display: block;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>粤语就这么简单</title>
+<style>
+  :root {
+    --accent: #b44a2d;
+    --accent-strong: #8f361d;
+    --accent-soft: #f4dfd0;
+    --bg: #f6f1e8;
+    --panel: #fffdf9;
+    --panel-alt: #f2e7d9;
+    --sidebar-bg: #284254;
+    --sidebar-text: #f7f3ec;
+    --border: #decdb9;
+    --text: #2d241d;
+    --muted: #7a6a5b;
+    --highlight: #fff1c9;
+    --speaking: #ffe08a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    min-height: 100%;
+  }
+
+  body {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8f3ea 0%, #efe4d5 100%);
+    color: var(--text);
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+  }
+
+  #sidebar {
+    width: 220px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 12px;
+    background: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-y: auto;
+  }
+
+  #sidebar h1 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: center;
+    color: #ffd79b;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  #nav-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nav-btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--sidebar-text);
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .nav-btn:hover,
+  .nav-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  #controls {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  #controls label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #e8dfd2;
+  }
+
+  #speed-slider {
+    width: 100%;
+    accent-color: #f0a55e;
+  }
+
+  #stop-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px 24px 36px;
+  }
+
+  #readbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    background: rgba(255, 250, 243, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+
+  #readbar button {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  #readall-btn {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  #status {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  #chapter-container {
+    display: block;
+  }
+
+  .chapter {
+    display: none;
+  }
+
+  .chapter.active {
+    display: block;
+  }
+
+  .chapter-title {
+    margin: 0 0 18px;
+    font-size: 30px;
+    color: var(--accent-strong);
+    letter-spacing: 0.02em;
+  }
+
+  .page-block,
+  .dialogue-scene,
+  .phrase-card,
+  .vocab-table-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(76, 46, 24, 0.06);
+  }
+
+  .page-block,
+  .dialogue-scene,
+  .vocab-table-wrap {
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+
+  .scene-header,
+  .vocab-section-title {
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-strong);
+  }
+
+  .sub-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .sub-tab-btn {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 14px;
+    background: #fff;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .sub-tab-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .sub-section {
+    display: none;
+  }
+
+  .sub-section.active {
+    display: block;
+  }
+
+  .phrase-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .phrase-card {
+    padding: 14px 16px;
+    --row-play-slot: 0px;
+  }
+
+  .phrase-card.has-row-play-btn,
+  .dialogue-line.has-row-play-btn {
+    --row-play-slot: 46px;
+  }
+
+  .study-jp {
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    padding-left: var(--row-play-slot);
+  }
+
+  .study-zh {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #5f5042;
+    padding-left: var(--row-play-slot);
+  }
+
+  .dialogue-yue-row,
+  .dialogue-yue-row-static {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    line-height: 1.7;
+    padding-left: var(--row-play-slot);
+  }
+
+  .dialogue-yue-text,
+  .phrase-seg-char,
+  .ic-char,
+  .tone-char,
+  .number-yue,
+  .vocab-yue-token,
+  .init-char,
+  .yue {
+    font-size: 20px;
+  }
+
+  .phrase-seg,
+  .ic-char,
+  .tone-char,
+  .number-yue,
+  .vocab-yue-token,
+  .init-char,
+  .yue {
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 2px 4px;
+  }
+
+  .phrase-seg:hover,
+  .ic-char:hover,
+  .tone-char:hover,
+  .number-yue:hover,
+  .vocab-yue-token:hover,
+  .init-char:hover,
+  .yue:hover {
+    background: var(--highlight);
+  }
+
+  .speaking {
+    background: var(--speaking) !important;
+    outline: 2px solid #f2b948;
+  }
+
+  .phrase-play-btn,
+  .dialogue-scene-btn {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--accent-strong);
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .phrase-play-btn {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dialogue-scene-btn {
+    padding: 4px 10px;
+  }
+
+  .dialogue-scene-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    color: var(--accent-strong);
+  }
+
+  .dialogue-scene-toolbar {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  .dialogue-line {
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    background: #fffaf4;
+    border: 1px solid #eadcca;
+    border-radius: 12px;
+  }
+
+  .vocab-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .vocab-table th,
+  .vocab-table td,
+  .tone-table th,
+  .tone-table td {
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  .vocab-table th,
+  .tone-table th {
+    background: var(--panel-alt);
+  }
+
+  .tone-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  .initial-group {
+    margin-bottom: 14px;
+  }
+
+  .initial-group-label {
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-strong);
+  }
+
+  .initial-chars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .ic-card {
+    min-width: 82px;
+    padding: 8px 10px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .ic-jp {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 900px) {
+    body {
+      display: block;
+    }
+
+    #sidebar {
+      width: auto;
+      min-width: 0;
+      border-right: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    #main {
+      padding: 16px;
+    }
+
+    .chapter-title {
+      font-size: 24px;
+    }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎉 欢迎来到测试页面</h1>
-        <p>这是一个标准的 HTML 测试文件，包含了基础的结构、样式和交互功能。</p>
-        <p>点击下方按钮进行测试操作。</p>
-        
-        <div class="button-group">
-            <button class="btn-primary" onclick="showMessage()">点击我</button>
-            <button class="btn-secondary" onclick="clearMessage()">清除</button>
-        </div>
-        
-        <div id="result">
-            <strong>✓ 成功！</strong> 这是一条测试消息，时间为: <span id="timestamp"></span>
-        </div>
+<nav id="sidebar">
+  <h1>粤语就这么简单</h1>
+  <div id="nav-list"></div>
+  <div id="controls">
+    <label>点读速度：<span id="speed-display">1.0×</span></label>
+    <input type="range" id="speed-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+    <button id="stop-btn" type="button">停止</button>
+  </div>
+
+</nav>
+
+<main id="main">
+  <div id="readbar">
+    <button id="readall-btn" type="button">朗读本章</button>
+    <span id="status"></span>
+  </div>
+
+  <div id="chapter-container">
+<section class="chapter" id="ch-1_02" data-part="PART 1 基础语音" data-nav-label="1-02 声母"><h2 class="chapter-title">1-02 声母</h2>
+<div class="page-block">
+<div class="initial-group">
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">kau4</span><span class="ic-char" onclick="speak(this)">求</span></div>
+    <div class="ic-card"><span class="ic-jp">koeng4</span><span class="ic-char" onclick="speak(this)">强</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑪ gu (gw)</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">gu1</span><span class="ic-char" onclick="speak(this)">姑</span></div>
+    <div class="ic-card"><span class="ic-jp">gwaa1</span><span class="ic-char" onclick="speak(this)">瓜</span></div>
+    <div class="ic-card"><span class="ic-jp">gwong1</span><span class="ic-char" onclick="speak(this)">光</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑫ ku (kw)</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">fu1</span><span class="ic-char" onclick="speak(this)">枯</span></div>
+    <div class="ic-card"><span class="ic-jp">kwong4</span><span class="ic-char" onclick="speak(this)">狂</span></div>
+    <div class="ic-card"><span class="ic-jp">kwai1</span><span class="ic-char" onclick="speak(this)">亏</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑬ ng</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">ngo5</span><span class="ic-char" onclick="speak(this)">我</span></div>
+    <div class="ic-card"><span class="ic-jp">ngan4</span><span class="ic-char" onclick="speak(this)">银</span></div>
+    <div class="ic-card"><span class="ic-jp">ngau4</span><span class="ic-char" onclick="speak(this)">牛</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑭ h</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">haa1</span><span class="ic-char" onclick="speak(this)">虾</span></div>
+    <div class="ic-card"><span class="ic-jp">hoi2</span><span class="ic-char" onclick="speak(this)">海</span></div>
+    <div class="ic-card"><span class="ic-jp">hoeng1</span><span class="ic-char" onclick="speak(this)">香</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑮ j / z</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">zyu1</span><span class="ic-char" onclick="speak(this)">朱</span></div>
+    <div class="ic-card"><span class="ic-jp">zi2</span><span class="ic-char" onclick="speak(this)">纸</span></div>
+    <div class="ic-card"><span class="ic-jp">zaa1</span><span class="ic-char" onclick="speak(this)">渣</span></div>
+    <div class="ic-card"><span class="ic-jp">ze2</span><span class="ic-char" onclick="speak(this)">姐</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑯ q / c</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">ci4</span><span class="ic-char" onclick="speak(this)">雌</span></div>
+    <div class="ic-card"><span class="ic-jp">cin1</span><span class="ic-char" onclick="speak(this)">千</span></div>
+    <div class="ic-card"><span class="ic-jp">cung1</span><span class="ic-char" onclick="speak(this)">葱</span></div>
+    <div class="ic-card"><span class="ic-jp">coi3</span><span class="ic-char" onclick="speak(this)">菜</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑰ x / s</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">si1</span><span class="ic-char" onclick="speak(this)">诗</span></div>
+    <div class="ic-card"><span class="ic-jp">sit3</span><span class="ic-char" onclick="speak(this)">屑</span></div>
+    <div class="ic-card"><span class="ic-jp">saa1</span><span class="ic-char" onclick="speak(this)">沙</span></div>
+    <div class="ic-card"><span class="ic-jp">saan1</span><span class="ic-char" onclick="speak(this)">山</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑱ y</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">ji1</span><span class="ic-char" onclick="speak(this)">衣</span></div>
+    <div class="ic-card"><span class="ic-jp">jan4</span><span class="ic-char" onclick="speak(this)">人</span></div>
+    <div class="ic-card"><span class="ic-jp">jit6</span><span class="ic-char" onclick="speak(this)">热</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">⑲ w</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">wan1</span><span class="ic-char" onclick="speak(this)">温</span></div>
+    <div class="ic-card"><span class="ic-jp">wong4</span><span class="ic-char" onclick="speak(this)">王</span></div>
+    <div class="ic-card"><span class="ic-jp">wan4</span><span class="ic-char" onclick="speak(this)">云</span></div>
+  </div>
+</div>
+
+</div></section>
+
+
+
+<section class="chapter" id="ch-1_03" data-part="PART 1 基础语音" data-nav-label="1-03 单韵母"><h2 class="chapter-title">1-03 单韵母</h2>
+<div class="page-block">
+<div class="scene-header">粤语拼音声母表</div>
+<div class="initial-group">
+  <div class="initial-group-label">① a</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">a3</span><span class="ic-char" onclick="speak(this)">亚</span></div>
+    <div class="ic-card"><span class="ic-jp">ma1</span><span class="ic-char" onclick="speak(this)">妈</span></div>
+    <div class="ic-card"><span class="ic-jp">fa1</span><span class="ic-char" onclick="speak(this)">花</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">② o</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">go1</span><span class="ic-char" onclick="speak(this)">歌</span></div>
+    <div class="ic-card"><span class="ic-jp">ngo1</span><span class="ic-char" onclick="speak(this)">我</span></div>
+    <div class="ic-card"><span class="ic-jp">fo1</span><span class="ic-char" onclick="speak(this)">火</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">③ u</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">wu1</span><span class="ic-char" onclick="speak(this)">乌</span></div>
+    <div class="ic-card"><span class="ic-jp">fu3</span><span class="ic-char" onclick="speak(this)">富</span></div>
+    <div class="ic-card"><span class="ic-jp">fu2</span><span class="ic-char" onclick="speak(this)">苦</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① i</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">i1</span><span class="ic-char" onclick="speak(this)">衣</span></div>
+    <div class="ic-card"><span class="ic-jp">in4</span><span class="ic-char" onclick="speak(this)">诗</span></div>
+    <div class="ic-card"><span class="ic-jp">it6</span><span class="ic-char" onclick="speak(this)">池</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">④ ü</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">ü1</span><span class="ic-char" onclick="speak(this)">书</span></div>
+    <div class="ic-card"><span class="ic-jp">mü1</span><span class="ic-char" onclick="speak(this)">鱼</span></div>
+    <div class="ic-card"><span class="ic-jp">fü1</span><span class="ic-char" onclick="speak(this)">住</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ê</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">hê1</span><span class="ic-char" onclick="speak(this)">靴</span></div>
+    <div class="ic-card"><span class="ic-jp">dê2</span><span class="ic-char" onclick="speak(this)">朵</span></div>
+    <div class="ic-card"><span class="ic-jp">gê3</span><span class="ic-char" onclick="speak(this)">锯</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① é</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">zé2</span><span class="ic-char" onclick="speak(this)">姐</span></div>
+    <div class="ic-card"><span class="ic-jp">yé6</span><span class="ic-char" onclick="speak(this)">夜</span></div>
+    <div class="ic-card"><span class="ic-jp">cé1</span><span class="ic-char" onclick="speak(this)">车</span></div>
+  </div>
+</div>
+</section>
+
+
+<section class="chapter" id="ch-1_04" data-part="PART 1 基础语音" data-nav-label="1-04 复韵母"><h2 class="chapter-title">1-04 复韵母</h2>
+<div class="page-block">
+<div class="scene-header">粤语拼音声母表</div>
+<div class="initial-group">
+  <div class="initial-group-label">① ai</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">gai1</span><span class="ic-char" onclick="speak(this)">街</span></div>
+    <div class="ic-card"><span class="ic-jp">mai5</span><span class="ic-char" onclick="speak(this)">买</span></div>
+    <div class="ic-card"><span class="ic-jp">hai4</span><span class="ic-char" onclick="speak(this)">鞋</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">② éi</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">féi1</span><span class="ic-char" onclick="speak(this)">飞</span></div>
+    <div class="ic-card"><span class="ic-jp">séi3</span><span class="ic-char" onclick="speak(this)">四</span></div>
+    <div class="ic-card"><span class="ic-jp">béi6</span><span class="ic-char" onclick="speak(this)">避</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">③ ui</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">mui2</span><span class="ic-char" onclick="speak(this)">妹</span></div>
+    <div class="ic-card"><span class="ic-jp">bui3</span><span class="ic-char" onclick="speak(this)">背</span></div>
+    <div class="ic-card"><span class="ic-jp">kui2</span><span class="ic-char" onclick="speak(this)">绘</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① ei</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">zei2</span><span class="ic-char" onclick="speak(this)">仔</span></div>
+    <div class="ic-card"><span class="ic-jp">mei5</span><span class="ic-char" onclick="speak(this)">米</span></div>
+    <div class="ic-card"><span class="ic-jp">sei1</span><span class="ic-char" onclick="speak(this)">西</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">④ oi</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">oi3</span><span class="ic-char" onclick="speak(this)">爱</span></div>
+    <div class="ic-card"><span class="ic-jp">loi4</span><span class="ic-char" onclick="speak(this)">来</span></div>
+    <div class="ic-card"><span class="ic-jp">toi4</span><span class="ic-char" onclick="speak(this)">台</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ou</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">cou2</span><span class="ic-char" onclick="speak(this)">草</span></div>
+    <div class="ic-card"><span class="ic-jp">dou1</span><span class="ic-char" onclick="speak(this)">刀</span></div>
+    <div class="ic-card"><span class="ic-jp">gou1</span><span class="ic-char" onclick="speak(this)">高</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① iu</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">giu1</span><span class="ic-char" onclick="speak(this)">娇</span></div>
+    <div class="ic-card"><span class="ic-jp">qiu1</span><span class="ic-char" onclick="speak(this)">超</span></div>
+    <div class="ic-card"><span class="ic-jp">niu5</span><span class="ic-char" onclick="speak(this)">鸟</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① êu</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">cêu2</span><span class="ic-char" onclick="speak(this)">娶</span></div>
+    <div class="ic-card"><span class="ic-jp">sêu3</span><span class="ic-char" onclick="speak(this)">税</span></div>
+    <div class="ic-card"><span class="ic-jp">zêu1</span><span class="ic-char" onclick="speak(this)">追</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ao</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">mao1</span><span class="ic-char" onclick="speak(this)">猫</span></div>
+    <div class="ic-card"><span class="ic-jp">hao6</span><span class="ic-char" onclick="speak(this)">校</span></div>
+    <div class="ic-card"><span class="ic-jp">ngao5</span><span class="ic-char" onclick="speak(this)">咬</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① eo</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">leo4</span><span class="ic-char" onclick="speak(this)">楼</span></div>
+    <div class="ic-card"><span class="ic-jp">geo2</span><span class="ic-char" onclick="speak(this)">狗</span></div>
+    <div class="ic-card"><span class="ic-jp">yeo6</span><span class="ic-char" onclick="speak(this)">又</span></div>
+  </div>
+</div>
+</section>
+
+
+<section class="chapter" id="ch-1_05" data-part="PART 1 基础语音" data-nav-label="1-05 鼻韵母"><h2 class="chapter-title">1-05 鼻韵母</h2>
+<div class="page-block">
+<div class="scene-header">粤语拼音声母表</div>
+<div class="initial-group">
+  <div class="initial-group-label">① am</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">lam4</span><span class="ic-char" onclick="speak(this)">蓝</span></div>
+    <div class="ic-card"><span class="ic-jp">nam4</span><span class="ic-char" onclick="speak(this)">南</span></div>
+    <div class="ic-card"><span class="ic-jp">ham4</span><span class="ic-char" onclick="speak(this)">咸</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">② em</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">sem1</span><span class="ic-char" onclick="speak(this)">芯</span></div>
+    <div class="ic-card"><span class="ic-jp">zem1</span><span class="ic-char" onclick="speak(this)">针</span></div>
+    <div class="ic-card"><span class="ic-jp">gem1</span><span class="ic-char" onclick="speak(this)">金</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">③ im</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">jim1</span><span class="ic-char" onclick="speak(this)">尖</span></div>
+    <div class="ic-card"><span class="ic-jp">tim4</span><span class="ic-char" onclick="speak(this)">甜</span></div>
+    <div class="ic-card"><span class="ic-jp">him2</span><span class="ic-char" onclick="speak(this)">险</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① an</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">fan6</span><span class="ic-char" onclick="speak(this)">饭</span></div>
+    <div class="ic-card"><span class="ic-jp">man5</span><span class="ic-char" onclick="speak(this)">晚</span></div>
+    <div class="ic-card"><span class="ic-jp">wan4</span><span class="ic-char" onclick="speak(this)">还</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">④ in</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">din6</span><span class="ic-char" onclick="speak(this)">电</span></div>
+    <div class="ic-card"><span class="ic-jp">nin4</span><span class="ic-char" onclick="speak(this)">年</span></div>
+    <div class="ic-card"><span class="ic-jp">tin4</span><span class="ic-char" onclick="speak(this)">田</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ün</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">lün6</span><span class="ic-char" onclick="speak(this)">乱</span></div>
+    <div class="ic-card"><span class="ic-jp">xün4</span><span class="ic-char" onclick="speak(this)">船</span></div>
+    <div class="ic-card"><span class="ic-jp">nün5</span><span class="ic-char" onclick="speak(this)">暖</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① on</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">ngon1</span><span class="ic-char" onclick="speak(this)">安</span></div>
+    <div class="ic-card"><span class="ic-jp">hon5</span><span class="ic-char" onclick="speak(this)">旱</span></div>
+    <div class="ic-card"><span class="ic-jp">gon1</span><span class="ic-char" onclick="speak(this)">干</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① un</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">fun1</span><span class="ic-char" onclick="speak(this)">宽</span></div>
+    <div class="ic-card"><span class="ic-jp">wun2</span><span class="ic-char" onclick="speak(this)">碗</span></div>
+    <div class="ic-card"><span class="ic-jp"></span><span class="ic-char" onclick="speak(this)">官</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① en</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">sen1</span><span class="ic-char" onclick="speak(this)">身</span></div>
+    <div class="ic-card"><span class="ic-jp">yen4</span><span class="ic-char" onclick="speak(this)">人</span></div>
+    <div class="ic-card"><span class="ic-jp">guen1</span><span class="ic-char" onclick="speak(this)">军</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ên</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">cên1</span><span class="ic-char" onclick="speak(this)">春</span></div>
+    <div class="ic-card"><span class="ic-jp">sên4</span><span class="ic-char" onclick="speak(this)">唇</span></div>
+    <div class="ic-card"><span class="ic-jp">tên5</span><span class="ic-char" onclick="speak(this)">盾</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① m</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">m4</span><span class="ic-char" onclick="speak(this)">唔</span></div>
+
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① ng</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">ng5</span><span class="ic-char" onclick="speak(this)">午</span></div>
+    <div class="ic-card"><span class="ic-jp">ng5</span><span class="ic-char" onclick="speak(this)">五</span></div>
+    <div class="ic-card"><span class="ic-jp">ng6</span><span class="ic-char" onclick="speak(this)">误</span></div>
+  </div>
+</div>
+</section>
+
+<section class="chapter" id="ch-1_06" data-part="PART 1 基础语音" data-nav-label="1-06 后鼻韵母"><h2 class="chapter-title">1-06 后鼻韵母</h2>
+<div class="page-block">
+<div class="scene-header">粤语拼音声母表</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① ang</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">lang5</span><span class="ic-char" onclick="speak(this)">冷</span></div>
+    <div class="ic-card"><span class="ic-jp">guang5</span><span class="ic-char" onclick="speak(this)">逛</span></div>
+    <div class="ic-card"><span class="ic-jp">sang1</span><span class="ic-char" onclick="speak(this)">生</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① eng</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">deng1</span><span class="ic-char" onclick="speak(this)">灯</span></div>
+    <div class="ic-card"><span class="ic-jp">neng4</span><span class="ic-char" onclick="speak(this)">能</span></div>
+    <div class="ic-card"><span class="ic-jp">heng6</span><span class="ic-char" onclick="speak(this)">幸</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ung</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">fung1</span><span class="ic-char" onclick="speak(this)">风</span></div>
+    <div class="ic-card"><span class="ic-jp">dung1</span><span class="ic-char" onclick="speak(this)">东</span></div>
+    <div class="ic-card"><span class="ic-jp">pung1</span><span class="ic-char" onclick="speak(this)">碰</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ing</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">bing1</span><span class="ic-char" onclick="speak(this)">兵</span></div>
+    <div class="ic-card"><span class="ic-jp">hing1</span><span class="ic-char" onclick="speak(this)">兄</span></div>
+    <div class="ic-card"><span class="ic-jp">xing1</span><span class="ic-char" onclick="speak(this)">星</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ong</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">cong4</span><span class="ic-char" onclick="speak(this)">床</span></div>
+    <div class="ic-card"><span class="ic-jp">long6</span><span class="ic-char" onclick="speak(this)">浪</span></div>
+    <div class="ic-card"><span class="ic-jp">mong4</span><span class="ic-char" onclick="speak(this)">忙</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① éng</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">téng1</span><span class="ic-char" onclick="speak(this)">听</span></div>
+    <div class="ic-card"><span class="ic-jp">béng2</span><span class="ic-char" onclick="speak(this)">饼</span></div>
+    <div class="ic-card"><span class="ic-jp">jéng2</span><span class="ic-char" onclick="speak(this)">并</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① êng</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">lêng4</span><span class="ic-char" onclick="speak(this)">凉</span></div>
+    <div class="ic-card"><span class="ic-jp">cêng4</span><span class="ic-char" onclick="speak(this)">长</span></div>
+    <div class="ic-card"><span class="ic-jp">nêng4</span><span class="ic-char" onclick="speak(this)">娘</span></div>
+  </div>
+</div>
+
+</section>
+
+<section class="chapter" id="ch-1_07" data-part="PART 1 基础语音" data-nav-label="1-07 入声韵母"><h2 class="chapter-title">1-07 入声韵母</h2>
+<div class="page-block">
+<div class="scene-header">粤语拼音声母表</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① ab</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">dab3</span><span class="ic-char" onclick="speak(this)">答</span></div>
+    <div class="ic-card"><span class="ic-jp">ngab3</span><span class="ic-char" onclick="speak(this)">鸭</span></div>
+    <div class="ic-card"><span class="ic-jp">zab6</span><span class="ic-char" onclick="speak(this)">杂</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① eb</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">keb1</span><span class="ic-char" onclick="speak(this)">吸</span></div>
+    <div class="ic-card"><span class="ic-jp">geb1</span><span class="ic-char" onclick="speak(this)">急</span></div>
+    <div class="ic-card"><span class="ic-jp">zeb1</span><span class="ic-char" onclick="speak(this)">汁</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ib</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">tib3</span><span class="ic-char" onclick="speak(this)">贴</span></div>
+    <div class="ic-card"><span class="ic-jp">gib3</span><span class="ic-char" onclick="speak(this)">劫</span></div>
+    <div class="ic-card"><span class="ic-jp">yib6</span><span class="ic-char" onclick="speak(this)">业</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ad</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">fad3</span><span class="ic-char" onclick="speak(this)">发</span></div>
+    <div class="ic-card"><span class="ic-jp">sad3</span><span class="ic-char" onclick="speak(this)">杀</span></div>
+    <div class="ic-card"><span class="ic-jp">wad6</span><span class="ic-char" onclick="speak(this)">滑</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ed</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">med6</span><span class="ic-char" onclick="speak(this)">密</span></div>
+    <div class="ic-card"><span class="ic-jp">fed6</span><span class="ic-char" onclick="speak(this)">罚</span></div>
+    <div class="ic-card"><span class="ic-jp">ged1</span><span class="ic-char" onclick="speak(this)">吉</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① od</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">hod3</span><span class="ic-char" onclick="speak(this)">渴</span></div>
+    <div class="ic-card"><span class="ic-jp">god3</span><span class="ic-char" onclick="speak(this)">割</span></div>
+    <div class="ic-card"><span class="ic-jp">hod3</span><span class="ic-char" onclick="speak(this)">喝</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ud</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">fud3</span><span class="ic-char" onclick="speak(this)">阔</span></div>
+    <div class="ic-card"><span class="ic-jp">mud6</span><span class="ic-char" onclick="speak(this)">末</span></div>
+    <div class="ic-card"><span class="ic-jp">wud6</span><span class="ic-char" onclick="speak(this)">活</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① id</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">bid1</span><span class="ic-char" onclick="speak(this)">必</span></div>
+    <div class="ic-card"><span class="ic-jp">gid3</span><span class="ic-char" onclick="speak(this)">洁</span></div>
+    <div class="ic-card"><span class="ic-jp">yid6</span><span class="ic-char" onclick="speak(this)">热</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① üd</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">düd6</span><span class="ic-char" onclick="speak(this)">夺</span></div>
+    <div class="ic-card"><span class="ic-jp">yüd6</span><span class="ic-char" onclick="speak(this)">月</span></div>
+    <div class="ic-card"><span class="ic-jp">xüd3</span><span class="ic-char" onclick="speak(this)">说</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① êd</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">lêd6</span><span class="ic-char" onclick="speak(this)">律</span></div>
+    <div class="ic-card"><span class="ic-jp">sêd1</span><span class="ic-char" onclick="speak(this)">摔</span></div>
+    <div class="ic-card"><span class="ic-jp">dêd6</span><span class="ic-char" onclick="speak(this)">咄</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① ag</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">bag6</span><span class="ic-char" onclick="speak(this)">白</span></div>
+    <div class="ic-card"><span class="ic-jp">wag6</span><span class="ic-char" onclick="speak(this)">划</span></div>
+    <div class="ic-card"><span class="ic-jp">cag3</span><span class="ic-char" onclick="speak(this)">拆</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① eg</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">beg1</span><span class="ic-char" onclick="speak(this)">北</span></div>
+    <div class="ic-card"><span class="ic-jp">meg6</span><span class="ic-char" onclick="speak(this)">麦</span></div>
+    <div class="ic-card"><span class="ic-jp">seg1</span><span class="ic-char" onclick="speak(this)">塞</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① og</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">log6</span><span class="ic-char" onclick="speak(this)">乐</span></div>
+    <div class="ic-card"><span class="ic-jp">bog3</span><span class="ic-char" onclick="speak(this)">博</span></div>
+    <div class="ic-card"><span class="ic-jp">mog1</span><span class="ic-char" onclick="speak(this)">剥</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① ug</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">lug6</span><span class="ic-char" onclick="speak(this)">绿</span></div>
+    <div class="ic-card"><span class="ic-jp">dug6</span><span class="ic-char" onclick="speak(this)">毒</span></div>
+    <div class="ic-card"><span class="ic-jp">yug6</span><span class="ic-char" onclick="speak(this)">肉</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ig</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">big1</span><span class="ic-char" onclick="speak(this)">碧</span></div>
+    <div class="ic-card"><span class="ic-jp">yig1</span><span class="ic-char" onclick="speak(this)">忆</span></div>
+    <div class="ic-card"><span class="ic-jp">gig1</span><span class="ic-char" onclick="speak(this)">激</span></div>
+  </div>
+</div>
+
+
+<div class="initial-group">
+  <div class="initial-group-label">① êg</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">cêg3</span><span class="ic-char" onclick="speak(this)">桌</span></div>
+    <div class="ic-card"><span class="ic-jp">zêg3</span><span class="ic-char" onclick="speak(this)">雀</span></div>
+    <div class="ic-card"><span class="ic-jp">gêg3</span><span class="ic-char" onclick="speak(this)">脚</span></div>
+  </div>
+</div>
+
+<div class="initial-group">
+  <div class="initial-group-label">① ég</div>
+  <div class="initial-chars">
+    <div class="ic-card"><span class="ic-jp">zég</span><span class="ic-char" onclick="speak(this)">尺</span></div>
+    <div class="ic-card"><span class="ic-jp">dég</span><span class="ic-char" onclick="speak(this)">笛</span></div>
+    <div class="ic-card"><span class="ic-jp">xég</span><span class="ic-char" onclick="speak(this)">石</span></div>
+  </div>
+</div>
+
+</section>
+
+<section class="chapter" id="ch-1_08" data-part="PART 1 基础语音" data-nav-label="1-08 声调"><h2 class="chapter-title">1-08 声调</h2>
+<div class="page-block">
+<div class="scene-header">粤语六声调</div>
+<p style="font-size:13px;color:#555;margin:8px 0 14px;">粤语拼音标注 <strong>6个基本声调</strong>（调号1–6）。每句话的六个字，恰好依次代表第1声到第6声。点击每个字可收听发音。</p>
+
+
+<table class="tone-table">
+<thead>
+<tr>
+  <th style="width:14%">调号</th>
+  <th>第1声<br>阴平</th>
+  <th>第2声<br>阴上</th>
+  <th>第3声<br>阴去</th>
+  <th>第4声<br>阳平</th>
+  <th>第5声<br>阳上</th>
+  <th>第6声<br>阳去</th>
+</tr>
+</thead>
+<tbody id="tone-table-body"></tbody>
+</table>
+<p style="font-size:12px;color:#999;">💡 每句话六个字依次对应第1–6声。选一句你喜欢的反复朗读，即可掌握粤语六个基本声调。</p>
+</div>
+
+<div class="page-block">
+<div class="scene-header">入声词语点读</div>
+<p style="font-size:13px;color:#555;margin:8px 0 14px;">点击词语可逐字点读，点击 ▶ 可整词朗读。下面按阴入（1）、中入（3）、阳入（6）分组练习。</p>
+
+<div class="phrase-list">
+  <div style="font-size:12px;color:#c0392b;font-weight:bold;">阴入（第1调）</div>
+
+  <div class="phrase-card" data-row-no="01">
+  <div class="study-jp">zuk1 fuk1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">祝 福</span>
+  </div>
+  <div class="study-zh">祝福</div>
+</div>
+
+  <div class="phrase-card" data-row-no="02">
+  <div class="study-jp">ceot1 gik1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">出 击</span>
+  </div>
+  <div class="study-zh">出击</div>
+</div>
+
+  <div style="font-size:12px;color:#c0392b;font-weight:bold;">中入（第3调）</div>
+
+  <div class="phrase-card" data-row-no="03">
+  <div class="study-jp">tit3 taap3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">铁 塔</span>
+  </div>
+  <div class="study-zh">铁塔</div>
+</div>
+
+  <div class="phrase-card" data-row-no="04">
+  <div class="study-jp">bok3 saat3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">搏 杀</span>
+  </div>
+  <div class="study-zh">搏杀</div>
+</div>
+
+  <div style="font-size:12px;color:#c0392b;font-weight:bold;">阳入（第6调）</div>
+
+  <div class="phrase-card" data-row-no="05">
+  <div class="study-jp">luk6 zuk6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">陆 续</span>
+  </div>
+  <div class="study-zh">陆续</div>
+</div>
+
+  <div class="phrase-card" data-row-no="06">
+  <div class="study-jp">hok6 zaap6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">学 习</span>
+  </div>
+  <div class="study-zh">学习</div>
+</div>
+</div>
+</div></section>
+
+<section class="chapter" id="ch-2_01" data-part="PART 2 生活口语" data-nav-label="2-01 问候"><h2 class="chapter-title">2-01 问候</h2>
+
+<div class="sub-tabs">
+  <button class="sub-tab-btn active" data-tab="phrases" onclick="showSubTab('ch-2_01','phrases')">常用短语</button>
+  <button class="sub-tab-btn" data-tab="dialogues" onclick="showSubTab('ch-2_01','dialogues')">实用对话</button>
+  <button class="sub-tab-btn" data-tab="vocab" onclick="showSubTab('ch-2_01','vocab')">词汇及语法</button>
+  <button class="sub-tab-btn" data-tab="grammar" onclick="showSubTab('ch-2_01','grammar')">语法解析</button>
+</div>
+
+<!-- 常用短语 -->
+<div class="sub-section active" data-tab="phrases">
+<div class="phrase-list">
+
+<div class="phrase-card" data-row-no="01">
+  <div class="study-jp">zou2 san4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">早晨！</span>
+  </div>
+  <div class="study-zh">早上好！</div>
+</div>
+
+<div class="phrase-card" data-row-no="02">
+  <div class="study-jp">yau5 sam1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">有心。</span>
+  </div>
+  <div class="study-zh">谢谢关心。</div>
+</div>
+
+<div class="phrase-card" data-row-no="03">
+  <div class="study-jp">gam3 co3 dang6 aa3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咁错 荡啊？</span>
+  </div>
+  <div class="study-zh">什么风把你吹来了？（*用于熟悉朋友之间）</div>
+</div>
+
+<div class="phrase-card" data-row-no="04">
+  <div class="study-jp">mat1 gam3 ngaam1 ge2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">乜咁 啱嘅？</span>
+  </div>
+  <div class="study-zh">这么巧啊？</div>
+</div>
+
+<div class="phrase-card" data-row-no="05">
+  <div class="study-jp">gan6 pai4 dim2 aa3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">近排 点啊？</span>
+  </div>
+  <div class="study-zh">最近怎么样啊？</div>
+</div>
+
+<div class="phrase-card" data-row-no="06">
+  <div class="study-jp">sik6 zo2 fan6 mei6 aa3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">食咗饭 未啊？</span>
+  </div>
+  <div class="study-zh">吃饭了吗？（*只用于熟悉朋友之间）</div>
+</div>
+
+<div class="phrase-card" data-row-no="07">
+  <div class="study-jp">hou2 noi6 mou5 gin3 laa3</div>
+  <div class="dialogue-yue-row-static" data-segment-by="space" data-audio="07.MP3">
+    <span class="dialogue-yue-text">好耐 冇见 啦！</span>
+  </div>
+  <div class="study-zh">好久不见了！</div>
+</div>
+
+<div class="phrase-card" data-row-no="08">
+  <div class="study-jp">maa4 maa4 dei2 laa1 mai6 yau6 hai6 gam2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">麻麻地 啦， 咪又系 咁！</span>
+  </div>
+  <div class="study-zh">马马虎虎，还是老样子！</div>
+</div>
+
+<div class="phrase-card" data-row-no="09">
+  <div class="study-jp">zau2 sin1 dak1 haan4 zoi3 king1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">走先， 得闲 再倾。</span>
+  </div>
+  <div class="study-zh">先走了啊，下次有时间再聊。</div>
+</div>
+
+<div class="phrase-card" data-row-no="10">
+  <div class="study-jp">wan2 jat1 jat6 ceot1 lei4 sik6 fan6 aa3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">揾日出 出嚟 食饭 啊！</span>
+  </div>
+  <div class="study-zh">改天出来一起吃饭吧！</div>
+</div>
+
+</div><!-- /.phrase-list -->
+</div><!-- /.sub-section phrases -->
+
+<!-- 实用对话 -->
+<div class="sub-section" data-tab="dialogues">
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 早晨住宅楼电梯间，徐家明准备去上学，遇到张桂芬</div>
+<div class="dialogue-line">
+  <div class="study-jp">ming4 zei2, fan1 hog6 a4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">明仔，翻学啊？</span>
+  </div>
+  <div class="study-zh">张桂芬：小明，去上学吗？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hei6 a3, zêng1 yi1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">系啊，张姨。</span>
+  </div>
+  <div class="study-zh">徐家明：是啊，张阿姨。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">xig6 zo2 zou2 can1   méi6 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">食咗早餐 未啊？</span>
+  </div>
+  <div class="study-zh">张桂芬：吃早饭了吗？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">xig6 zo2 lag3。  zêng1 yi1,   ngo5 zeo6 fai2      dou3 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">食咗嘞。张姨，我就快 迟到喇！</span>
+  </div>
+  <div class="study-zh">徐家明：吃过了。张阿姨，我快要迟到了啊！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gem2 néi5 ji6 géi2 hou2 sêng1 hang4 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咁你 自己 好 声行 啊！</span>
+  </div>
+  <div class="study-zh">张桂芬：那你路上小心！</div>
+</div>
+</div>
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 上午公园内，张桂芬遇见晨运的陈正华</div>
+<div class="dialogue-line">
+  <div class="study-jp">zou2 sen4 wo3 cen2 bag3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">早晨 喎 陈伯！</span>
+  </div>
+  <div class="study-zh">张桂芬：早上好啊，陈伯！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">zêng1 yi1, med1 gem3 zou2 sen4 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">张姨， 乜咁 早晨啊？</span>
+  </div>
+  <div class="study-zh">陈正华：张阿姨，今天怎么这么早啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gem1 yed6 m4 sei2 sung3 go3 xûn1 fan1 yeo3 yi4 yûn2 mé1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">今日 唔使 送 个孙 翻 幼儿园 咩？</span>
+  </div>
+  <div class="study-zh">张桂芬：你今天不用送小孙子上幼儿园吗？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">sem1 pou2 kem4 yed6 ceo3 zuo2 go3 xûn1 fan1 hêu3, ngo5 nan4 deg1 qing1 han4 ha5</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">心抱 琴日 凑咗 个孙 翻去，我 难得 清闲 吓。</span>
+  </div>
+  <div class="study-zh">陈正华：儿媳妇昨天接孙子回去了（凑 = 带、照顾，咗 = 了（完成体），），我难得清闲一下。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gen6 pai2 sen1 tei2 dim2 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">近排， 身体 点啊？</span>
+  </div>
+  <div class="study-zh">张桂芬：最近身体怎么样啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">yed1 go3 lou5 hang1 mei6 yeo6 hei6 gem2, m4 sei2 béng6 dou1 teo1 xiu3 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">一个 老坑 咪 又系 咁， 唔 使病 都 偷笑啦！</span>
+  </div>
+  <div class="study-zh">陈正华：不还是老样子呗，一个老头自己过日子，不生病算走运了。</div>
+</div>
+</div>
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 中午公司楼下茶餐厅内，王新杰遇见旧同事徐彪</div>
+<div class="dialogue-line">
+  <div class="study-jp">wa3,      lou5 cêu2,      med1 gem3   ngam1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哗 ，老徐 ， 乜咁 啱啊？</span>
+  </div>
+  <div class="study-zh">王新杰：哇，老徐，这么巧啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">wei3, dim2 a3 néi5? gen6 pai2 hei2 bin1 dou6 fad6 dad6 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂 ，点啊 你？ 近排 喺边度 发达啊？</span>
+  </div>
+  <div class="study-zh">徐彪：哎，你最近怎么样？在哪里发财呀？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ma4 ma2 déi2 la1, mei6 yeo6 hei6 gem2! néi5 né1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">麻麻 地啦 ，咪又 系咁！ 你呢？</span>
+  </div>
+  <div class="study-zh">王新杰：马马虎虎，不还是老样子。你呢？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ngo5 yeo6 mei6 ca1 m4 do1, wei3, gem1 qi3 m4 deg1 han4, dei6 yed6 zoi3 wen2 néi5 king1 guo3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我 又咪 差唔多。 喂 ，今次 唔 得闲 ， 第日 再搵 你 倾过 。</span>
+  </div>
+  <div class="study-zh">徐彪：我不也是差不多。哎，今天比较忙，改天再找你聊天。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gem2 wen2 yed6 cêu1 lei4 xig6 fan6 wag6 zé2 da2 ma4 zêg3 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咁 搵日 出嚟 食饭 或者 打 麻雀 啦！</span>
+  </div>
+  <div class="study-zh">王新杰：那改天出来吃饭或者打麻将吧！</div>
+</div>
+</div>
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 下午办公室内，刘薇为肖勇引见王新杰</div>
+<div class="dialogue-line">
+  <div class="study-jp">xiu1 zung2, ngoi3 min3 yeo5 wei6 wong2 sang1 wen2 néi5</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">肖总， 外面 有位 王生 搵你。</span>
+  </div>
+  <div class="study-zh">刘薇：肖总，外面有位王先生找您。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">o6, giu3 kêu5 yeb6 lei4 a1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哦， 叫佢 入嚟 喎。</span>
+  </div>
+  <div class="study-zh">肖勇：哦，叫他进来吧。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">xiu1 zung2 néi5 hou2, ngo5 hei6 xing3 wa4 coi2 mou6 gung1 xi1 gé3 yib6 mou6 ging1 léi5 xiu2 wong2, sêng1 qi3 hei2 léi5 zung2 dou6, ngo5 déi6 gin3 guo3 ga3 la2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">肖总 你好， 我系 胜华 财务 公司 嘅 业务 经理 小王。 上次 喺 李总 度， 我地 见过 嘎喇。</span>
+  </div>
+  <div class="study-zh">王新杰：肖总您好，我是胜华财务公司的业务经理小王。上一次在李总那里，我们见过面的。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">néi5 hou2, m4 hou2 yi3 xi3 sêng1 qi3 mou5 lo2 néi5 kad1 pin2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你好， 唔好意思， 上次 冇 摞 你 咔片。</span>
+  </div>
+  <div class="study-zh">肖勇：你好，不好意思，上一次没有向你要名片。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">m4 gen2 yiu3, xiu1 zung2 tai3 hag1 héi2 la1, m4 goi1 do1 do1 guan1 jiu3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔紧要 ，肖总 太客气啦， 唔该 多多 关照。</span>
+  </div>
+  <div class="study-zh">王新杰：没关系，肖总太客气了，请多多关照。</div>
+</div>
+</div>
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 晚上家里，刘薇等丈夫陈国栋回家</div>
+<div class="dialogue-line">
+  <div class="study-jp">lou5 gung1 néi5 fan1 lei4 la4? dim2 gai2 gem3 ngan3 gé2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">老公 你 翻嚟 啦， 点解 咁 晏 嘅？</span>
+  </div>
+  <div class="study-zh">刘薇：老公你回来啦？怎么这么晚啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hei3 a1, ga1 ban1 a1 ma3, mou6 gei2 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">系啊， 加班 啊嘛， 冇计 啦！</span>
+  </div>
+  <div class="study-zh">陈国栋：是啊，加班嘛，没办法啦！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">fai3 di1 guo3 lei4 tei2 ha5 bin1 go3 lei4 zo2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">快啲 过嚟 睇下 边个 嚟咗。</span>
+  </div>
+  <div class="study-zh">刘薇：快点过来看看谁来了。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">wa3, lou5 biu2? hou2 noi6 mou5 gin3 la3, med1 gem3 co3 dong6 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哗， 老表？ 好耐 冇见 啦！ 乜咁 错荡 啊？</span>
+  </div>
+  <div class="study-zh">陈国栋：哗，表姐？好久不见啦！什么风把你吹来了啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">lo2 di1 yé6 guo3 lei4 béi2 néi5 déi6 a1 ma3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">攞 啲嘢 过嚟， 俾 你哋 啊嘛！</span>
+  </div>
+  <div class="study-zh">高敏：拿点东西过来给你们嘛！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">do1 zé6 sai3, lou5 biu2 zen1 hei6 yeo5 ngo5 déi6 sem1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">多谢晒， 老表 真系 有 我哋 心。</span>
+  </div>
+  <div class="study-zh">陈国栋：多谢晒，表姐真是有心。</div>
+</div>
+</div>
+</div>
+
+<!-- 词汇及语法 -->
+<div class="sub-section" data-tab="vocab">
+<div class="page-block">
+  <div class="vocab-section-title">生词联想与扩展</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>拼音</th>
+          <th>类比及联想词汇</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">早餐</td>
+          <td class="vocab-jp">zou2 can1</td>
+          <td>午餐 m5 can1、晚餐 man5 can1、下午茶 ha6 m5 ca4、宵夜 xiu1 ye2</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">迟到</td>
+          <td class="vocab-jp">qi4 dou2</td>
+          <td>早退 zou2 teu3、旷课 kuong5 fo1、旷工 kuong3 gung1、请假 ceng2 ga3</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">幼儿园</td>
+          <td class="vocab-jp">yeo3 yi4 yün2</td>
+          <td>学校 hog6 hao6、学前班 hog6 qin4 ban1、小学 xiu2 hog6、中学 zung1 hog6、大学 dai6 hog6</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">外面</td>
+          <td class="vocab-jp">ngoi min</td>
+          <td>里面 léu5 min、出面 cêu1 min、入面 yeb6 min6</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">公司</td>
+          <td class="vocab-jp">gung1 xi1</td>
+          <td>经理 ging1 léi5、企业 kéi5 yib6、集团 zab6 tün4</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">清闲</td>
+          <td class="vocab-jp">qing1 han4</td>
+          <td>得闲 deg1 han4、无聊 mou4 liu4</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">发达</td>
+          <td class="vocab-jp">fad3 dad6</td>
+          <td>发财 fad3 coi4、有钱 yeo5 qin2</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="page-block">
+  <div class="vocab-section-title">重点词汇释义与例句</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>普通话释义</th>
+          <th>例句（翻译）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">fan1 hog6<br>翻学</td>
+          <td class="vocab-mean">上学</td>
+          <td class="vocab-ex">mommy，我唔想翻学啊！<br><span class="vocab-translation">（妈妈，我不想上学啊！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">deg1 han4<br>得闲</td>
+          <td class="vocab-mean">有时间，有空</td>
+          <td class="vocab-ex">亮女 今晚 得唔得闲 一齐 食饭啊？<br><span class="vocab-translation">（美女今晚有空一起吃饭吗？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">m4 sei2<br>唔使</td>
+          <td class="vocab-mean">不需要，不用</td>
+          <td class="vocab-ex">食多啲啦唔使客气！<br><span class="vocab-translation">（多吃点吧，不用客气的！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">bin1 dou6<br>边度</td>
+          <td class="vocab-mean">哪里</td>
+          <td class="vocab-ex">你住边度啊？<br><span class="vocab-translation">（你在哪儿住呢？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">hou2 seng1<br>好声</td>
+          <td class="vocab-mean">小心，注意</td>
+          <td class="vocab-ex">唔好急，好声行啊！<br><span class="vocab-translation">（不用急的，小心点走路！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">ceo3 xun1<br>凑孙</td>
+          <td class="vocab-mean">带孙子</td>
+          <td class="vocab-ex">唔系个个老人家都中意帮手凑孙噶！<br><span class="vocab-translation">（不是每个老人家都喜欢帮忙带孙子的！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">sem1 pou5<br>心抱</td>
+          <td class="vocab-mean">儿媳妇</td>
+          <td class="vocab-ex">张伯你个心抱真系紧张啊！<br><span class="vocab-translation">（张伯你的儿媳妇真是贤惠啊！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">gen6 pai2<br>近排</td>
+          <td class="vocab-mean">最近，这段时间</td>
+          <td class="vocab-ex">近排我都好忙吖。<br><span class="vocab-translation">（这段时间我都很忙。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">lou5 hang1<br>老坑</td>
+          <td class="vocab-mean">老头（贬义，用于自嘲或责骂）</td>
+          <td class="vocab-ex">咪以为我系老坑就虾我！<br><span class="vocab-translation">（不要看我是老头就欺负我！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">da2 ma4 zêg2<br>打麻雀</td>
+          <td class="vocab-mean">打麻将，打牌</td>
+          <td class="vocab-ex">啲师奶最中意就系打麻雀！<br><span class="vocab-translation">（那些家庭主妇最喜欢打麻将了。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">m4 hou2 yi3 xi1<br>唔好意思</td>
+          <td class="vocab-mean">不好意思（用于道歉或者提起注意）</td>
+          <td class="vocab-ex">唔好意思，借借！<br><span class="vocab-translation">（不好意思，请让让！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">m4 goi1<br>唔该</td>
+          <td class="vocab-mean">请，麻烦（用于提起注意或者请求帮助）</td>
+          <td class="vocab-ex">唔该帮我开门吖！<br><span class="vocab-translation">（请帮我开门！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">dim2 gai2<br>点解</td>
+          <td class="vocab-mean">为什么</td>
+          <td class="vocab-ex">点解你要骂我？<br><span class="vocab-translation">（你为什么要骂我？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">dei6 yed6<br>第日</td>
+          <td class="vocab-mean">以后</td>
+          <td class="vocab-ex">宜家唔好好读书第日就揾唔到工喇！<br><span class="vocab-translation">（现在不好好念书以后就找不到工作了！）</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- 语法解析 -->
+<div class="sub-section" data-tab="grammar">
+<div class="page-block">
+  <div class="phrase-list">
+    <div class="phrase-card" data-row-no="01">
+      <div class="study-jp">zo2</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">佢 嚟咗 香港 一个 星期 喇。</span>
+      </div>
+      <div class="study-zh">语法：咗。表示动作完成或状态变化已经实现。例句：他来香港一个星期了。</div>
     </div>
-    
-    <script>
-        function showMessage() {
-            const resultDiv = document.getElementById('result');
-            const timestamp = document.getElementById('timestamp');
-            const now = new Date();
-            timestamp.textContent = now.toLocaleString('zh-CN');
-            resultDiv.classList.add('show');
+
+    <div class="phrase-card" data-row-no="02">
+      <div class="study-jp">sik6 gan2 faan6</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">食紧 饭。</span>
+      </div>
+      <div class="study-zh">语法：紧。表示动作正在进行。例句：正在吃饭。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="03">
+      <div class="study-jp">haang4 gan2</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">行紧。</span>
+      </div>
+      <div class="study-zh">语法：紧。表示动作正在进行。例句：正在走。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="04">
+      <div class="study-jp">soeng5 gan2 tong4</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">上紧 堂。</span>
+      </div>
+      <div class="study-zh">语法：紧。表示动作正在进行。例句：正在上课。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="05">
+      <div class="study-jp">saai3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">演唱会 飞 已经 卖晒。</span>
+      </div>
+      <div class="study-zh">语法：晒。用在动词或形容词后，表示“全部”。例句：演唱会门票已经全部售完了。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="06">
+      <div class="study-jp">ngo5 zung6 mei6 sik6 faan6 aa3, ji4 gaa1 hou2 tou5 ngo6</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">我 仲未 食饭 啊， 而家 好 肚饿。</span>
+      </div>
+      <div class="study-zh">语法：未。表示预期可能会发生，但到目前还没有发生。例句：我还没吃饭，现在很饿。</div>
+    </div>
+  </div>
+</div>
+</div>
+
+</section>
+
+
+<section class="chapter" id="ch-2_02" data-part="PART 2 生活口语" data-nav-label="2-02 介绍"><h2 class="chapter-title">2-02 介绍</h2>
+
+<div class="sub-tabs">
+  <button class="sub-tab-btn active" data-tab="phrases" onclick="showSubTab('ch-2_02','phrases')">常用短语</button>
+  <button class="sub-tab-btn" data-tab="dialogues" onclick="showSubTab('ch-2_02','dialogues')">实用对话</button>
+  <button class="sub-tab-btn" data-tab="vocab" onclick="showSubTab('ch-2_02','vocab')">词汇及语法</button>
+  <button class="sub-tab-btn" data-tab="grammar" onclick="showSubTab('ch-2_02','grammar')">语法解析</button>
+</div>
+
+<!-- 常用短语 -->
+
+<div class="sub-section active" data-tab="phrases">
+<div class="phrase-list">
+
+<div class="phrase-card" data-row-no="01">
+  <div class="study-jp">yi2? néi1 wei2 hei6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咦？ 呢位 系？</span>
+  </div>
+  <div class="study-zh">咦？这位是？</div>
+</div>
+
+<div class="phrase-card" data-row-no="02">
+  <div class="study-jp">gai3 xiu6 go3 yen4 néi5 xig1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">介绍 个人 你识！</span>
+  </div>
+  <div class="study-zh">介绍一个人给你认识。</div>
+</div>
+
+<div class="phrase-card" data-row-no="03">
+  <div class="study-jp">go3 wei2 tung4 xi6 néi5 déi6 hou2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">各位 同事 你哋 好！</span>
+  </div>
+  <div class="study-zh">各位同事你们好！</div>
+</div>
+
+<div class="phrase-card" data-row-no="04">
+  <div class="study-jp">hou4 zei2, néi1 go3 hei6 a3 qün4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">豪仔， 呢个 系 阿全。</span>
+  </div>
+  <div class="study-zh">小豪，这是阿全。</div>
+</div>
+
+<div class="phrase-card" data-row-no="05">
+  <div class="study-jp">dai6 ga1 giu3 ngo5 hou4 zei2 deg1 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">大家 叫 我 豪仔 得喇！</span>
+  </div>
+  <div class="study-zh">大家叫我小豪就可以了。</div>
+</div>
+
+<div class="phrase-card" data-row-no="06">
+  <div class="study-jp">qing2 dai6 ga1 do1 do1 ji2 gao3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">请 大家 多多 指教。</span>
+  </div>
+  <div class="study-zh">请大家多多指教。</div>
+</div>
+
+<div class="phrase-card" data-row-no="07">
+  <div class="study-jp">zung6 yeo5 hou2 do1 yé5 sêu1 yiu3 hêng3 gog3 wei2 hog6 zab6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">仲有 好多 嘢 需要 向 各位 学习。</span>
+  </div>
+  <div class="study-zh">还有很多东西需要向大家学习。</div>
+</div>
+
+<div class="phrase-card" data-row-no="08">
+  <div class="study-jp">ji6 ngo5 gai3 xiu6 ha5, ngo5 giu3 wong4 sen1 yü5</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">自我 介绍 吓， 我 叫 王新宇。</span>
+  </div>
+  <div class="study-zh">自我介绍一下，我叫王新宇。</div>
+</div>
+
+<div class="phrase-card" data-row-no="09">
+  <div class="study-jp">fong1 m4 fong1 bin6 leo4 dei1 din6 wa2 hou6 ma5 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">方唔方便 留低 电话号码 啊？</span>
+  </div>
+  <div class="study-zh">方便留下电话号码吗？</div>
+</div>
+
+<div class="phrase-card" data-row-no="10">
+  <div class="study-jp">gem1 yed6 yeo5 yen4 gai3 xiu6 zo2 go3 nêu5 zei2 béi2 ngo5 xig1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">今日 有人 介绍咗 个 女仔 俾我 识 啊！</span>
+  </div>
+  <div class="study-zh">今天有人介绍了个女孩子给我认识呢！</div>
+</div>
+
+</div><!-- /.phrase-list -->
+</div><!-- /.sub-section phrases -->
+
+
+<!-- 实用对话 -->
+
+<div class="sub-section" data-tab="dialogues">
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景A 早晨课室内，杨美珊向同学们介绍新同学林伟豪</div>
+<div class="dialogue-line">
+  <div class="study-jp">gog3 wei2 tung4 hog6, gem1 yed6 yeo5 wei2 sen1 tung4 hog6 jün3 léi4 ngo5 déi6 ban1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">各位 同学， 今日 有位 新同学 转嚟 我哋 班。</span>
+  </div>
+  <div class="study-zh">杨美珊：各位同学，今天有位新同学转到我们班来。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">dai6 ga1 hou2, ngo5 giu3 lem4 wei5 hou4, dai6 ga1 giu3 ngo5 hou4 zei2 zeo6 deg1 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">大家 好， 我 叫 林伟豪， 大家 叫 我 豪仔 就 得喇。</span>
+  </div>
+  <div class="study-zh">林伟豪：大家好，我叫林伟豪，大家叫我小豪就可以了。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">wei5 hou4 tung4 hog6 hei6 hêng1 gong2 yen4, gen3 jü6 fu6 mou5 bun1 léi4 guong2 zeo1 jü6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">伟豪 同学 系 香港人， 跟住 父母 搬嚟 广州 住。</span>
+  </div>
+  <div class="study-zh">杨美珊：伟豪同学是香港人，跟着父母搬来广州住。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">dai6 ga1 ping4 xi4 yiu3 bong1 ha5 keoi5 sug6 xig1 hog6 hao6 wan4 ging2 tung4 gung1 fo3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">大家 平时 要 帮吓 佢 熟悉 学校 环境 同 功课。</span>
+  </div>
+  <div class="study-zh">杨美珊：大家平时要帮帮他熟悉学校环境和功课。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hei6 a1, ngo5 ji5 qin4 yed1 jig6 dou1 hei2 hêng1 gong2 fan1 hog6, pou2 tung1 wa2 m4 hei6 géi2 hou2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">系啊， 我 之前 一直 都 喺 香港 翻学， 普通话 唔系 几好。</span>
+  </div>
+  <div class="study-zh">林伟豪：是啊，我之前一直都在香港上学，普通话不是很好。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ngo5 ngug1 kéi2 zou6 gong2 xig6 ca4 can1 téng1 gé3, fun1 ying4 dai6 ga1 léi4 bong1 cen3 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我 屋企 做 港式 茶餐厅 嘅， 欢迎 大家 嚟 帮衬 啊！</span>
+  </div>
+  <div class="study-zh">林伟豪：我家里是做港式茶餐厅的，欢迎大家来光顾！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">lèi4 xig6 yé5 yeo5 jid3 da2, zung6 sung3 sang1 guo2 tim1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">嚟 食嘢 有 折打， 仲 送 生果 添！</span>
+  </div>
+  <div class="study-zh">林伟豪：来吃东西有折扣，还送水果！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">wa3! néi5 dou1 géi2 xig1 zou6 sang1 yi3 ga3 wo3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哇！ 你 都 几 识 做生意 嘎喎！</span>
+  </div>
+  <div class="study-zh">杨美珊：哇！你也太会做生意了吧！</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景B 课间操场上，徐家明向钟铭全介绍新朋友林伟豪</div>
+<div class="dialogue-line">
+  <div class="study-jp">gou1 lou2 qün4, gai3 xiu6 go3 yen4 néi5 xig1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">高佬全， 介绍 个人 你识！</span>
+  </div>
+  <div class="study-zh">徐家明：高佬全，介绍一个人给你认识！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">bin1 go3 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">边个 啊？</span>
+  </div>
+  <div class="study-zh">钟铭全：谁啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hou4 zei2, néi1 go3 hei6 a3 qün4, qün4 nin4 kab1 zeoi3 gou1 gé3, ngo5 déi6 go3 go3 dou1 giu3 keoi5 gou1 lou2 qün4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">豪仔， 呢个 系 阿全， 全年级 最高 嘅， 我哋 个个 都 叫 佢 高佬全。</span>
+  </div>
+  <div class="study-zh">徐家明：小豪，这是阿全，他是全年级最高的，我们大家都叫他“高佬全”。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">néi1 go3 hei6 hou4 zei2, lem4 wei5 hou4, ngo5 déi6 ban1 gé3 cab3 ban1 saang1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">呢个 系 豪仔， 林伟豪， 我哋 班 嘅 插班生。</span>
+  </div>
+  <div class="study-zh">徐家明：这是小豪，林伟豪，是我们班的插班生。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gem1 yed6 sin1 léi4 gé3, gong2 ngou6 saang1 léi4 ga3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">今日 先 嚟 嘅， 港澳生 嚟 嘎。</span>
+  </div>
+  <div class="study-zh">徐家明：他今天才来，是港澳生。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">qün4 go1 néi5 hou2, ngo5 giu3 hou4 zei2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">全哥 你好， 我 叫 豪仔。</span>
+  </div>
+  <div class="study-zh">林伟豪：全哥你好，我叫小豪。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">téng1 ming4 zei2 gong2 wa6 néi5 déi6 sing4 yed1 yed1 cei4 da2 géi1, ho2 yi3 ngai3 maai4 ngo5 ga3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">听 明仔 讲话， 你哋 成日 一齐 打机， 可以 嗌埋 我 嘎！</span>
+  </div>
+  <div class="study-zh">林伟豪：听小明说，你们经常一起打游戏，可以叫上我啊！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">mé1 qün4 go1 a1, gem3 hak3 héi3, qün4 sai3 gaai3 dou1 giu3 ngo5 gou1 lou2 qün4 gé2, log6 tong4 yed1 cei4 da2 géi1 a1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咩 全哥 吖， 咁 客气， 全世界 都 叫 我 高佬全 嘅。 落堂 一齐 打机 吖！</span>
+  </div>
+  <div class="study-zh">钟铭全：什么全哥啊，这么客气，大家都叫我高佬全。下课一起打游戏吧！</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景C 上午公司会议室内，肖勇向大家介绍新同事徐彪</div>
+<div class="dialogue-line">
+  <div class="study-jp">dai6 ga1 hou2, gem1 yed6 lei6 wui2 hoi1 qi2 qin4 tung4 dai6 ga1 gai3 xiu6 go3 sen1 tung4 xi6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">大家 好， 今日 例会 开始 前 同 大家 介绍 个 新同事。</span>
+  </div>
+  <div class="study-zh">肖勇：大家好，今天例会开始前先给大家介绍一位新同事。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ngo5 déi6 bou6 mun4 gé3 fan1 xig1 si1, cêu4 biu1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我哋 部门 嘅 分析师， 徐彪。</span>
+  </div>
+  <div class="study-zh">肖勇：我们部门的分析师，徐彪。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">go3 wei2 tung4 xi6 néi5 déi6 hou2, ngo5 giu3 cêu4 biu1, céng2 dai6 ga1 do1 do1 ji2 gao3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">各位 同事 你哋 好， 我 叫 徐彪， 请 大家 多多 指教。</span>
+  </div>
+  <div class="study-zh">徐彪：各位同事你们好，我叫徐彪，请大家多多指教。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">cêu4 biu1 ji1 qin4 hei2 ngan4 hong4 zou6 teo4 zi1 fan1 xig1 yün4, yeo5 béi2 gao3 do1 ging1 yim6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">徐彪 之前 喺 银行 做 投资 分析员， 有 比较 多 经验。</span>
+  </div>
+  <div class="study-zh">肖勇：徐彪之前在银行做投资分析员，经验比较丰富。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">dai6 ga1 yi5 heo6 yeo5 mé1 yib6 mou6 soeng6 gé3 men6 tai4 yiu3 do1 di1 hêng3 keoi5 céng2 gaau3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">大家 以后 有 咩 业务 上 嘅 问题， 要 多啲 向 佢 请教。</span>
+  </div>
+  <div class="study-zh">肖勇：大家以后业务上有什么问题，要多向他请教。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">xiu1 zung2 tai3 toi4 geu2 le3, ngo5 hei6 nam4 hoi1 gam1 jung4 bit1 yip6 gé3, ji1 qin4 hei2 teo4 hong2 zou6 guo3 saam1 nin4 teo4 zi1 fan1 xig1 si1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">肖总 太 抬举 嘞， 我 系 南开 金融 毕业 嘅， 之前 喺 投行 做过 三年 投资 分析师。</span>
+  </div>
+  <div class="study-zh">徐彪：肖总太抬举了，我是南开金融毕业的，之前在投行做过三年投资分析师。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ngo5 deoi3 PE si1 mou6 gei1 gam1 béi2 gao3 sug6 xig1, hei1 mong6 ngo5 gé3 ging1 yim6 ho2 yi3 bong1 dou2 gung1 si1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我 对 PE 私募基金 比较 熟悉， 希望 我 嘅 经验 可以 帮到 公司。</span>
+  </div>
+  <div class="study-zh">徐彪：我对 PE 私募基金比较熟悉，希望我的经验可以帮到公司。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">yeo5 hou2 do1 yé5 zung6 yiu3 hêng3 xiu1 zung2 tung4 gog3 wei2 hog6 zab6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">有 好多 嘢 仲 需要 向 肖总 同 各位 学习。</span>
+  </div>
+  <div class="study-zh">徐彪：还有很多东西需要向肖总和各位学习。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hou2, fei3 wa2 zeo6 m4 do1 gong2, gem2 yi4 ga1 zing3 sik1 hoi1 wui2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">好， 废话 就 唔多 讲 嘞， 咁 宜家 正式 开会。</span>
+  </div>
+  <div class="study-zh">肖勇：好，废话就不多说了，现在正式开会。</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 场景D 傍晚电影院前，刘薇向杨美珊介绍学长王新宇</div>
+<div class="dialogue-line">
+  <div class="study-jp">wei3, méi5 san1, néi5 bin1, néi1 bin1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喂， 美珊， 呢边， 呢边 啊！</span>
+  </div>
+  <div class="study-zh">刘薇：喂，美珊，这边，这边！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">yün4 léi4 néi5 hei2 dou6 a4, wan2 dou2 ngo5 a1, yi2? néi1 wei2 hei6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">原嚟 你 喺 度 啊， 揾到 我 吖。 咦？ 呢位 系？</span>
+  </div>
+  <div class="study-zh">杨美珊：原来你在这儿啊，我终于找到你了。咦？这位是？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ji6 ngo5 gai3 xiu6 ha5, ngo5 giu3 wong4 sen1 yü5, leo4 wai5 hei6 ngo5 dai6 hog6 gé3 si1 mui2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">自我 介绍 吓， 我 叫 王新宇。 刘薇 系 我 大学 嘅 师妹。</span>
+  </div>
+  <div class="study-zh">王新宇：自我介绍一下，我叫王新宇。刘薇是我大学的师妹。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hai1, néi5 hou2 a3, ngo5 hei6 yêng4 méi5 san1, tung4 wai5 zé1 dou1 xig1 zo2 hou2 noi6 ga3 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">嗨， 你好 啊， 我 系 杨美珊， 同 薇姐 都 识咗 好耐 嘎喇。</span>
+  </div>
+  <div class="study-zh">杨美珊：嗨，你好啊，我是杨美珊，和薇姐认识很久了。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">dei6 yed1 ci3 gin3 min6, fong1 m4 fong1 bin6 leo4 dei1 din6 wa2 hou6 ma5 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">第一次 见面， 方唔方便 留低 电话号码 啊？</span>
+  </div>
+  <div class="study-zh">王新宇：第一次见面，方便留个电话号码吗？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">mou5 men6 tai4 a1, néi5 gei2 dei1 a1, gem2 néi5 géi2 do1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">冇 问题 啊， 你 记低 啊， 咁 你 几多 啊？</span>
+  </div>
+  <div class="study-zh">杨美珊：没问题，你记一下吧。那你的电话号码是多少啊？</div>
+</div>
+</div>
+</div>
+
+
+<!-- 词汇及语法 -->
+<div class="sub-section" data-tab="vocab">
+<div class="page-block">
+  <div class="vocab-section-title">生词联想与扩展</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>拼音</th>
+          <th>类比及联想词汇</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">今日</td>
+          <td class="vocab-jp">gem1 yed6</td>
+          <td>前日 qin4 yed6、琴日 kem4 yed6、听日 ting1 yed6、后日 hou6 yed6</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">熟悉</td>
+          <td class="vocab-jp">sug6 xig1</td>
+          <td>了解 liu5 gai2、认识 ying6 xig1、点头之交 dim2 teo4 ji1 gao1、陌生 meg6 seng1</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">父母</td>
+          <td class="vocab-jp">fu6 mou5</td>
+          <td>兄弟 hing1 dei6、姊妹 ji2 mui2、兄嫂 hing1 sou2、叔婶 sug1 sem2</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">学校</td>
+          <td class="vocab-jp">hog6 hao6</td>
+          <td>公司 gung1 xi1、单位 dan1 wei2、家庭 ga1 ting4</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">功课</td>
+          <td class="vocab-jp">gung1 fo3</td>
+          <td>作业 zog3 yib6、课程 fo3 qing4</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">茶餐厅</td>
+          <td class="vocab-jp">ca4 can1 teng1</td>
+          <td>西餐厅 sei1 can1 teng1、拉面馆 lai1 min6 gun2、茶楼 ca4 leo4</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">做生意</td>
+          <td class="vocab-jp">zou6 sang1 yi3</td>
+          <td>创业 cong3 yib6、打工 da2 gung1</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">抬举</td>
+          <td class="vocab-jp">toi4 geu2</td>
+          <td>赏识 seng2 xig1、交流 gao1 leo4、沟通 kau1 tung1</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="page-block">
+  <div class="vocab-section-title">重点词汇释义与例句</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>普通话释义</th>
+          <th>例句（翻译）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">bong1 cen3<br>帮衬</td>
+          <td class="vocab-mean">光顾</td>
+          <td class="vocab-ex">得闲 记得 再 嚟 帮衬 啊！<br><span class="vocab-translation">（有时间记得再过来光顾啊！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">xig6 yé5<br>食嘢</td>
+          <td class="vocab-mean">吃东西</td>
+          <td class="vocab-ex">你 做咩 又 唔 食嘢 啊？ 减肥 啊？<br><span class="vocab-translation">（你为什么又不吃东西呀？减肥吗？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">sang1 guo2<br>生果</td>
+          <td class="vocab-mean">水果</td>
+          <td class="vocab-ex">夏天 啲 生果 种类 好多 好 新鲜！<br><span class="vocab-translation">（夏天的水果种类很多，很新鲜！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">gou1 lou2<br>高佬</td>
+          <td class="vocab-mean">高人，高个子</td>
+          <td class="vocab-ex">你 觉得 头先 嗰个 高佬 点 啊？<br><span class="vocab-translation">（你觉得刚才那个高个子怎么样？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">da2 géi1<br>打机</td>
+          <td class="vocab-mean">打游戏机</td>
+          <td class="vocab-ex">仔， 你 唔好 一 有 时间 就 打机！<br><span class="vocab-translation">（儿子啊，你不要一有时间就打游戏机啦！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">ngai3<br>嗌</td>
+          <td class="vocab-mean">叫</td>
+          <td class="vocab-ex">有 好 嘢 记得 一定 要 嗌 我 啊！<br><span class="vocab-translation">（有好事情记得一定要告诉我啊！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">log6 tong4<br>落堂</td>
+          <td class="vocab-mean">下课</td>
+          <td class="vocab-ex">你 几点 落堂 啊？ 我 嚟 接 你 吖！<br><span class="vocab-translation">（你几点下课呀？我来接你吧！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">yi4 ga1<br>宜家 / 依家</td>
+          <td class="vocab-mean">现在</td>
+          <td class="vocab-ex">宜家 我 好 唔 得闲 啊！<br><span class="vocab-translation">（现在我很忙啊！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">wen2<br>搵</td>
+          <td class="vocab-mean">找，赚</td>
+          <td class="vocab-ex">我 冇 搵 你 啲 嘢， 你 自己 翻去 揾吓 啦！<br><span class="vocab-translation">（我没拿你的东西，你自己回去找一下吧！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">nêu5 zei2<br>女仔</td>
+          <td class="vocab-mean">女孩</td>
+          <td class="vocab-ex">女仔 大多数 中意 高啲 嘅 男仔！<br><span class="vocab-translation">（女孩子大多数喜欢高一点的男孩子！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">seu6 ngan5<br>顺眼</td>
+          <td class="vocab-mean">合眼缘</td>
+          <td class="vocab-ex">我 第一眼 见 佢 就 觉得 佢 好 顺眼。<br><span class="vocab-translation">（我第一眼见他就觉得他很合眼缘。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">geb1 zen3<br>急进</td>
+          <td class="vocab-mean">急于前进，冲动</td>
+          <td class="vocab-ex">追 女仔 唔 可以 咁 急进！<br><span class="vocab-translation">（追求女孩子不适宜太过冲动的！）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">tei2 din6 ying2<br>睇电影</td>
+          <td class="vocab-mean">看电影</td>
+          <td class="vocab-ex">我 平时 最 中意 睇电影 喇！<br><span class="vocab-translation">（我平时最喜欢看电影的。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">dai6 lou2<br>大佬</td>
+          <td class="vocab-mean">大哥，老大（帮派或者组织中）</td>
+          <td class="vocab-ex">你哋 呢度 边个 系 大佬？<br><span class="vocab-translation">（你们这儿谁说了算的？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">sai3 lou2<br>细佬</td>
+          <td class="vocab-mean">1. 弟弟 2. 小弟（谦称）</td>
+          <td class="vocab-ex">细佬 我 有 两个 细佬 噃！<br><span class="vocab-translation">（小弟我有两个弟弟呢！）</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- 语法解析 -->
+<div class="sub-section" data-tab="grammar">
+<div class="page-block">
+  <div class="phrase-list">
+    <div class="phrase-card" data-row-no="01">
+      <div class="study-jp">gai3 xiu6 go3 yen4 néi5 xig1</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">介绍 个人 你识！</span>
+      </div>
+      <div class="study-zh">语法：介绍……识。固定表达，表示“介绍给你认识”。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="02">
+      <div class="study-jp">dai6 ga1 giu3 ngo5 hou4 zei2 dak1 la3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">大家 叫 我 豪仔 得喇！</span>
+      </div>
+      <div class="study-zh">语法：得喇。表示“这样就可以了”“这样就行了”。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="03">
+      <div class="study-jp">fong1 m4 fong1 bin6 leo4 dei1 din6 wa2 hou6 ma5 a3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">方唔方便 留低 电话号码 啊？</span>
+      </div>
+      <div class="study-zh">语法：方唔方便……？礼貌提问句式，表示“方不方便……？”。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="04">
+      <div class="study-jp">qing2 dai6 ga1 do1 do1 ji2 gao3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">请 大家 多多 指教。</span>
+      </div>
+      <div class="study-zh">表达：请教。初次见面或正式介绍时常用的谦逊表达。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="05">
+      <div class="study-jp">zung6 yeo5 hou2 do1 yé5 sêu1 yiu3 hêng3 gog3 wei2 hog6 zab6</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">仲有 好多 嘢 需要 向 各位 学习。</span>
+      </div>
+      <div class="study-zh">表达：学习。用于自我介绍或工作场景里表示谦逊和学习态度。</div>
+    </div>
+  </div>
+</div>
+</div>
+
+</section>
+
+<section class="chapter" id="ch-2_03" data-part="PART 2 生活口语" data-nav-label="2-03 交通"><h2 class="chapter-title">2-03 交通</h2>
+
+<div class="sub-tabs">
+  <button class="sub-tab-btn active" data-tab="phrases" onclick="showSubTab('ch-2_03','phrases')">常用短语</button>
+  <button class="sub-tab-btn" data-tab="dialogues" onclick="showSubTab('ch-2_03','dialogues')">实用对话</button>
+  <button class="sub-tab-btn" data-tab="vocab" onclick="showSubTab('ch-2_03','vocab')">词汇及语法</button>
+  <button class="sub-tab-btn" data-tab="grammar" onclick="showSubTab('ch-2_03','grammar')">语法解析</button>
+</div>
+
+<!-- 常用短语 -->
+<div class="sub-section active" data-tab="phrases">
+<div class="phrase-list">
+
+<div class="phrase-card" data-row-no="01">
+  <div class="study-jp">m4 goi1, qing2 men6 bag6 wen4 san1 dim2 hêu3 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔该，请问白云山点去啊？</span>
+  </div>
+  <div class="study-zh">不好意思，请问白云山怎么走啊？</div>
+</div>
+
+<div class="phrase-card" data-row-no="02">
+  <div class="study-jp">néi5 xig1 m4 xig1 lou6 ga3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你识唔识路嘎？</span>
+  </div>
+  <div class="study-zh">你究竟知不知道怎么走的呀？</div>
+</div>
+
+<div class="phrase-card" data-row-no="03">
+  <div class="study-jp">hei2 go2 dou6 fu6 gen6 a4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">喺嗰度附近啊？</span>
+  </div>
+  <div class="study-zh">在那里附近吗？</div>
+</div>
+
+<div class="phrase-card" data-row-no="04">
+  <div class="study-jp">yün4 jü6 néi1 tiu4 lou6 jig6 hang4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">沿住呢条路直行！</span>
+  </div>
+  <div class="study-zh">沿着这条路直走！</div>
+</div>
+
+<div class="phrase-card" data-row-no="05">
+  <div class="study-jp">néi5 ngug' kéi2 hei2 bin1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你屋企喺边啊？</span>
+  </div>
+  <div class="study-zh">你家在哪儿啊？</div>
+</div>
+
+<div class="phrase-card" data-row-no="06">
+  <div class="study-jp">guo3 do1 go3 gai1 heo2 zeo6 hei6 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">过多个街口就系喇！</span>
+  </div>
+  <div class="study-zh">再过一个路口就是了！</div>
+</div>
+
+<div class="phrase-card" data-row-no="07">
+  <div class="study-jp">hêu3 dung6 man6 xing1 xing4 dab3 géi2 hou6 xin3 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">去动漫星城搭几号线啊？</span>
+  </div>
+  <div class="study-zh">去动漫星城坐地铁几号线呢？</div>
+</div>
+
+<div class="phrase-card" data-row-no="08">
+  <div class="study-jp">yed1 hou6 xin3 gung1 yün2 qin4 zam6 log6 déi6 tid3 zeo6 dou3 lag3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">一号线公园前站落地铁就到嘞。</span>
+  </div>
+  <div class="study-zh">一号线公园前站出地铁就到了。</div>
+</div>
+
+<div class="phrase-card" data-row-no="09">
+  <div class="study-jp">guo3 zo2 ced1 zei2 go2 go3 lou6 heo2 jün3 zo1 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">过咗“7仔”嗰个路口转右啦！</span>
+  </div>
+  <div class="study-zh">过了7-11便利店的那个路口右拐吧！</div>
+</div>
+
+<div class="phrase-card" data-row-no="10">
+  <div class="study-jp">néi3 hêu3 dou3 men6 men6 sêng1 cêng4 di1 yen4 zeo6 ji1 ga3 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你去到问问商场啲人就知嘎啦。</span>
+  </div>
+  <div class="study-zh">你去到那里问问商场的人就知道了。</div>
+</div>
+
+</div>
+</div>
+
+<!-- 实用对话 -->
+<div class="sub-section" data-tab="dialogues">
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 A场景 早上马路边，张桂芬向路人问路</div>
+<div class="dialogue-line">
+  <div class="study-jp">m4 goi1, leng3 zei2, qing2 men6 bag6 wen4 san1 dim2 heu3 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">唔该，靓仔，请问白云山点去啊？</span>
+  </div>
+  <div class="study-zh">张桂芬：不好意思，年轻人，请问白云山怎么走啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">a3 yi1 nei5 seng2 heu3 bag6 wen1 san1 a4, nei1 tiu4 lou6 jig6 hang4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">阿姨，你想去白云山啊？呢条路直行。</span>
+  </div>
+  <div class="study-zh">路人：阿姨你想去白云山吗？沿着这条路一直走。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gen3 jyu6 zeo6 gin3 dou2 bag6 wen4 san1 seo6 piu3 dim2 hei2 zo2 seo2 bin1 lag3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">跟住就见到白云山售票点喺左手边嘞。</span>
+  </div>
+  <div class="study-zh">路人：然后就会看到白云山的售票点在左手边了。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">yun4 jyu6 nei1 tiu4 lou6 jig6 hang4 zeo6 deg1 la3, hei6 mei6 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">沿住呢条路直行就得喇，系咪啊？</span>
+  </div>
+  <div class="study-zh">张桂芬：沿着这条路直走就行了，对吗？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hei6 a3, hei2 seo6 piu3 dim2 ced1 xi6 lou5 yen4 zing6 ho2 nang4 zung6 ho2 ji3 min5 piu3 tim1, ho2 ji3 jig6 jip3 seng5 san1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">系啊，喺售票点出示老人证，可能仲可以免票添，可以直接上山。</span>
+  </div>
+  <div class="study-zh">路人：是啊，在售票点出示老人证可能还能免票呢，可以直接上山。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">o6, hou2, m4 goi1 sai3 leng3 zei2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哦，好，唔该晒靓仔。</span>
+  </div>
+  <div class="study-zh">张桂芬：哦，好的，谢谢哈年轻人。</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 B场景 上午，徐彪开车送儿子徐家明去同学家玩</div>
+<div class="dialogue-line">
+  <div class="study-jp">a3 zei2 a3, nei5 geo6 ging2 xig1 m4 xig1 deg1 lou6 ga3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">阿仔啊，你究竟识唔识路嘎？</span>
+  </div>
+  <div class="study-zh">徐彪：儿子啊，你究竟知不知道怎么走的呀？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ngo5 gei3 deg1 tung4 hog6 gong2 waa6 hei6 hei2 nei1 dou6 fu6 gen6 ga3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">我记得同学讲话系呢度附近嘎！</span>
+  </div>
+  <div class="study-zh">徐家明：我记得同学说是在这里附近的！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">bed1 yu4 nei5 da2 go3 din6 waa2 men6 haa5 tung4 hog6 zai2 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">不如你打个电话问吓同学仔啦！</span>
+  </div>
+  <div class="study-zh">徐彪：不如你打个电话问一下同学吧！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gou1 lou2 qun4, ngo5 yi4 gaa1 hei2 ced1 zai2 fu6 gen6 a3, nei5 ngug1 kei2 hei2 bin1 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">高佬全，我宜家喺7仔附近啊，你屋企喺边啊？</span>
+  </div>
+  <div class="study-zh">徐家明：高佬全，我现在在7-11便利店附近啊，你家在哪儿啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">guo3 zo2 ced1 zai2 go2 go3 lou6 heo2 jun3 zo2 la1, jig6 hang4 guo3 do1 go3 gai1 heo2 zeo6 hei6 la3, yeng4 guong1 faa1 yun2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">过咗7仔嗰个路口转左啦，直行过多一个街口就系喇，阳光花园。</span>
+  </div>
+  <div class="study-zh">钟铭全：过了7-11便利店那个路口左拐吧，直走再过一个路口就是了，阳光花园。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">ming4 saai3, zan6 gaan1 gin3. lou5 dau6, qin4 min6 lou6 heo2 jun3 zo2 yeng4 guong1 faa1 yun2 aa1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">明晒，阵间见。老豆，前面路口转左阳光花园吖。</span>
+  </div>
+  <div class="study-zh">徐家明：明白了，阵间见。老爸，前面路口左转就是阳光花园啊。</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 C场景 电话中，杨美珊问刘薇日本餐厅的位置</div>
+<div class="dialogue-line">
+  <div class="study-jp">mei4 ze1, ngo5 hei6 a3 san1 a3. seng6 ci3 nei5 waa6 hou2 hou2 sik6 ge3 go2 gaan1 yed6 bun2 coi3 can1 teng1 le1, hei2 bin1 dou6 a3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">薇姐，我系阿珊啊。上次你话好好食嘅嗰间日本菜餐厅咧，喺边度啊？</span>
+  </div>
+  <div class="study-zh">杨美珊：薇姐，我是阿珊。上次你说很好吃的那间日本餐厅，在哪里啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">go2 gaan1 je5 aa4, zou6 me1 aa3, dak6 jin4 gaan1 soeng2 heu3 ge2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">嗰间嘢啊，做咩啊？突然间想去嘅？</span>
+  </div>
+  <div class="study-zh">刘薇：那间店啊，怎么啦？突然间想去的？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">wong4 san1 jyu5 yoek3 ngo5 sik6 faan6 aa3, men6 ngo5 soeng2 sik6 me1, ngo5 nam2 hei2 nei5 seng6 ci3 waa6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">王新宇约我食饭啊，问我想食咩，我惗起你上次话……</span>
+  </div>
+  <div class="study-zh">杨美珊：王新宇约我吃饭啊，问我想吃什么，我就想起你上次说的那间店……</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">haa1 haa1, hou2. nei5 gei3 m4 gei3 dak1 ngo5 dei6 seng6 ci3 maai5 nei5 go2 tiu4 mai5 sik1 kwan4 ge3 go2 gaan1 pou3 tau4 aa3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哈哈，好。你记唔记得我哋上次买你嗰条米色裙嘅嗰间铺头啊？</span>
+  </div>
+  <div class="study-zh">刘薇：哈哈，好的。你还记得上次我们买你那条米色裙的那间店吗？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gei3 dak1 aa3, hei2 go2 dou6 fu6 gen6 aa4</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">记得啊，喺嗰度附近啊？</span>
+  </div>
+  <div class="study-zh">杨美珊：记得啊，在那边附近吗？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hei6 aa3, hei2 qin4 min6 go2 go3 seng1 ceng4 yeb6 min6, hou2 ci3 hei2 sei3 lau2</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">系啊，喺前面嗰个商场入面，好似喺四楼。</span>
+  </div>
+  <div class="study-zh">刘薇：是啊，在前面那个商场里面，好像在四楼。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">nei5 heu3 dou3 men6 men6 seng1 ceng4 di1 yen4 zeo6 ji1 gaa3 la3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">你去到问问商场啲人就知嘎啦。</span>
+  </div>
+  <div class="study-zh">刘薇：你去到那里问问商场的人就知道了。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hou2, m4 goi1 sai3 mei4 ze1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">好，唔该晒薇姐。</span>
+  </div>
+  <div class="study-zh">杨美珊：好，谢谢薇姐。</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 D场景 地铁站，林伟豪想去动漫星城，向路人问路</div>
+<div class="dialogue-line">
+  <div class="study-jp">go4 go1, m4 goi1 ngo5 soeng2 men6 haa5 heu3 dung6 man6 xing1 xing4 dab3 gei2 hou6 xin3 aa3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哥哥，唔该我想问吓去动漫星城搭几号线啊？</span>
+  </div>
+  <div class="study-zh">林伟豪：哥哥，不好意思，我想问一下去动漫星城搭几号线啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">dung6 man6 xing1 xing4 aa4, ngo5 tai2 haa5 sin1. dung6 man6 xing1 xing4 hei6 hei2 gung1 yun2 qin4 zam6 wo3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">动漫星城啊，我睇下先。动漫星城系喺公园前站喎。</span>
+  </div>
+  <div class="study-zh">路人：动漫星城啊，我看一下先。动漫星城是在公园前站哦。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hou2 ci3 hei6 aa3, fu6 gen6 zung6 jau5 beg1 ging1 lou6 bou6 hang4 gaai1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">好似系啊，附近仲有北京路步行街。</span>
+  </div>
+  <div class="study-zh">林伟豪：好像是的，附近还有北京路步行街。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gam2 zeo6 hei6 lag3, nei5 dab3 saam1 hou6 xin3 heu3 dou3 tai2 juk6 sai1 lou6 zam6, zoi3 jun3 jat1 hou6 xin3 heu3 dou3 gung1 yun2 qin4 zam6</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咁就系喇，你搭三号线去到体育西路站，再转一号线去到公园前站。</span>
+  </div>
+  <div class="study-zh">路人：那就对了，你坐三号线到体育西路站，再转一号线去到公园前站。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">waa3, gam3 maa4 faan4 aa4, gwong2 zeo1 dei6 tid3 dou1 gei2 fuk1 zaap6 wo3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">哇，咁麻烦啊？广州地铁都几复杂喎。</span>
+  </div>
+  <div class="study-zh">林伟豪：哇，这么麻烦啊？广州地铁还挺复杂的哦。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">siu2 siu2 gam2 la1, hei2 jat1 hou6 xin3 gung1 yun2 qin4 zam6 log6 dei6 tid3, dou1 hou2 faai3 ge3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">小小咁啦，喺一号线公园前站落地铁，都好快嘅。</span>
+  </div>
+  <div class="study-zh">路人：也还好啦，在一号线公园前站下地铁，其实也很快。</div>
+</div>
+</div>
+
+<div class="dialogue-scene"><div class="dialogue-scene-header">📍 E场景 计程车上，刘薇跟司机说要去妇幼医院</div>
+<div class="dialogue-line">
+  <div class="study-jp">si1 gei1, m4 goi1 heu3 fu3 jau3 ji5 yun2 aa1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">司机，唔该去妇幼医院吖！</span>
+  </div>
+  <div class="study-zh">刘薇：师傅，麻烦去妇幼医院！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">hou2 aa3, m4 goi1 kau3 hou2 on1 cyun4 daai3 haa5, haang4 tin1 fu2 lou6 ding6 hei6 wong4 bou3 daai6 dou6 aa3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">好啊，唔该扣好安全带吓！行天府路定系黄埔大道啊？</span>
+  </div>
+  <div class="study-zh">司机：好的，请扣好安全带吧！走天府路还是黄埔大道啊？</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">wong4 bou3 daai6 dou6 ho2 nang4 sek1 ce1. haang4 tin1 fu2 lou6 la1, ho2 nang4 faai3 di1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">黄埔大道可能塞车。行天府路啦，可能快啲。</span>
+  </div>
+  <div class="study-zh">刘薇：黄埔大道可能塞车。走天府路吧，可能快一点。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">tau4 sin1 teng1 din6 toi4 gaau1 tung1 siu1 sik1, hou2 ci3 waa6 tin1 fu2 lou6 zong6 zo2 ce1, jau5 siu2 siu2 sek1 wo3</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">头先听电台交通消息，好似话天府路撞咗车，有小小塞喎。</span>
+  </div>
+  <div class="study-zh">司机：刚刚听电台交通消息，好像说天府路撞车了，有一点堵车哦。</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">gam2 aa4, gam2 zeo6 haang4 wong4 bou3 daai6 dou6 la1. nei1 paai4 lok6 jyu5 tin1, gaau1 tung1 ji3 ngoi6 zan1 hei6 do1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">咁啊？咁就行黄埔大道啦。呢排落雨天，交通意外真系多！</span>
+  </div>
+  <div class="study-zh">刘薇：这样啊？那就走黄埔大道吧。这段时间下雨天，交通意外真的很多！</div>
+</div>
+<div class="dialogue-line">
+  <div class="study-jp">tin1 jyu5 lou6 waat6 aa1 maa3, ce1 jau6 do1 yan4 jau6 do1, mou5 baan6 faat3 la1</div>
+  <div class="dialogue-yue-row" data-segment-by="space">
+    <span class="dialogue-yue-text">天雨路滑吖嘛，车又多人又多，冇办法啦！</span>
+  </div>
+  <div class="study-zh">司机：下雨路滑嘛，车也多、人也多，没办法啦！</div>
+</div>
+</div>
+</div>
+
+<!-- 词汇及语法 -->
+<div class="sub-section" data-tab="vocab">
+<div class="page-block">
+  <div class="vocab-section-title">生词联想与扩展</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>拼音</th>
+          <th>类比及联想词汇</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">白云山</td>
+          <td class="vocab-jp">baak6 wan4 saan1</td>
+          <td>越秀山 jyut6 sau3 saan1、莲花山 lin4 faa1 saan1、景点 ging2 dim2、公园 gung1 jyun4</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">路口</td>
+          <td class="vocab-jp">lou6 hau2</td>
+          <td>街口 gaai1 hau2、红绿灯 hung4 luk6 dang1、转弯 zyun2 waan1、直路 zik6 lou6</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">附近</td>
+          <td class="vocab-jp">fu6 gan6</td>
+          <td>旁边 pong4 bin1、对面 deoi3 min6、后面 hau6 min6、前面 qin4 min6</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">商场</td>
+          <td class="vocab-jp">soeng1 coeng4</td>
+          <td>铺头 pou3 tau4、超市 ciu1 si5、百货公司 baak3 fo3 gung1 si1</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">地铁</td>
+          <td class="vocab-jp">dei6 tit3</td>
+          <td>公交 gung1 gaau1、巴士 baa1 si2、计程车 gai3 cing4 ce1、站 zaam6</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">步行街</td>
+          <td class="vocab-jp">bou6 hang4 gaai1</td>
+          <td>商业街 soeng1 jip6 gaai1、食街 sik6 gaai1、夜市 je6 si5</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">妇幼医院</td>
+          <td class="vocab-jp">fu5 jau3 ji5 jyun2</td>
+          <td>医院 ji1 jyun2、门诊 mun4 can2、急诊 gap1 can2、药房 joek6 fong2</td>
+        </tr>
+        <tr>
+          <td class="vocab-key">塞车</td>
+          <td class="vocab-jp">sak1 ce1</td>
+          <td>交通 gaau1 tung1、意外 ji3 ngoi6、畅顺 coeng3 seon6、绕路 jiu2 lou6</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="page-block">
+  <div class="vocab-section-title">重点词汇释义与例句</div>
+  <div class="vocab-table-wrap">
+    <table class="vocab-table">
+      <thead>
+        <tr>
+          <th>生词</th>
+          <th>普通话释义</th>
+          <th>例句（翻译）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="vocab-key">dim2 heoi3<br>点去</td>
+          <td class="vocab-mean">怎么去，怎么走</td>
+          <td class="vocab-ex">请问 地铁站 点去 啊？<br><span class="vocab-translation">（请问地铁站怎么走啊？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">lou6 hau2<br>路口</td>
+          <td class="vocab-mean">路口</td>
+          <td class="vocab-ex">过咗 前面 个 路口 再 转右。<br><span class="vocab-translation">（过了前面的路口再右转。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">zyun2 zo2 / zyun2 jau6<br>转左 / 转右</td>
+          <td class="vocab-mean">左转 / 右转</td>
+          <td class="vocab-ex">喺 红绿灯 嗰边 转左 就见到 喇。<br><span class="vocab-translation">（在红绿灯那边左转就看到了。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">soeng1 coeng4<br>商场</td>
+          <td class="vocab-mean">商场</td>
+          <td class="vocab-ex">前面 嗰个 商场 入面 有 好多 食肆。<br><span class="vocab-translation">（前面那个商场里面有很多餐厅。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">bou6 hang4 gaai1<br>步行街</td>
+          <td class="vocab-mean">步行街</td>
+          <td class="vocab-ex">北京路 步行街 夜晚 好热闹。<br><span class="vocab-translation">（北京路步行街晚上很热闹。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">daap3 gei2 hou6 sin3<br>搭几号线</td>
+          <td class="vocab-mean">坐几号线</td>
+          <td class="vocab-ex">去 体育西路 要 搭 几号线 啊？<br><span class="vocab-translation">（去体育西路要坐几号线啊？）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">on1 cyun4 daai3<br>安全带</td>
+          <td class="vocab-mean">安全带</td>
+          <td class="vocab-ex">上车 之后 记得 扣好 安全带。<br><span class="vocab-translation">（上车之后记得系好安全带。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">sak1 ce1<br>塞车</td>
+          <td class="vocab-mean">堵车</td>
+          <td class="vocab-ex">呢排 一到 放工 就 好 塞车。<br><span class="vocab-translation">（最近一到下班时间就很堵车。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">gaau1 tung1 ji3 ngoi6<br>交通意外</td>
+          <td class="vocab-mean">交通事故</td>
+          <td class="vocab-ex">落雨天 交通意外 特别 多。<br><span class="vocab-translation">（下雨天交通事故特别多。）</span></td>
+        </tr>
+        <tr>
+          <td class="vocab-key">mou5 baan6 faat3<br>冇办法</td>
+          <td class="vocab-mean">没有办法</td>
+          <td class="vocab-ex">车 同 人 都 咁多， 真系 冇办法。<br><span class="vocab-translation">（车和人都这么多，真是没有办法。）</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- 语法解析 -->
+<div class="sub-section" data-tab="grammar">
+<div class="page-block">
+  <div class="phrase-list">
+    <div class="phrase-card" data-row-no="01">
+      <div class="study-jp">dim2 heoi3 aa3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">请问 白云山 点去 啊？</span>
+      </div>
+      <div class="study-zh">句式：点去……啊？用于问“怎么去/怎么走”。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="02">
+      <div class="study-jp">hei2 bin1 a3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">你屋企 喺 边 啊？</span>
+      </div>
+      <div class="study-zh">句式：喺边啊？用于询问地点位置。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="03">
+      <div class="study-jp">yün4 zyu6 ... zik6 hang4</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">沿住 呢条路 直行！</span>
+      </div>
+      <div class="study-zh">句式：沿住……直行。用于给出最直接的路线指引。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="04">
+      <div class="study-jp">guo3 zo2 ... zeo6 hei6 la3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">过咗 嗰个 路口 就系 喇！</span>
+      </div>
+      <div class="study-zh">句式：过咗……就系喇。用于说明到达目的地前的关键参照物。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="05">
+      <div class="study-jp">dab3 gei2 hou6 xin3 a3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">去 动漫星城 搭 几号线 啊？</span>
+      </div>
+      <div class="study-zh">句式：搭几号线啊？用于询问地铁或公交线路。</div>
+    </div>
+
+    <div class="phrase-card" data-row-no="06">
+      <div class="study-jp">ding6 hei6 ... a3</div>
+      <div class="dialogue-yue-row" data-segment-by="space">
+        <span class="dialogue-yue-text">行 天府路 定系 黄埔大道 啊？</span>
+      </div>
+      <div class="study-zh">句式：定系……？用于在两个路线或选项之间作比较和提问。</div>
+    </div>
+  </div>
+</div>
+</div>
+
+</section>
+
+      </div>
+</main>
+
+<script>
+let currentUtterance = null;
+let currentAudio = null;
+let isSpeaking = false;
+let currentNumberQuizItem = null;
+let currentSceneLoop = null;
+let currentChapterId = null;
+let preferredCantoneseVoice = null;
+let hasShownVoiceWarning = false;
+
+const digitTextMap = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+const digitJpMap = ['ling4', 'jat1', 'ji6', 'saam1', 'sei3', 'ng5', 'luk6', 'cat1', 'baat3', 'gau2'];
+const cantoneseNumbers = Array.from({ length: 101 }, (_, value) => buildCantoneseNumber(value));
+const toneSentenceRows = [
+  {
+    labelLines: ['鸡好贵', '唔买住'],
+    items: [
+      { jp: 'gai1', char: '鸡' },
+      { jp: 'hou2', char: '好' },
+      { jp: 'gwai3', char: '贵' },
+      { jp: 'm4', char: '唔' },
+      { jp: 'maai5', char: '买' },
+      { jp: 'zyu6', char: '住' }
+    ]
+  },
+  {
+    labelLines: ['瓜果菜', '禾米稻'],
+    items: [
+      { jp: 'gwaa1', char: '瓜' },
+      { jp: 'gwo2', char: '果' },
+      { jp: 'coi3', char: '菜' },
+      { jp: 'wo4', char: '禾' },
+      { jp: 'mai5', char: '米' },
+      { jp: 'dou6', char: '稻' }
+    ]
+  },
+  {
+    labelLines: ['心想要', '同你住'],
+    items: [
+      { jp: 'sam1', char: '心' },
+      { jp: 'soeng2', char: '想' },
+      { jp: 'jiu3', char: '要' },
+      { jp: 'tung4', char: '同' },
+      { jp: 'nei5', char: '你' },
+      { jp: 'zyu6', char: '住' }
+    ]
+  },
+  {
+    labelLines: ['身体壮', '唔会病'],
+    items: [
+      { jp: 'san1', char: '身' },
+      { jp: 'tai2', char: '体' },
+      { jp: 'zong3', char: '壮' },
+      { jp: 'm4', char: '唔' },
+      { jp: 'wui5', char: '会' },
+      { jp: 'beng6', char: '病' }
+    ]
+  },
+  {
+    labelLines: ['三点半', '黎我度'],
+    items: [
+      { jp: 'saam1', char: '三' },
+      { jp: 'dim2', char: '点' },
+      { jp: 'bun3', char: '半' },
+      { jp: 'lai4', char: '黎' },
+      { jp: 'ngo5', char: '我' },
+      { jp: 'dou6', char: '度' }
+    ]
+  },
+  {
+    labelLines: ['番茄酱', '牛腩面'],
+    items: [
+      { jp: 'faan1', char: '番' },
+      { jp: 'ke2', char: '茄' },
+      { jp: 'zoeng3', char: '酱' },
+      { jp: 'ngau4', char: '牛' },
+      { jp: 'naam5', char: '腩' },
+      { jp: 'min6', char: '面' }
+    ]
+  }
+];
+
+function scoreVoice(voice) {
+  const lang = (voice.lang || '').toLowerCase();
+  const name = (voice.name || '').toLowerCase();
+  let score = 0;
+
+  if (lang === 'yue-hk') score += 200;
+  if (lang === 'zh-hk') score += 180;
+  if (lang.startsWith('yue')) score += 160;
+  if (lang.includes('hk')) score += 120;
+  if (lang.startsWith('zh')) score += 60;
+
+  if (name.includes('cantonese') || name.includes('粤') || name.includes('廣東')) score += 200;
+  if (name.includes('hong kong') || name.includes('hongkong') || name.includes('香港')) score += 120;
+
+  if (voice.default) score += 15;
+  if (voice.localService) score += 10;
+  return score;
+}
+
+function pickPreferredCantoneseVoice() {
+  const voices = window.speechSynthesis.getVoices() || [];
+  if (!voices.length) return null;
+
+  const sorted = voices
+    .slice()
+    .sort(function(a, b) { return scoreVoice(b) - scoreVoice(a); });
+
+  const best = sorted[0] || null;
+  if (!best) return null;
+
+  // Accept only likely Cantonese/HK/Chinese voices; otherwise keep null to use browser default.
+  const bestScore = scoreVoice(best);
+  return bestScore >= 120 ? best : null;
+}
+
+function initPreferredVoice() {
+  preferredCantoneseVoice = pickPreferredCantoneseVoice();
+}
+
+function createUtterance(text) {
+  if (!preferredCantoneseVoice && !hasShownVoiceWarning) {
+    const statusEl = document.getElementById('status');
+    if (statusEl) {
+      statusEl.textContent = '当前系统未检测到粤语语音包，个别字可能读偏。建议在系统语音里安装 Hong Kong Cantonese 语音。';
+    }
+    hasShownVoiceWarning = true;
+  }
+
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = preferredCantoneseVoice
+    ? (preferredCantoneseVoice.lang || 'zh-HK')
+    : 'zh-HK';
+  utter.rate = getSpeed();
+  if (preferredCantoneseVoice) {
+    utter.voice = preferredCantoneseVoice;
+  }
+  return utter;
+}
+
+function buildCantoneseNumber(value) {
+  if (value === 100) {
+    return { value, text: '一百', jp: 'jat1 baak3' };
+  }
+
+  if (value <= 10) {
+    return {
+      value,
+      text: value === 10 ? '十' : digitTextMap[value],
+      jp: value === 10 ? 'sap6' : digitJpMap[value]
+    };
+  }
+
+  if (value < 20) {
+    const ones = value % 10;
+    return {
+      value,
+      text: `十${digitTextMap[ones]}`,
+      jp: `sap6 ${digitJpMap[ones]}`
+    };
+  }
+
+  const tens = Math.floor(value / 10);
+  const ones = value % 10;
+  return {
+    value,
+    text: `${digitTextMap[tens]}十${ones ? digitTextMap[ones] : ''}`,
+    jp: `${digitJpMap[tens]} sap6${ones ? ` ${digitJpMap[ones]}` : ''}`
+  };
+}
+
+function buildNavigationFromDom() {
+  const nav = document.getElementById('nav-list');
+  if (!nav) return;
+
+  const sections = Array.from(document.querySelectorAll('#chapter-container .chapter')).map(function(section) {
+    return {
+      id: section.id,
+      part: section.dataset.part || '',
+      navLabel: section.dataset.navLabel || section.querySelector('.chapter-title')?.textContent?.trim() || section.id
+    };
+  });
+
+  const parts = [];
+  sections.forEach(function(section) {
+    let part = parts.find(function(item) { return item.label === section.part; });
+    if (!part) {
+      part = { label: section.part, sections: [] };
+      parts.push(part);
+    }
+    part.sections.push(section);
+  });
+
+  nav.innerHTML = parts.map(function(part) {
+    return `
+      <div class="nav-part">${part.label}</div>
+      ${part.sections.map(function(section) {
+        return `<button type="button" class="nav-btn" data-target="${section.id}">${section.navLabel}</button>`;
+      }).join('')}
+    `;
+  }).join('');
+
+  nav.querySelectorAll('.nav-btn').forEach(function(button) {
+    button.addEventListener('click', function() {
+      showChapter(button.dataset.target);
+    });
+  });
+}
+
+function renderNumberTables() {
+  const basicTarget = document.getElementById('numbers-0-10');
+  const advancedTarget = document.getElementById('numbers-11-100');
+  if (!basicTarget || !advancedTarget) return;
+
+  basicTarget.innerHTML = `
+    <table class="number-basic-table">
+      <thead>
+        <tr>
+          <th>阿拉伯数字</th>
+          <th>中文写法</th>
+          <th>粤语发音</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${cantoneseNumbers.slice(0, 11).map(function(item) {
+          return `
+            <tr>
+              <td class="num-col">${item.value}</td>
+              <td><span class="yue number-yue" id="number-yue-${item.value}" data-number="${item.value}" onclick="speak(this)">${item.text}</span></td>
+              <td><span class="number-jp">${item.jp}</span></td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+
+  const rows = [];
+  for (let start = 11; start <= 91; start += 10) {
+    rows.push(cantoneseNumbers.slice(start, start + 10));
+  }
+
+  advancedTarget.innerHTML = `
+    <table class="number-grid-table">
+      <tbody>
+        ${rows.map(function(row) {
+          return `
+            <tr>
+              ${row.map(function(item) {
+                return `
+                  <td>
+                    <div class="number-card">
+                      <span class="number-digit">${item.value}</span>
+                      <span class="yue number-yue" id="number-yue-${item.value}" data-number="${item.value}" onclick="speak(this)">${item.text}</span>
+                      <span class="number-jp">${item.jp}</span>
+                    </div>
+                  </td>
+                `;
+              }).join('')}
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderToneTable() {
+  const target = document.getElementById('tone-table-body');
+  if (!target) return;
+
+  target.innerHTML = toneSentenceRows.map(function(row) {
+    const sentence = row.items.map(function(item) { return item.char; }).join('');
+    return `
+      <tr>
+        <td class="tone-sentence-cell">
+          <div class="tone-sentence-row" data-tone-sentence="${sentence}">
+            <button class="phrase-play-btn" type="button" onclick="speakToneSentence(this)">▶</button>
+            <span class="tone-sentence-text">${row.labelLines.join('<br>')}</span>
+          </div>
+        </td>
+        ${row.items.map(function(item) {
+          return `
+            <td>
+              <span class="tone-jp">${item.jp}</span>
+              <span class="tone-char" onclick="speak(this)">${item.char}</span>
+            </td>
+          `;
+        }).join('')}
+      </tr>
+    `;
+  }).join('');
+}
+
+function getSpeed() {
+  return parseFloat(document.getElementById('speed-slider').value);
+}
+
+function updateSpeedDisplay() {
+  document.getElementById('speed-display').textContent = `${getSpeed().toFixed(1)}×`;
+}
+
+function playQuizNumber(item, message) {
+  if (!item) return;
+  stopSpeech();
+  document.getElementById('number-quiz-status').textContent = message;
+  const utter = createUtterance(item.text);
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function playNumberSequence() {
+  stopSpeech();
+  let idx = 0;
+  isSpeaking = true;
+
+  function next() {
+    if (!isSpeaking || idx >= cantoneseNumbers.length) {
+      isSpeaking = false;
+      document.getElementById('status').textContent = '';
+      return;
+    }
+
+    const item = cantoneseNumbers[idx++];
+    const el = document.getElementById(`number-yue-${item.value}`);
+    document.getElementById('status').textContent = `数字自动播放 ${idx}/${cantoneseNumbers.length}`;
+    if (el) {
+      el.classList.add('speaking');
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    const utter = createUtterance(item.text);
+    utter.onend = function() {
+      if (el) el.classList.remove('speaking');
+      next();
+    };
+    utter.onerror = function() {
+      if (el) el.classList.remove('speaking');
+      next();
+    };
+    currentUtterance = utter;
+    window.speechSynthesis.speak(utter);
+  }
+
+  next();
+}
+
+function startNumberQuiz() {
+  currentNumberQuizItem = cantoneseNumbers[Math.floor(Math.random() * cantoneseNumbers.length)];
+  document.getElementById('number-quiz-input').value = '';
+  document.getElementById('number-quiz-result').textContent = '';
+  playQuizNumber(currentNumberQuizItem, '已随机播放一道数字题，请输入你听到的数字。');
+  document.getElementById('number-quiz-input').focus();
+}
+
+function replayNumberQuiz() {
+  if (!currentNumberQuizItem) {
+    document.getElementById('number-quiz-status').textContent = '请先点击“随机出题”。';
+    return;
+  }
+  playQuizNumber(currentNumberQuizItem, '已重播当前题目，请继续作答。');
+}
+
+function checkNumberQuizAnswer() {
+  if (!currentNumberQuizItem) {
+    document.getElementById('number-quiz-result').textContent = '请先点击“随机出题”。';
+    return;
+  }
+
+  const rawValue = document.getElementById('number-quiz-input').value.trim();
+  if (!/^\d+$/.test(rawValue)) {
+    document.getElementById('number-quiz-result').textContent = '请输入 0-100 的整数。';
+    return;
+  }
+
+  const answer = Number(rawValue);
+  if (answer < 0 || answer > 100) {
+    document.getElementById('number-quiz-result').textContent = '请输入 0-100 范围内的数字。';
+    return;
+  }
+
+  if (answer === currentNumberQuizItem.value) {
+    document.getElementById('number-quiz-result').textContent = `回答正确：${currentNumberQuizItem.value} = ${currentNumberQuizItem.text}（${currentNumberQuizItem.jp}）`;
+    return;
+  }
+
+  document.getElementById('number-quiz-result').textContent = `回答不正确，正确答案是 ${currentNumberQuizItem.value} = ${currentNumberQuizItem.text}（${currentNumberQuizItem.jp}）`;
+}
+
+function getStudyRowContainer(el) {
+  if (!el) return null;
+  return el.closest('.dialogue-line, .phrase-card');
+}
+
+function getStudyRowText(container) {
+  if (!container) return '';
+  return Array.from(container.querySelectorAll('.dialogue-yue-row .phrase-seg-char')).map(function(el) {
+    return el.textContent.trim();
+  }).join('');
+}
+
+function getRowAudioSource(row) {
+  if (!row) return '';
+  return (row.dataset.audio || '').trim();
+}
+
+function playRowAudio(src, onEnd, onError) {
+  if (!src) {
+    if (onError) onError();
+    return;
+  }
+
+  const audio = new Audio(src);
+  currentAudio = audio;
+
+  audio.onended = function() {
+    if (currentAudio === audio) currentAudio = null;
+    if (onEnd) onEnd();
+  };
+
+  audio.onerror = function() {
+    if (currentAudio === audio) currentAudio = null;
+    if (onError) onError();
+  };
+
+  audio.play().catch(function() {
+    if (currentAudio === audio) currentAudio = null;
+    if (onError) onError();
+  });
+}
+
+function speak(el) {
+  if (el.closest('.dialogue-yue-row-static')) return;
+  stopSpeech();
+  const text = el.textContent.trim();
+  if (!text) return;
+  const utter = createUtterance(text);
+  el.classList.add('speaking');
+  utter.onend = function() { el.classList.remove('speaking'); };
+  utter.onerror = function() { el.classList.remove('speaking'); };
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function speakStudyRow(btn) {
+  stopSpeech();
+  const container = getStudyRowContainer(btn);
+  if (!container) return;
+  const row = container.querySelector('.dialogue-yue-row, .dialogue-yue-row-static');
+  if (!row) return;
+
+  const audioSrc = getRowAudioSource(row);
+  if (audioSrc) {
+    btn.classList.add('speaking');
+    container.classList.add('speaking');
+    row.classList.add('speaking');
+    playRowAudio(
+      audioSrc,
+      function() {
+        btn.classList.remove('speaking');
+        container.classList.remove('speaking');
+        row.classList.remove('speaking');
+      },
+      function() {
+        btn.classList.remove('speaking');
+        container.classList.remove('speaking');
+        row.classList.remove('speaking');
+      }
+    );
+    return;
+  }
+
+  if (row.classList.contains('dialogue-yue-row-static')) return;
+
+  const text = getStudyRowText(container);
+  if (!text) return;
+
+  const utter = createUtterance(text);
+  btn.classList.add('speaking');
+  container.classList.add('speaking');
+  row.classList.add('speaking');
+  utter.onend = function() {
+    btn.classList.remove('speaking');
+    container.classList.remove('speaking');
+    row.classList.remove('speaking');
+  };
+  utter.onerror = function() {
+    btn.classList.remove('speaking');
+    container.classList.remove('speaking');
+    row.classList.remove('speaking');
+  };
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function speakPhrase(btn) {
+  speakStudyRow(btn);
+}
+
+function getDialogueLineText(line) {
+  return getStudyRowText(line);
+}
+
+function speakLine(btn) {
+  speakStudyRow(btn);
+}
+
+function speakToneSentence(btn) {
+  stopSpeech();
+  const row = btn.closest('.tone-sentence-row');
+  if (!row) return;
+  const text = row.dataset.toneSentence || '';
+  if (!text) return;
+
+  const utter = createUtterance(text);
+  btn.classList.add('speaking');
+  row.classList.add('speaking');
+  utter.onend = function() {
+    btn.classList.remove('speaking');
+    row.classList.remove('speaking');
+  };
+  utter.onerror = function() {
+    btn.classList.remove('speaking');
+    row.classList.remove('speaking');
+  };
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function buildPhraseSegment(text) {
+  const seg = document.createElement('span');
+  seg.className = 'phrase-seg';
+  const char = document.createElement('span');
+  char.className = 'phrase-seg-char';
+  char.textContent = text;
+  seg.appendChild(char);
+  return seg;
+}
+
+function tokenizeCantoneseFragments(text) {
+  const source = text || '';
+  const pattern = /[\u3400-\u9FFF]+[，。！？、,.!?;；:：]?/g;
+  const fragments = [];
+  let lastIndex = 0;
+  let match = null;
+
+  while ((match = pattern.exec(source)) !== null) {
+    if (match.index > lastIndex) {
+      fragments.push({ text: source.slice(lastIndex, match.index), clickable: false });
+    }
+    fragments.push({ text: match[0], clickable: true });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < source.length) {
+    fragments.push({ text: source.slice(lastIndex), clickable: false });
+  }
+
+  return fragments;
+}
+
+function wrapVocabCantoneseInTextNode(textNode) {
+  const parts = tokenizeCantoneseFragments(textNode.nodeValue);
+  if (!parts.some(function(part) { return part.clickable; })) return;
+
+  const fragment = document.createDocumentFragment();
+  parts.forEach(function(part) {
+    if (!part.text) return;
+    if (!part.clickable) {
+      fragment.appendChild(document.createTextNode(part.text));
+      return;
+    }
+
+    const span = document.createElement('span');
+    span.className = 'vocab-yue-token';
+    span.textContent = part.text;
+    span.setAttribute('onclick', 'speak(this)');
+    fragment.appendChild(span);
+  });
+
+  textNode.parentNode.replaceChild(fragment, textNode);
+}
+
+function enhanceVocabCellForPlayback(cell) {
+  if (!cell || cell.dataset.yueEnhanced === 'true') return;
+
+  const walker = document.createTreeWalker(
+    cell,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: function(node) {
+        if (!node.nodeValue || !node.nodeValue.trim()) {
+          return NodeFilter.FILTER_REJECT;
         }
-        
-        function clearMessage() {
-            const resultDiv = document.getElementById('result');
-            resultDiv.classList.remove('show');
+        const parent = node.parentElement;
+        if (!parent) {
+          return NodeFilter.FILTER_REJECT;
         }
-        
-        // 页面加载完成的提示
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('测试页面已加载完成！');
-        });
-    </script>
+        if (parent.closest('.vocab-translation')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const textNodes = [];
+  let current = null;
+  while ((current = walker.nextNode())) {
+    textNodes.push(current);
+  }
+
+  textNodes.forEach(function(textNode) {
+    wrapVocabCantoneseInTextNode(textNode);
+  });
+
+  cell.dataset.yueEnhanced = 'true';
+}
+
+function initVocabPlayback() {
+  document.querySelectorAll('.sub-section[data-tab="vocab"]').forEach(function(section) {
+    const targetCells = section.querySelectorAll('.vocab-table td.vocab-key, .vocab-table td:nth-child(3)');
+    targetCells.forEach(function(cell) {
+      enhanceVocabCellForPlayback(cell);
+    });
+  });
+}
+
+function createRowPlayButton() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'phrase-play-btn';
+  button.textContent = '▶';
+  button.setAttribute('aria-label', '播放本行');
+  button.addEventListener('click', function() {
+    speakStudyRow(button);
+  });
+  return button;
+}
+
+function initRowPlaybackButtons() {
+  document.querySelectorAll('.dialogue-yue-row, .dialogue-yue-row-static').forEach(function(row) {
+    row.querySelectorAll('.phrase-play-btn').forEach(function(button) {
+      button.remove();
+    });
+    row.classList.remove('has-row-play-btn');
+
+    const container = getStudyRowContainer(row);
+    if (container) {
+      container.classList.remove('has-row-play-btn');
+    }
+  });
+
+  document.querySelectorAll('.dialogue-yue-row, .dialogue-yue-row-static[data-audio]').forEach(function(row) {
+    row.classList.add('has-row-play-btn');
+    const container = getStudyRowContainer(row);
+    if (container) {
+      container.classList.add('has-row-play-btn');
+    }
+    row.prepend(createRowPlayButton());
+  });
+}
+
+function splitSpaceTokens(text) {
+  return (text || '').trim().split(/\s+/).filter(Boolean);
+}
+
+function tokenizeYueText(text) {
+  const compact = (text || '').trim();
+  if (!compact) return [];
+
+  // If user provided spaces, always trust manual segmentation first.
+  if (/\s/.test(compact)) {
+    return splitSpaceTokens(compact);
+  }
+
+  // Fallback: split into single CJK chars (optionally with trailing punctuation).
+  const tokenPattern = /[A-Za-z0-9]+(?:['-][A-Za-z0-9]+)*[，。！？、,.!?;；:：]?|[\u3400-\u9FFF][，。！？、,.!?;；:：]?|[^\s]/g;
+  return compact.match(tokenPattern) || [];
+}
+
+function tokenizeYueChars(text) {
+  const compact = (text || '').replace(/\s+/g, '').trim();
+  if (!compact) return [];
+  const tokenPattern = /[A-Za-z0-9]+(?:['-][A-Za-z0-9]+)*[，。！？、,.!?;；:：]?|[\u3400-\u9FFF][，。！？、,.!?;；:：]?|[^\s]/g;
+  return compact.match(tokenPattern) || [];
+}
+
+function chooseBestYueTokens(rawText, expectedCount) {
+  const spacedTokens = splitSpaceTokens(rawText || '');
+  const charTokens = tokenizeYueChars(rawText || '');
+
+  if (!expectedCount || expectedCount <= 0) {
+    return spacedTokens.length ? spacedTokens : charTokens;
+  }
+
+  if (spacedTokens.length === expectedCount) {
+    return spacedTokens;
+  }
+
+  if (charTokens.length === expectedCount) {
+    return charTokens;
+  }
+
+  if (!spacedTokens.length) {
+    return charTokens;
+  }
+
+  if (!charTokens.length) {
+    return spacedTokens;
+  }
+
+  // Pick segmentation whose count is closer to pinyin syllable count.
+  return Math.abs(charTokens.length - expectedCount) < Math.abs(spacedTokens.length - expectedCount)
+    ? charTokens
+    : spacedTokens;
+}
+
+function extractDialogueYueTokens(row, expectedCount) {
+  const raw = row.querySelector('.dialogue-yue-text');
+  if (raw) {
+    const rawText = raw.textContent || '';
+    const spacedTokens = splitSpaceTokens(rawText);
+    if (/\s/.test(rawText) && spacedTokens.length) {
+      // Respect manual segmentation when user split tokens with spaces.
+      return spacedTokens;
+    }
+    return chooseBestYueTokens(rawText, expectedCount);
+  }
+
+  const segmented = Array.from(row.querySelectorAll('.phrase-seg-char')).map(function(el) {
+    return el.textContent.trim();
+  }).filter(Boolean);
+  if (segmented.length) {
+    return segmented;
+  }
+
+  return chooseBestYueTokens(row.textContent, expectedCount);
+}
+
+function extractPhraseYueTokens(row) {
+  const raw = row.querySelector('.dialogue-yue-text');
+  if (raw) {
+    const rawText = raw.textContent || '';
+    const spacedTokens = splitSpaceTokens(rawText);
+    if (/\s/.test(rawText) && spacedTokens.length) {
+      return spacedTokens;
+    }
+    return chooseBestYueTokens(rawText, 0);
+  }
+
+  const segmented = Array.from(row.querySelectorAll('.phrase-seg-char')).map(function(el) {
+    return el.textContent.trim();
+  }).filter(Boolean);
+
+  if (segmented.length === 1) {
+    return chooseBestYueTokens(segmented[0], 0);
+  }
+
+  if (segmented.length > 1) {
+    return segmented;
+  }
+
+  return chooseBestYueTokens(row.textContent, 0);
+}
+
+function alignPhraseRowsBySpace() {
+  return;
+}
+
+function alignDialogueRowsBySpace() {
+  document.querySelectorAll('.dialogue-yue-row[data-segment-by="space"], .dialogue-yue-row-static[data-segment-by="space"]').forEach(function(row) {
+    if (row.dataset.segmentHydrated === 'true') return;
+
+    const line = row.closest('.dialogue-line');
+    const yueTokens = extractDialogueYueTokens(row, 0);
+
+    row.innerHTML = '';
+    yueTokens.forEach(function(token) {
+      const seg = document.createElement('span');
+      seg.className = 'phrase-seg';
+
+      const char = document.createElement('span');
+      char.className = 'phrase-seg-char';
+      char.textContent = token;
+      seg.appendChild(char);
+      row.appendChild(seg);
+    });
+
+    row.dataset.segmentHydrated = 'true';
+  });
+}
+
+function setSceneLoopButtonState(btn, active) {
+  if (!btn) return;
+  btn.classList.toggle('speaking', active);
+  btn.textContent = active ? '停止循环' : '循环播放';
+}
+
+function playSceneLoopStep(state) {
+  if (!currentSceneLoop || currentSceneLoop !== state) return;
+  if (!state.lines.length) {
+    stopSpeech();
+    return;
+  }
+
+  const line = state.lines[state.index];
+  const lineBtn = line.querySelector('.phrase-play-btn');
+  const text = getDialogueLineText(line);
+  if (!text) {
+    state.index = (state.index + 1) % state.lines.length;
+    playSceneLoopStep(state);
+    return;
+  }
+
+  line.classList.add('speaking');
+  if (lineBtn) lineBtn.classList.add('speaking');
+  line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  const utter = createUtterance(text);
+  utter.onend = function() {
+    line.classList.remove('speaking');
+    if (lineBtn) lineBtn.classList.remove('speaking');
+    if (!currentSceneLoop || currentSceneLoop !== state) return;
+    state.index = (state.index + 1) % state.lines.length;
+    playSceneLoopStep(state);
+  };
+  utter.onerror = function() {
+    line.classList.remove('speaking');
+    if (lineBtn) lineBtn.classList.remove('speaking');
+    if (!currentSceneLoop || currentSceneLoop !== state) return;
+    state.index = (state.index + 1) % state.lines.length;
+    playSceneLoopStep(state);
+  };
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function toggleSceneLoop(btn) {
+  const scene = btn.closest('.dialogue-scene');
+  if (!scene) return;
+
+  if (currentSceneLoop && currentSceneLoop.scene === scene) {
+    stopSpeech();
+    return;
+  }
+
+  stopSpeech();
+  const state = {
+    scene: scene,
+    btn: btn,
+    lines: Array.from(scene.querySelectorAll('.dialogue-line')),
+    index: 0
+  };
+  currentSceneLoop = state;
+  setSceneLoopButtonState(btn, true);
+  playSceneLoopStep(state);
+}
+
+function initDialogueSceneControls() {
+  document.querySelectorAll('.dialogue-scene').forEach(function(scene) {
+    const header = scene.querySelector('.dialogue-scene-header');
+    if (!header || header.querySelector('.dialogue-scene-toolbar')) return;
+    const title = header.textContent.trim();
+    header.textContent = '';
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'dialogue-scene-title';
+    titleSpan.textContent = title;
+
+    const toolbar = document.createElement('span');
+    toolbar.className = 'dialogue-scene-toolbar';
+
+    const loopBtn = document.createElement('button');
+    loopBtn.type = 'button';
+    loopBtn.className = 'dialogue-scene-btn';
+    loopBtn.textContent = '循环播放';
+    loopBtn.setAttribute('onclick', 'toggleSceneLoop(this)');
+
+    toolbar.appendChild(loopBtn);
+    header.appendChild(titleSpan);
+    header.appendChild(toolbar);
+  });
+}
+
+function stopSpeech() {
+  window.speechSynthesis.cancel();
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  document.querySelectorAll('.speaking').forEach(function(el) {
+    el.classList.remove('speaking');
+  });
+  isSpeaking = false;
+  if (currentSceneLoop && currentSceneLoop.btn) {
+    setSceneLoopButtonState(currentSceneLoop.btn, false);
+  }
+  currentSceneLoop = null;
+  document.getElementById('status').textContent = '';
+}
+
+function readCurrentChapter() {
+  stopSpeech();
+  const active = document.querySelector('.chapter.active');
+  if (!active) return;
+
+  const sourceEls = Array.from(active.querySelectorAll('.yue, .phrase-seg-char, .dialogue-yue-text, .init-char, .ic-char, .tone-char, .number-yue, .vocab-yue-token')).filter(function(el) {
+    const sub = el.closest('.sub-section');
+    if (sub && !sub.classList.contains('active')) return false;
+    return el.textContent.trim().length > 0;
+  });
+
+  const visited = new Set();
+  const units = [];
+
+  sourceEls.forEach(function(el) {
+    let key = el;
+    let text = el.textContent.trim();
+
+    const dialogueLine = el.closest('.dialogue-line');
+    if (dialogueLine) {
+      key = dialogueLine;
+      text = getDialogueLineText(dialogueLine);
+      if (!text) {
+        const fallback = dialogueLine.querySelector('.dialogue-yue-text');
+        text = fallback ? fallback.textContent.trim() : '';
+      }
+    } else {
+      const phraseCard = el.closest('.phrase-card');
+      if (phraseCard) {
+        key = phraseCard;
+        text = Array.from(phraseCard.querySelectorAll('.phrase-seg-char')).map(function(node) {
+          return node.textContent.trim();
+        }).join('');
+      } else {
+        const toneRow = el.closest('.tone-sentence-row');
+        if (toneRow) {
+          key = toneRow;
+          text = toneRow.dataset.toneSentence || Array.from(toneRow.querySelectorAll('.tone-char')).map(function(node) {
+            return node.textContent.trim();
+          }).join('');
+        }
+      }
+    }
+
+    if (!text || visited.has(key)) return;
+    visited.add(key);
+    units.push({ el: key, text: text });
+  });
+
+  if (units.length === 0) {
+    document.getElementById('status').textContent = '本章暂无可朗读内容';
+    return;
+  }
+
+  let idx = 0;
+  isSpeaking = true;
+
+  function next() {
+    if (!isSpeaking || idx >= units.length) {
+      isSpeaking = false;
+      document.getElementById('status').textContent = '';
+      return;
+    }
+    const unit = units[idx++];
+    const el = unit.el;
+    document.getElementById('status').textContent = `朗读中 ${idx}/${units.length}`;
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const utter = createUtterance(unit.text);
+    el.classList.add('speaking');
+    utter.onend = function() { el.classList.remove('speaking'); next(); };
+    utter.onerror = function() { el.classList.remove('speaking'); next(); };
+    currentUtterance = utter;
+    window.speechSynthesis.speak(utter);
+  }
+
+  next();
+}
+
+function showChapter(id) {
+  stopSpeech();
+  document.querySelectorAll('.chapter').forEach(function(chapter) {
+    chapter.classList.remove('active');
+    chapter.style.display = 'none';
+  });
+  document.querySelectorAll('.nav-btn').forEach(function(button) {
+    button.classList.remove('active');
+  });
+
+  const chapter = document.getElementById(id);
+  if (chapter) {
+    chapter.style.display = 'block';
+    chapter.classList.add('active');
+    document.getElementById('main').scrollTop = 0;
+  }
+
+  const button = document.querySelector(`.nav-btn[data-target="${id}"]`);
+  if (button) button.classList.add('active');
+  currentChapterId = id;
+}
+
+function showSubTab(chapterId, tabName) {
+  const chapter = document.getElementById(chapterId);
+  if (!chapter) return;
+  chapter.querySelectorAll('.sub-section').forEach(function(section) {
+    section.classList.remove('active');
+  });
+  chapter.querySelectorAll('.sub-tab-btn').forEach(function(button) {
+    button.classList.remove('active');
+  });
+  const section = chapter.querySelector(`.sub-section[data-tab="${tabName}"]`);
+  const button = chapter.querySelector(`.sub-tab-btn[data-tab="${tabName}"]`);
+  if (section) section.classList.add('active');
+  if (button) button.classList.add('active');
+}
+
+function bindShellEvents() {
+  document.getElementById('stop-btn').addEventListener('click', stopSpeech);
+  document.getElementById('readall-btn').addEventListener('click', readCurrentChapter);
+  document.getElementById('speed-slider').addEventListener('input', updateSpeedDisplay);
+
+  document.addEventListener('click', function(event) {
+    const seg = event.target.closest('.phrase-seg');
+    if (!seg) return;
+    if (!seg.closest('.dialogue-yue-row')) return;
+    const charEl = seg.querySelector('.phrase-seg-char');
+    if (charEl) speak(charEl);
+  });
+}
+
+function bindDynamicEvents() {
+  const quizInput = document.getElementById('number-quiz-input');
+  if (quizInput) {
+    quizInput.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        checkNumberQuizAnswer();
+      }
+    });
+  }
+}
+
+async function initApp() {
+  initPreferredVoice();
+  window.speechSynthesis.addEventListener('voiceschanged', initPreferredVoice);
+
+  bindShellEvents();
+  updateSpeedDisplay();
+
+  buildNavigationFromDom();
+  renderNumberTables();
+  renderToneTable();
+  alignDialogueRowsBySpace();
+  initVocabPlayback();
+  initRowPlaybackButtons();
+  initDialogueSceneControls();
+  bindDynamicEvents();
+
+  const firstChapter = document.querySelector('#chapter-container .chapter');
+  if (firstChapter) {
+    showChapter(firstChapter.id);
+  }
+}
+
+Object.assign(window, {
+  speak,
+  speakStudyRow,
+  speakToneSentence,
+  showSubTab,
+  playNumberSequence,
+  startNumberQuiz,
+  replayNumberQuiz,
+  checkNumberQuizAnswer,
+  stopSpeech,
+  toggleSceneLoop,
+  readCurrentChapter,
+  showChapter
+});
+
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
 </body>
 </html>
+
+
+
+
