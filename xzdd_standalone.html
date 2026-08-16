@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>四川麻将血战到底 V2 - 单文件版</title>
+<style>
+:root{
+  --bg:#181512; --panel:#241f1b; --panel2:#2f281f; --gold:#e4bb65; --green:#0b8f45; --green2:#087238;
+  --tile:#f8f1df; --tileText:#1b1b1b; --muted:#b9aa90; --danger:#d86b5f; --ok:#78d68d; --blue:#64b5f6;
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top,#3d261b 0,#181512 45%,#0d0c0b 100%);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",Arial,sans-serif}
+button,.importLabel{border:1px solid #6f5833;background:linear-gradient(#5d4321,#2e2418);color:#ffe2a0;border-radius:9px;padding:8px 11px;cursor:pointer;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+button:hover,.importLabel:hover{filter:brightness(1.15)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.importLabel input{display:none}
+.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid #513a22;background:rgba(0,0,0,.35);position:sticky;top:0;z-index:10;backdrop-filter: blur(6px)}
+h1{margin:0;color:#ffd584;font-size:22px} h1 span{font-size:14px;color:#bfe7bf} p{margin:4px 0;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.statusbar{display:flex;gap:22px;flex-wrap:wrap;padding:9px 18px;background:#1f1a15;border-bottom:1px solid #3d3124;color:#d5c4a4}.statusbar b{color:#fff0b3}
+.layout{display:grid;grid-template-columns:minmax(720px,1fr) 390px;gap:14px;padding:14px}.gameZone{min-width:720px}.table{height:760px;position:relative;border:14px solid #6d461f;border-radius:34px;background:radial-gradient(circle,#10a954 0,#087239 70%,#044e29 100%);box-shadow:inset 0 0 70px rgba(0,0,0,.55),0 14px 28px rgba(0,0,0,.45);overflow:hidden}.table:before{content:"";position:absolute;inset:26px;border:3px solid rgba(255,213,132,.45);border-radius:25px;pointer-events:none}
+.centerPanel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:250px;min-height:180px;background:rgba(18,26,18,.68);border:2px solid rgba(255,213,132,.65);border-radius:18px;padding:14px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.45);z-index:1}.centerTitle{font-size:24px;font-weight:900;color:#ffd97e;text-shadow:0 2px 4px #000}.lastDiscard{margin-top:10px;color:#dfffe4}.winnerInfo{margin-top:8px;color:#b2e7ff;font-size:13px}.actionArea{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.seat{position:absolute;background:rgba(27,22,17,.82);border:1px solid rgba(255,215,128,.35);border-radius:16px;padding:10px;box-shadow:0 5px 18px rgba(0,0,0,.36)}.seat0{left:50%;bottom:18px;transform:translateX(-50%);width:84%;min-height:190px}.seat2{left:50%;top:18px;transform:translateX(-50%);width:64%;min-height:150px}.seat1{right:18px;top:175px;width:240px;min-height:330px}.seat3{left:18px;top:175px;width:240px;min-height:330px}.seatHeader{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:5px;margin-bottom:6px}.seatName{font-weight:900;color:#ffdc91}.seatName.active{color:#79f78c}.badges{display:flex;gap:4px;flex-wrap:wrap}.badge{font-size:12px;border:1px solid #655130;background:#33291d;border-radius:999px;padding:2px 7px;color:#f5dba4}.badge.hued{background:#19411f;color:#9df2a6}.badge.que{background:#4b2630;color:#ffb5bd}.score{color:#b7e8ff}.rowTitle{font-size:12px;color:#ceb990;margin:7px 0 3px}.hand,.discards,.melds{display:flex;gap:4px;flex-wrap:wrap;align-items:center}.seat1 .hand,.seat3 .hand{max-height:128px;overflow:auto}.tile{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:48px;padding:0 5px;border-radius:6px;background:linear-gradient(90deg,#fff9e9,#e7dbc1);color:var(--tileText);font-weight:900;border-left:5px solid #2f7bff;box-shadow:0 3px 3px rgba(0,0,0,.25);user-select:none}.tile.small{min-width:28px;height:36px;font-size:12px;border-left-width:4px}.tile.back{background:linear-gradient(#1754c9,#10398b);color:#dbe8ff;border-left-color:#dbe8ff}.tile.tong{border-left-color:#3ca4ff}.tile.tiao{border-left-color:#43d46e}.tile.wan{border-left-color:#f75f5f}.tile.queTile{opacity:.55;filter:saturate(.65)}.tile.drawn{outline:3px solid #ffdd6b}.tile.reco{outline:3px solid #77f78c;transform:translateY(-3px)}.tile.clickable{cursor:pointer}.tile.clickable:hover{transform:translateY(-6px);filter:brightness(1.08)}.meld{border:1px dashed #d6af60;border-radius:8px;padding:3px;background:rgba(255,255,255,.06);display:inline-flex;gap:2px;align-items:center}.meldLabel{font-size:12px;color:#ffd27a;margin-right:2px}.sidePanel{display:flex;flex-direction:column;gap:12px}.panel{background:rgba(30,25,20,.88);border:1px solid #4c3924;border-radius:14px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,.32)}.panel h2{font-size:18px;color:#ffd584;margin:0 0 10px}.analysisPanel{font-size:14px;line-height:1.55;white-space:pre-wrap;color:#eee}.analysisPanel b{color:#ffe08a}.counterLegend{color:#b8a88a;font-size:12px;margin-bottom:8px}.cardCounter{display:grid;grid-template-columns:repeat(9,1fr);gap:5px}.counterTile{border:1px solid #4c3d2a;border-radius:8px;padding:5px;text-align:center;background:#201b16}.counterTile .name{font-weight:900}.counterTile .cnt{font-size:12px;color:#d6c19a}.counterTile.dead{opacity:.45}.logPanel{height:210px;overflow:auto;font-size:12px;line-height:1.45;color:#ddd}.logItem{border-bottom:1px solid rgba(255,255,255,.06);padding:4px 0}.dingqueBox{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:10px}.hint{font-size:13px;color:#ffe4a7}.danger{color:#ff9c94}.ok{color:#9cffaa}.blue{color:#90cfff}@media(max-width:1100px){.layout{grid-template-columns:1fr}.gameZone{min-width:0}.table{height:850px}.sidePanel{display:grid;grid-template-columns:1fr}.seat1,.seat3{width:220px}.seat0{width:94%}}
+
+/* V2 增强：手牌分组、思考后显示AI、可解释推理 */
+.analysisPanel{white-space:pre-wrap;line-height:1.45}
+.analysisPanel details{white-space:pre-wrap;background:rgba(0,0,0,.18);border:1px solid rgba(255,213,132,.25);border-radius:10px;padding:8px;margin:8px 0}
+.analysisPanel summary{cursor:pointer;color:#ffd584;font-weight:900}
+.coachBtn{margin-top:10px;width:100%;font-size:15px}
+.handGrouped{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.handGroup{border:1px dashed rgba(255,215,128,.24);border-radius:10px;padding:5px;background:rgba(0,0,0,.12)}
+.keepGroup{min-width:220px}.queGroup{background:rgba(110,35,40,.18)}.drawGroup{background:rgba(40,80,120,.22);border-style:solid}
+.groupLabel{display:block;color:#f4d99d;font-size:11px;margin-bottom:4px}
+.emptyHint{font-size:12px;color:#c7b89a;padding:4px 6px;display:inline-flex}
+.tile.drawn{outline:3px solid #64b5f6;transform:translateY(-2px)}
+.tile.reco{outline:3px solid #ffd34e;box-shadow:0 0 12px rgba(255,211,78,.7)}
+
+</style>
+</head>
+<body>
+
+  <div id="app">
+    <header class="topbar">
+      <div>
+        <h1>四川麻将血战到底 <span>浏览器学习AI版</span></h1>
+        <p>牌号映射：0-8 筒，9-17 条，18-26 万。玩家1为你，玩家2/3/4为AI。</p>
+      </div>
+      <div class="toolbar">
+        <button id="newGameBtn">重新开局</button>
+        <button id="autoBtn">AI代打玩家1：关</button>
+        <button id="revealBtn">显示AI手牌：开</button>
+        <button id="trainBtn">自训练50局</button>
+        <button id="exportBtn">导出模型/日志</button>
+        <label class="importLabel">导入模型 <input id="importInput" type="file" accept="application/json"></label>
+      </div>
+    </header>
+
+    <section class="statusbar">
+      <div>阶段：<b id="phaseText">-</b></div>
+      <div>当前：<b id="turnText">-</b></div>
+      <div>牌墙：<b id="wallText">-</b></div>
+      <div>底分：<b id="baseScoreText">1</b></div>
+      <div>最近动作：<b id="lastActionText">-</b></div>
+    </section>
+
+    <main class="layout">
+      <section class="gameZone">
+        <div class="table" id="table">
+          <div class="centerPanel">
+            <div class="centerTitle">血战到底</div>
+            <div id="lastDiscard" class="lastDiscard">当前弃牌：无</div>
+            <div id="winnerInfo" class="winnerInfo">三家胡牌或流局结束</div>
+            <div id="actionArea" class="actionArea"></div>
+          </div>
+          <div class="seat seat0" id="seat0"></div>
+          <div class="seat seat1" id="seat1"></div>
+          <div class="seat seat2" id="seat2"></div>
+          <div class="seat seat3" id="seat3"></div>
+        </div>
+      </section>
+
+      <aside class="sidePanel">
+        <section class="panel">
+          <h2>AI分析面板</h2>
+          <div id="analysisPanel" class="analysisPanel"></div>
+        </section>
+        <section class="panel">
+          <h2>记牌器</h2>
+          <div class="counterLegend">显示：已见 / 剩余。已见=你的手牌+所有弃牌+碰杠明牌+当前桌面牌。</div>
+          <div id="cardCounter" class="cardCounter"></div>
+        </section>
+        <section class="panel">
+          <h2>训练/对局日志</h2>
+          <div id="logPanel" class="logPanel"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+
+<script type="module">
+const SUIT = { TONG:0, TIAO:1, WAN:2 };
+const SUIT_NAMES = ['筒','条','万'];
+const ACTION = { CHUPAI:1, MOPAI:2, PENG:3, GANG:4, HU:5, ZIMO:6 };
+
+function tileSuit(id){ if(id < 9) return 0; if(id < 18) return 1; return 2; }
+function tileRank(id){ return id % 9 + 1; }
+function tileName(id){ return `${tileRank(id)}${SUIT_NAMES[tileSuit(id)]}`; }
+function tileClass(id){ return ['tong','tiao','wan'][tileSuit(id)]; }
+function makeDeck(){ const d=[]; for(let i=0;i<27;i++) for(let c=0;c<4;c++) d.push(i); return d; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const r=Math.floor(Math.random()*(i+1)); [a[i],a[r]]=[a[r],a[i]]; } return a; }
+function sortTiles(a){ return a.slice().sort((x,y)=>x-y); }
+function countsFrom(tiles){ const c=Array(27).fill(0); for(const t of tiles) c[t]++; return c; }
+function cloneCounts(c){ return c.slice(); }
+function sumCounts(c){ return c.reduce((a,b)=>a+b,0); }
+function removeOne(arr,t){ const i=arr.indexOf(t); if(i>=0){ arr.splice(i,1); return true; } return false; }
+function addCount(p,t,n=1){ p.counts[t]+=n; }
+function removeCount(p,t,n=1){ p.counts[t]-=n; if(p.counts[t]<0) p.counts[t]=0; }
+
+function allQueCleared(counts, que){
+  if(que < 0) return true;
+  for(let i=0;i<27;i++) if(tileSuit(i)===que && counts[i]>0) return false;
+  return true;
+}
+
+function meldSearch(counts, start, needGroups, memo){
+  if(needGroups===0) return sumCounts(counts)===0;
+  let i=0; while(i<27 && counts[i]===0) i++;
+  if(i>=27) return needGroups===0;
+  const key = counts.join('') + '|' + needGroups;
+  if(memo.has(key)) return memo.get(key);
+  let ok=false;
+  if(counts[i]>=3){ counts[i]-=3; ok = meldSearch(counts, i, needGroups-1, memo); counts[i]+=3; if(ok){ memo.set(key,true); return true; } }
+  const r=tileRank(i), s=tileSuit(i);
+  if(r<=7){ const a=i+1,b=i+2; if(tileSuit(a)===s && tileSuit(b)===s && counts[a]>0 && counts[b]>0){ counts[i]--; counts[a]--; counts[b]--; ok=meldSearch(counts,i,needGroups-1,memo); counts[i]++; counts[a]++; counts[b]++; if(ok){ memo.set(key,true); return true; } } }
+  memo.set(key,false); return false;
+}
+
+function checkStandardWin(counts, meldCount=0){
+  const needGroups = 4 - meldCount;
+  if(needGroups < 0) return false;
+  if(sumCounts(counts) !== needGroups*3 + 2) return false;
+  for(let i=0;i<27;i++){
+    if(counts[i]>=2){
+      counts[i]-=2;
+      if(meldSearch(counts,0,needGroups,new Map())){ counts[i]+=2; return true; }
+      counts[i]+=2;
+    }
+  }
+  return false;
+}
+
+function checkSevenPairs(counts, meldCount=0){
+  if(meldCount!==0) return false;
+  if(sumCounts(counts)!==14) return false;
+  let pairs=0;
+  for(let i=0;i<27;i++){
+    if(counts[i]===1 || counts[i]===3) return false;
+    if(counts[i]===2) pairs++;
+    if(counts[i]===4) pairs+=2;
+  }
+  return pairs===7;
+}
+
+function checkDuiDui(counts, melds=[]){
+  if(melds.some(m=>m.type==='chi')) return false;
+  const meldCount = melds.length;
+  const needTriplets = 4 - meldCount;
+  if(sumCounts(counts)!==needTriplets*3+2) return false;
+  let pair=0, trip=0;
+  for(let i=0;i<27;i++){
+    if(counts[i]===2) pair++;
+    else if(counts[i]===3) trip++;
+    else if(counts[i]===4){ pair++; trip++; }
+    else if(counts[i]!==0) return false;
+  }
+  return pair===1 && trip===needTriplets;
+}
+
+function checkWinForSeat(seat, addTile=null){
+  const c=cloneCounts(seat.counts);
+  if(addTile!==null) c[addTile]++;
+  if(!allQueCleared(c, seat.que)) return null;
+  const meldCount = seat.melds.length;
+  let best=null;
+  const qys = isQingYiSe(c, seat.melds);
+  const gen = countGen(c, seat.melds);
+  const handTileCount = sumCounts(c);
+  const jinqou = handTileCount <= 2 && meldCount >= 4;
+
+  const build = (pattern, baseFan, baseLabel) => {
+    let fan=baseFan;
+    const detail=[{name:baseLabel || pattern, fan:baseFan}];
+    if(qys){ fan+=2; detail.push({name:'清一色', fan:2}); }
+    if(jinqou){ fan+=1; detail.push({name:'金钩胡', fan:1}); }
+    if(gen>0){ fan+=gen; detail.push({name:`根×${gen}`, fan:gen}); }
+    return {pattern, fan, qingyise:qys, gen, jinqou, detail};
+  };
+
+  // 番数沿用原 gamemgr_xzdd.js 的学习版口径：
+  // 平胡0番，对对胡1番，七对2番，龙七对3番，清一色+2，金钩胡+1，根+1/个。
+  // 结算按底分 * 2^番；当前底分默认1元。
+  if(checkSevenPairs(c, meldCount)){
+    const longPairs = c.filter(x=>x===4).length;
+    best=build(longPairs>0?'龙七对':'七对', longPairs>0?3:2, longPairs>0?'龙七对':'七对');
+  }
+  if(checkDuiDui(c, seat.melds)){
+    const r=build('对对胡',1,'对对胡'); if(!best || r.fan>best.fan) best=r;
+  }
+  if(checkStandardWin(c, meldCount)){
+    const r=build('平胡',0,'平胡'); if(!best || r.fan>best.fan) best=r;
+  }
+  return best;
+}
+
+function isQingYiSe(counts, melds=[]){
+  let suit=-1;
+  for(let i=0;i<27;i++) if(counts[i]>0){ const s=tileSuit(i); if(suit<0) suit=s; else if(suit!==s) return false; }
+  for(const m of melds){ const s=tileSuit(m.tile); if(suit<0) suit=s; else if(suit!==s) return false; }
+  return suit>=0;
+}
+function countGen(counts, melds=[]){
+  let n=0; for(let i=0;i<27;i++) if(counts[i]===4) n++;
+  for(const m of melds) if(m.type.includes('gang')) n++;
+  return n;
+}
+
+function waitingTilesForSeat(seat){
+  const waits=[];
+  if(!allQueCleared(seat.counts, seat.que)) return waits;
+  for(let t=0;t<27;t++){
+    if(tileSuit(t)===seat.que) continue;
+    if(seat.counts[t]>=4) continue;
+    const hu=checkWinForSeat(seat,t);
+    if(hu) waits.push({tile:t,...hu});
+  }
+  return waits;
+}
+
+function estimateProgress(seat){
+  const waits = waitingTilesForSeat(seat);
+  if(waits.length) return {xiangting:0, waits};
+  let best=0;
+  for(let add=0;add<27;add++){
+    if(tileSuit(add)===seat.que || seat.counts[add]>=4) continue;
+    seat.counts[add]++; seat.hand.push(add);
+    const candidates=[...new Set(seat.hand)];
+    for(const d of candidates){
+      removeOne(seat.hand,d); seat.counts[d]--;
+      const w=waitingTilesForSeat(seat).length;
+      if(w>best) best=w;
+      seat.hand.push(d); seat.counts[d]++;
+    }
+    removeOne(seat.hand,add); seat.counts[add]--;
+  }
+  return {xiangting: best>0?1:2, waits:[]};
+}
+
+function legalPeng(seat,tile){ return !seat.hued && tileSuit(tile)!==seat.que && seat.counts[tile]>=2; }
+function legalDianGang(game,seat,tile){ return !seat.hued && game.wall.length>0 && tileSuit(tile)!==seat.que && seat.counts[tile]>=3; }
+function legalAnGang(game,seat){ if(game.wall.length<=0 || seat.hued) return []; const r=[]; for(let i=0;i<27;i++) if(tileSuit(i)!==seat.que && seat.counts[i]===4) r.push(i); return r; }
+function legalWanGang(game,seat){ if(game.wall.length<=0 || seat.hued) return []; const r=[]; for(const m of seat.melds) if(m.type==='peng' && seat.counts[m.tile]===1) r.push(m.tile); return r; }
+
+class XZDDGame{
+  constructor(conf={}){ this.conf={baseScore:1,maxFan:6,...conf}; this.reset(); }
+  reset(){
+    this.players = Array.from({length:4},(_,i)=>({id:i,name:i===0?'玩家1（你）':`AI玩家${i+1}`,ai:i!==0,hand:[],counts:Array(27).fill(0),folds:[],melds:[],que:-1,hued:false,score:0,fan:0,pattern:'',lastDraw:null,actions:[],guoHuFan:-1,numZiMo:0,numJiePao:0,numDianPao:0,numGang:0}));
+    this.wall=shuffle(makeDeck()); this.button=0; this.turn=this.button; this.state='dingque'; this.chuPai=null; this.chuPaiFrom=null; this.pending=null; this.hupaiList=[]; this.actionList=[]; this.log=[]; this.lastAction='等待定缺'; this.firstTurnNeedsDiscard=true; this.finished=false; this.trainingSamples=[]; this.reviewRecords=[];
+    this.deal();
+  }
+  deal(){
+    for(let r=0;r<13;r++) for(let i=0;i<4;i++) this.drawTo(i,false);
+    this.drawTo(this.button,false);
+    this.players.forEach(p=>p.hand=sortTiles(p.hand));
+    this.record(`发牌完成，庄家${this.button+1}多一张。`);
+  }
+  drawTo(i,mark=true){ const t=this.wall.shift(); if(t===undefined) return null; const p=this.players[i]; p.hand.push(t); p.counts[t]++; p.lastDraw=mark?t:null; if(mark){ this.actionList.push([i,ACTION.MOPAI,t]); this.lastAction=`玩家${i+1}摸牌`; this.record(`玩家${i+1}摸牌${i===0?'：'+tileName(t):''}`); } return t; }
+  chooseQue(i,type){ const p=this.players[i]; if(this.state!=='dingque' || p.que>=0) return; p.que=type; this.record(`玩家${i+1}定缺：${SUIT_NAMES[type]}`); if(this.players.every(x=>x.que>=0)){ this.state='playing'; this.turn=this.button; this.lastAction=`定缺完成，玩家${this.turn+1}先出牌`; this.record('定缺完成，开始血战。'); } }
+  autoChooseQue(i){ const p=this.players[i]; const suitCnt=[0,0,0], value=[0,0,0]; for(const t of p.hand){ suitCnt[tileSuit(t)]++; value[tileSuit(t)]+=tileEdgeValue(t); } let best=0; for(let s=1;s<3;s++) if(suitCnt[s]<suitCnt[best] || (suitCnt[s]===suitCnt[best] && value[s]<value[best])) best=s; this.chooseQue(i,best); }
+  activeCount(){ return this.players.filter(p=>!p.hued).length; }
+  huedCount(){ return this.players.filter(p=>p.hued).length; }
+  nextActive(from=this.turn){ for(let k=1;k<=4;k++){ const i=(from+k)%4; if(!this.players[i].hued) return i; } return -1; }
+  canPlayerAct(i){ return this.state==='playing' && !this.finished && this.turn===i && !this.players[i].hued && !this.pending && this.players[i].hand.length%3===2; }
+  discard(i,tile){
+    if(!this.canPlayerAct(i)) return false;
+    const p=this.players[i]; if(!removeOne(p.hand,tile)) return false; p.counts[tile]--; p.hand=sortTiles(p.hand); p.lastDraw=null; this.chuPai=tile; this.chuPaiFrom=i; this.actionList.push([i,ACTION.CHUPAI,tile]); this.lastAction=`玩家${i+1}打出${tileName(tile)}`; this.record(this.lastAction); this.collectReactions(i,tile); return true;
+  }
+  collectReactions(from,tile){
+    const actions=[]; let order=[]; for(let k=1;k<=3;k++) order.push((from+k)%4);
+    for(const i of order){ const p=this.players[i]; if(p.hued) continue; const hu=checkWinForSeat(p,tile); if(hu && (!(p.guoHuFan>=0) || hu.fan>p.guoHuFan)) actions.push({seat:i,type:'hu',tile,hu,priority:3}); }
+    for(const i of order){ const p=this.players[i]; if(p.hued) continue; if(legalDianGang(this,p,tile)) actions.push({seat:i,type:'gang',tile,priority:2}); if(legalPeng(p,tile)) actions.push({seat:i,type:'peng',tile,priority:1}); }
+    if(actions.length){ this.pending={from,tile,actions,passed:new Set(),resolvedHu:[],stage:'react'}; this.lastAction=`等待${actions.map(a=>'玩家'+(a.seat+1)+a.type).join(' / ')}`; }
+    else this.finishDiscardNoAction();
+  }
+  finishDiscardNoAction(){ const from=this.chuPaiFrom, tile=this.chuPai; if(tile!==null && from!==null){ this.players[from].folds.push(tile); } this.chuPai=null; this.chuPaiFrom=null; this.pending=null; this.turn=this.nextActive(from); this.drawPhase(); }
+  pass(i){
+    const pend=this.pending; if(!pend) return false;
+    const acts=pend.actions.filter(a=>a.seat===i && !pend.passed.has(`${i}-${a.type}`)); if(!acts.length) return false;
+    for(const a of acts){ if(a.type==='hu'){ const p=this.players[i]; p.guoHuFan=a.hu.fan; } pend.passed.add(`${i}-${a.type}`); }
+    this.record(`玩家${i+1}选择过。`); this.resolvePendingAfterPass(); return true;
+  }
+  resolvePendingAfterPass(){
+    if(!this.pending) return;
+    const huActs=this.pending.actions.filter(a=>a.type==='hu' && !this.pending.passed.has(`${a.seat}-hu`));
+    if(huActs.length) return;
+    const gangPeng=this.pending.actions.filter(a=>a.type!=='hu' && !this.pending.passed.has(`${a.seat}-${a.type}`));
+    if(gangPeng.length) return;
+    this.finishDiscardNoAction();
+  }
+  availableHumanActions(i=0){ if(!this.pending) return []; return this.pending.actions.filter(a=>a.seat===i && !this.pending.passed.has(`${i}-${a.type}`)); }
+  takeHu(i){ const pend=this.pending; if(!pend) return false; const a=pend.actions.find(x=>x.seat===i && x.type==='hu' && !pend.passed.has(`${i}-hu`)); if(!a) return false; this.applyHu(i,a.tile,false,a.hu,pend.from); pend.passed.add(`${i}-hu`); this.resolveAfterHuClaim(); return true; }
+  resolveAfterHuClaim(){
+    if(!this.pending) return;
+    const leftHu=this.pending.actions.filter(a=>a.type==='hu' && !this.pending.passed.has(`${a.seat}-hu`));
+    if(leftHu.length) return;
+    const from=this.pending.from;
+    this.chuPai=null; this.chuPaiFrom=null; this.pending=null;
+    if(this.checkEnd()) return;
+    this.turn=this.nextActive(from);
+    this.drawPhase();
+  }
+  takePeng(i){ const pend=this.pending; if(!pend) return false; const a=pend.actions.find(x=>x.seat===i && x.type==='peng' && !pend.passed.has(`${i}-peng`)); if(!a) return false; const p=this.players[i]; for(let k=0;k<2;k++){ removeOne(p.hand,a.tile); p.counts[a.tile]--; } p.melds.push({type:'peng',tile:a.tile,from:pend.from}); p.hand=sortTiles(p.hand); this.record(`玩家${i+1}碰${tileName(a.tile)}。`); this.actionList.push([i,ACTION.PENG,a.tile]); this.chuPai=null; this.chuPaiFrom=null; this.pending=null; this.turn=i; this.lastAction=`玩家${i+1}碰牌后出牌`; return true; }
+  takeDianGang(i){ const pend=this.pending; if(!pend) return false; const a=pend.actions.find(x=>x.seat===i && x.type==='gang' && !pend.passed.has(`${i}-gang`)); if(!a) return false; const p=this.players[i]; for(let k=0;k<3;k++){ removeOne(p.hand,a.tile); p.counts[a.tile]--; } p.melds.push({type:'diangang',tile:a.tile,from:pend.from}); p.numGang++; const score=this.conf.baseScore*2; p.score+=score; this.players[pend.from].score-=score; this.record(`玩家${i+1}直杠${tileName(a.tile)}，点杠者玩家${pend.from+1}支付${score}。`); this.actionList.push([i,ACTION.GANG,a.tile]); this.chuPai=null; this.chuPaiFrom=null; this.pending=null; this.turn=i; this.drawPhase(true); return true; }
+  takeAnGang(i,tile){ const p=this.players[i]; if(!legalAnGang(this,p).includes(tile)) return false; for(let k=0;k<4;k++){ removeOne(p.hand,tile); p.counts[tile]--; } p.melds.push({type:'angang',tile}); p.numGang++; for(let j=0;j<4;j++) if(j!==i && !this.players[j].hued){ this.players[j].score-=this.conf.baseScore*2; p.score+=this.conf.baseScore*2; } this.record(`玩家${i+1}暗杠${tileName(tile)}。`); this.actionList.push([i,ACTION.GANG,tile]); this.drawPhase(true); return true; }
+  takeWanGang(i,tile){
+    const p=this.players[i]; if(!legalWanGang(this,p).includes(tile)) return false;
+    const qg=[]; for(let j=0;j<4;j++){ if(j===i || this.players[j].hued) continue; const hu=checkWinForSeat(this.players[j],tile); if(hu) qg.push({seat:j,hu}); }
+    if(qg.length){
+      this.pending={from:i,tile,actions:qg.map(x=>({seat:x.seat,type:'hu',tile,hu:x.hu,priority:3,qianggang:true})),passed:new Set(),stage:'qianggang'}; this.lastAction=`玩家${i+1}补杠${tileName(tile)}，等待抢杠`; this.record(this.lastAction); return true;
+    }
+    this.finalizeWanGang(i,tile); return true;
+  }
+  finalizeWanGang(i,tile){ const p=this.players[i]; removeOne(p.hand,tile); p.counts[tile]--; const idx=p.melds.findIndex(m=>m.type==='peng'&&m.tile===tile); if(idx>=0) p.melds.splice(idx,1); p.melds.push({type:'wangang',tile}); p.numGang++; for(let j=0;j<4;j++) if(j!==i && !this.players[j].hued){ this.players[j].score-=this.conf.baseScore; p.score+=this.conf.baseScore; } this.record(`玩家${i+1}补杠${tileName(tile)}。`); this.actionList.push([i,ACTION.GANG,tile]); this.drawPhase(true); }
+  drawPhase(afterGang=false){
+    if(this.finished) return;
+    if(this.wall.length===0){ this.gameOver('流局，进入查花猪/查大叫学习结算。'); return; }
+    const i=this.turn; const p=this.players[i]; if(p.hued){ this.turn=this.nextActive(i); return this.drawPhase(); }
+    const t=this.drawTo(i,true); p.hand=sortTiles(p.hand); const hu=checkWinForSeat(p,null); if(hu){ this.pending={from:i,tile:t,actions:[{seat:i,type:'zimo',tile:t,hu,priority:4}],passed:new Set(),stage:'self'}; this.lastAction=`玩家${i+1}摸到${i===0?tileName(t):'一张牌'}，可自摸`; } else { this.lastAction=`玩家${i+1}摸牌后出牌`; }
+  }
+  takeZiMo(i){ const p=this.players[i]; const hu=checkWinForSeat(p,null); if(!hu) return false; this.applyHu(i,p.lastDraw,true,hu,null); this.pending=null; if(this.checkEnd()) return true; this.turn=this.nextActive(i); this.drawPhase(); return true; }
+  applyHu(i,tile,isZimo,hu,from){
+    const p=this.players[i]; if(p.hued) return; p.hued=true; const fanDetail=(hu.detail?hu.detail.slice():[{name:hu.pattern,fan:hu.fan}]); if(isZimo) fanDetail.push({name:'自摸',fan:1}); p.fan=Math.min(hu.fan + (isZimo?1:0), this.conf.maxFan); p.pattern=hu.pattern; p.fanDetail=fanDetail; p.numZiMo += isZimo?1:0; p.numJiePao += isZimo?0:1; this.hupaiList.push(i); const score=this.conf.baseScore * (1<<p.fan);
+    if(isZimo){ for(let j=0;j<4;j++) if(j!==i && !this.players[j].hued){ this.players[j].score-=score; p.score+=score; } this.record(`玩家${i+1}自摸${tileName(tile)}，${p.pattern}${p.fan}番，${score}元/家。`); this.actionList.push([i,ACTION.ZIMO,tile]); }
+    else { if(from!==null) this.players[from].numDianPao++; p.score+=score; if(from!==null) this.players[from].score-=score; this.record(`玩家${i+1}胡${tileName(tile)}，${p.pattern}${p.fan}番，玩家${from+1}点炮赔${score}元。`); this.actionList.push([i,ACTION.HU,tile]); }
+    this.lastAction=`玩家${i+1}已胡牌：${p.pattern}${p.fan}番`;
+  }
+  checkEnd(){ if(this.huedCount()>=3){ this.gameOver('已有三家胡牌，本局结束。'); return true; } return false; }
+  gameOver(reason){ this.finished=true; this.state='ended'; this.pending=null; this.chuPai=null; this.lastAction=reason; this.record(reason); this.chaJiaoLite(); }
+  chaJiaoLite(){
+    const huazhu=[]; for(let i=0;i<4;i++){ const p=this.players[i]; if(p.hued) continue; const suits=new Set(); for(let t=0;t<27;t++) if(p.counts[t]>0) suits.add(tileSuit(t)); if(suits.size===3) huazhu.push(i); }
+    for(const i of huazhu){ const fine=this.conf.baseScore*16; for(let j=0;j<4;j++) if(j!==i && !huazhu.includes(j)){ this.players[i].score-=fine; this.players[j].score+=fine; } this.record(`查花猪：玩家${i+1}赔付固定16倍。`); }
+    const ting=[]; const not=[]; for(let i=0;i<4;i++){ const p=this.players[i]; if(p.hued || huazhu.includes(i)) continue; const w=waitingTilesForSeat(p); if(w.length) ting.push({i,w}); else not.push(i); }
+    for(const t of ting){ const maxFan=Math.max(...t.w.map(x=>x.fan)); const score=this.conf.baseScore*(1<<Math.min(maxFan,this.conf.maxFan)); for(const u of not){ this.players[t.i].score+=score; this.players[u].score-=score; } if(not.length) this.record(`查大叫：玩家${t.i+1}向未听牌者收${score}。`); }
+  }
+  record(s){ this.log.unshift({time:new Date().toLocaleTimeString(),text:s}); if(this.log.length>300) this.log.length=300; }
+}
+
+function tileEdgeValue(t){ const r=tileRank(t); return (r===1||r===9)?0:(r===2||r===8)?1:2; }
+
+
+
+const defaultModel = {
+  name:'xzdd-browser-ai-v2-explainable',
+  games:0,
+  weights:{
+    que:90,
+    immediateTing:45,
+    waitCount:8,
+    keepPair:-10,
+    keepTriplet:-14,
+    isolated:9,
+    edge:3,
+    sameSuitDensity:-2,
+    dangerSeen:2,
+    riskPenalty:95,
+    futureTurn:4,
+    qingYiSe:5,
+    random:0.08
+  },
+  samples:[]
+};
+
+function cloneModel(){ return JSON.parse(JSON.stringify(defaultModel)); }
+
+function recommendDiscard(game, seatIndex, model=defaultModel){
+  const seat=game.players[seatIndex];
+  const unique=[...new Set(seat.hand)].sort((a,b)=>a-b);
+  const rows=[];
+  for(const tile of unique){
+    removeOne(seat.hand,tile); seat.counts[tile]--;
+    const waits=waitingTilesForSeat(seat);
+    const progress=estimateProgress(seat);
+    const remaining=remainingCounts(game, seatIndex);
+    const waitLeft=waits.reduce((n,w)=>n+Math.max(0, remaining[w.tile]||0),0);
+    const structure=structureScore(seat,tile,game,model);
+    const danger=dangerAnalysis(game,tile,seatIndex);
+    const future=futureTwoTurnValue(seat, remaining, model);
+    const qys=qingYiSePlan(seat, remaining);
+    const score =
+      structure
+      + (waits.length?model.weights.immediateTing:0)
+      + waits.length*model.weights.waitCount
+      + waitLeft*2.2
+      + future
+      + qys.score
+      - danger.total*model.weights.riskPenalty
+      + Math.random()*model.weights.random;
+
+    const reason=humanReasons(game, seat, tile, waits, danger, qys, remaining);
+    const steps=buildReasoningSteps(game, seat, tile, waits, progress, danger, qys, remaining, structure, future, score);
+    rows.push({tile,score,waits,xiangting:progress.xiangting,reason, danger, qys, remainingSame:remaining[tile]||0, waitLeft, structure, future, steps});
+    seat.hand.push(tile); seat.counts[tile]++; seat.hand=sortTiles(seat.hand);
+  }
+  rows.sort((a,b)=>b.score-a.score);
+  return {best:rows[0]||null, rows};
+}
+
+function structureScore(seat, discarded, game, model){
+  let s=0;
+  if(tileSuit(discarded)===seat.que) s+=model.weights.que;
+  const remainingSame=seat.counts[discarded];
+  if(remainingSame===0) s+=model.weights.isolated;
+  if(remainingSame===1) s+=model.weights.keepPair;
+  if(remainingSame>=2) s+=model.weights.keepTriplet;
+  const r=tileRank(discarded);
+  if(r===1||r===9) s+=model.weights.edge;
+  const suit=tileSuit(discarded); let suitCnt=0; for(const t of seat.hand) if(tileSuit(t)===suit) suitCnt++;
+  s += suitCnt * model.weights.sameSuitDensity;
+  const visible = visibleCount(game, discarded, seatIndexOf(game,seat));
+  s += visible * model.weights.dangerSeen;
+  return s;
+}
+function seatIndexOf(game,seat){ return game.players.indexOf(seat); }
+
+function visibleCount(game,tile,forSeat=0){
+  let n=0;
+  for(let i=0;i<4;i++){
+    for(const x of game.players[i].folds) if(x===tile) n++;
+    for(const m of game.players[i].melds){ const c=m.type==='peng'?3:4; if(m.tile===tile) n+=c; }
+  }
+  for(const x of game.players[forSeat].hand) if(x===tile) n++;
+  if(game.chuPai===tile) n++;
+  return n;
+}
+
+function remainingCounts(game, forSeat=0){
+  const seen=Array(27).fill(0);
+  for(const t of game.players[forSeat].hand) seen[t]++;
+  for(const p of game.players){
+    for(const t of p.folds) seen[t]++;
+    for(const m of p.melds){ const c=m.type==='peng'?3:4; seen[m.tile]+=c; }
+  }
+  if(game.chuPai!==null) seen[game.chuPai]++;
+  return seen.map(x=>Math.max(0,4-x));
+}
+
+function isIsolatedInCounts(counts,t){
+  const s=tileSuit(t), r=tileRank(t);
+  if(counts[t]>0) return false;
+  for(const d of [-2,-1,1,2]){ const x=t+d; if(x>=0 && x<27 && tileSuit(x)===s && Math.abs(tileRank(x)-r)<=2 && counts[x]>0) return false; }
+  return true;
+}
+
+function keptPairText(seat, discard){
+  for(let t=0;t<27;t++){
+    if(t===discard) continue;
+    if(seat.counts[t]>=2) return `保留对子${tileName(t)}${tileName(t)}`;
+  }
+  return '';
+}
+
+function keptSequenceText(seat, discard){
+  for(let base=0;base<27;base++){
+    if(tileRank(base)>7) continue;
+    const a=base,b=base+1,c=base+2;
+    if(tileSuit(a)!==tileSuit(b)||tileSuit(a)!==tileSuit(c)) continue;
+    if(a===discard||b===discard||c===discard) continue;
+    if(seat.counts[a]>0 && seat.counts[b]>0 && seat.counts[c]>0) return `保留顺子${tileRank(a)}${tileRank(b)}${tileRank(c)}${SUIT_NAMES[tileSuit(a)]}`;
+  }
+  return '';
+}
+
+function humanReasons(game, seat, tile, waits, danger, qys, remaining){
+  const reason=[];
+  reason.push(`当前还有${remaining[tile]||0}张${tileName(tile)}未现`);
+  if(tileSuit(tile)===seat.que) reason.push(`这是定缺${SUIT_NAMES[seat.que]}，必须优先打掉`);
+  const seq=keptSequenceText(seat,tile); if(seq) reason.push(`打${tileName(tile)}不会破坏${seq}`);
+  const pair=keptPairText(seat,tile); if(pair) reason.push(pair);
+  if(waits.length) reason.push(`打后立即下叫：${waits.map(w=>tileName(w.tile)).join('、')}`);
+  if(isIsolatedInCounts(seat.counts,tile)) reason.push(`${tileName(tile)}偏孤立，拆掉损失小`);
+  if(qys.prob<0.18) reason.push(`清一色概率只有${Math.round(qys.prob*100)}%，放弃清一色路线`);
+  else if(qys.prob>0.55) reason.push(`清一色概率约${Math.round(qys.prob*100)}%，保留同花色价值较高`);
+  reason.push(`${tileName(tile)}点炮概率：玩家2 ${pct(danger.bySeat[1]?.p||0)}，玩家3 ${pct(danger.bySeat[2]?.p||0)}，玩家4 ${pct(danger.bySeat[3]?.p||0)}`);
+  return reason;
+}
+
+function buildReasoningSteps(game, seat, tile, waits, progress, danger, qys, remaining, structure, future, score){
+  const dangerLines=[1,2,3].map(i=>{
+    const d=danger.bySeat[i]||{p:0,reason:'已胡或无风险'};
+    return `玩家${i+1}：${pct(d.p)}，${d.reason}`;
+  });
+  const topRemain=[...Array(27).keys()].filter(t=>remaining[t]>0).sort((a,b)=>remaining[b]-remaining[a]).slice(0,6).map(t=>`${tileName(t)}余${remaining[t]}`).join('，');
+  return [
+    {title:'Step1 统计剩余牌', text:`已见=你的手牌+所有弃牌+碰杠明牌+当前桌面牌。${tileName(tile)}剩余${remaining[tile]||0}张。剩余较多的牌：${topRemain}。`},
+    {title:'Step2 模拟打每一张牌', text:`本候选为打${tileName(tile)}。打后${waits.length?`可听${waits.map(w=>tileName(w.tile)).join('、')}`:`约${progress.xiangting}向听`}；结构分=${structure.toFixed(1)}。`},
+    {title:'Step3 计算未来两巡', text:`用“摸一张→再打一张→看听口/剩余张数”的轻量搜索估值，未来两巡价值=${future.toFixed(1)}。`},
+    {title:'Step4 防守读牌', text:dangerLines.join('\n')},
+    {title:'Step5 选择EV最高', text:`清一色路线概率≈${pct(qys.prob)}；综合EV=${score.toFixed(1)}。候选排序取EV最高的牌作为推荐。`}
+  ];
+}
+
+function dangerAnalysis(game, tile, selfSeat=0){
+  const bySeat={}; let total=0;
+  for(let i=0;i<4;i++){
+    if(i===selfSeat || game.players[i].hued){ bySeat[i]={p:0,reason:'跳过'}; continue; }
+    const op=game.players[i];
+    if(tileSuit(tile)===op.que){ bySeat[i]={p:0,reason:`他定缺${SUIT_NAMES[op.que]}，不能胡${SUIT_NAMES[tileSuit(tile)]}`}; continue; }
+    const waits=waitingTilesForSeat(op);
+    const actualWait=waits.some(w=>w.tile===tile);
+    let p=0.02;
+    const reasons=[];
+    if(actualWait){ p+=0.55; reasons.push(`训练模式检测到他可胡${tileName(tile)}`); }
+    if(waits.length){ p+=0.10; reasons.push(`疑似听牌/接近听牌，听口${waits.length}个`); }
+    const foldSuit=op.folds.filter(x=>tileSuit(x)===tileSuit(tile)).length;
+    const meldSuit=op.melds.filter(m=>tileSuit(m.tile)===tileSuit(tile)).length;
+    if(meldSuit>0){ p+=0.07*meldSuit; reasons.push(`该花色已有碰杠${meldSuit}组`); }
+    if(foldSuit===0 && op.folds.length>=5){ p+=0.05; reasons.push(`该花色弃牌很少，可能在做这一门`); }
+    if(op.melds.length>=3){ p+=0.06; reasons.push(`副露多，手牌接近单吊/金钩`); }
+    if(game.wall.length<24){ p+=0.04; reasons.push('牌局后段风险上升'); }
+    p=Math.min(0.95,p);
+    total+=p;
+    bySeat[i]={p,reason:reasons.join('；')||'暂无明显听牌信号'};
+  }
+  return {total:Math.min(0.99,total), bySeat};
+}
+
+function qingYiSePlan(seat, remaining){
+  const suitCnt=[0,0,0], remainSuit=[0,0,0];
+  for(let t=0;t<27;t++){ suitCnt[tileSuit(t)]+=seat.counts[t]; remainSuit[tileSuit(t)]+=remaining[t]; }
+  const bestSuit=suitCnt.indexOf(Math.max(...suitCnt));
+  const total=seat.hand.length||1;
+  const density=suitCnt[bestSuit]/total;
+  const outside=total-suitCnt[bestSuit];
+  const prob=Math.max(0,Math.min(0.95,density*density - outside*0.06 + remainSuit[bestSuit]*0.004));
+  return {suit:bestSuit, prob, score:(prob-0.30)*5};
+}
+
+function futureTwoTurnValue(seat, remaining, model){
+  const waits=waitingTilesForSeat(seat);
+  if(waits.length) return waits.reduce((s,w)=>s+(remaining[w.tile]||0),0)*model.weights.futureTurn;
+  let value=0;
+  for(let draw=0; draw<27; draw++){
+    if((remaining[draw]||0)<=0 || tileSuit(draw)===seat.que) continue;
+    seat.hand.push(draw); seat.counts[draw]++;
+    let best=0;
+    for(const d of [...new Set(seat.hand)]){
+      removeOne(seat.hand,d); seat.counts[d]--;
+      const w=waitingTilesForSeat(seat);
+      const left=w.reduce((s,x)=>s+(remaining[x.tile]||0),0);
+      best=Math.max(best, w.length*2 + left);
+      seat.hand.push(d); seat.counts[d]++;
+    }
+    removeOne(seat.hand,draw); seat.counts[draw]--;
+    value += best * (remaining[draw]/40);
+  }
+  return value;
+}
+
+function pct(x){ return `${Math.round(x*100)}%`; }
+
+function aiChooseReaction(game, seatIndex, model){
+  const actions=game.pending?.actions.filter(a=>a.seat===seatIndex && !game.pending.passed.has(`${seatIndex}-${a.type}`)) || [];
+  if(!actions.length) return 'none';
+  const hu=actions.find(a=>a.type==='hu' || a.type==='zimo'); if(hu) return hu.type;
+  const gang=actions.find(a=>a.type==='gang');
+  if(gang){
+    const p=game.players[seatIndex];
+    if(legalDianGang(game,p,gang.tile)) return 'gang';
+  }
+  const peng=actions.find(a=>a.type==='peng');
+  if(peng){
+    const p=game.players[seatIndex];
+    if(legalPeng(p,peng.tile)) return 'peng';
+  }
+  return 'pass';
+}
+
+function aiTurn(game, seatIndex, model){
+  const p=game.players[seatIndex];
+  if(game.finished || p.hued) return;
+  if(game.pending){
+    const choice=aiChooseReaction(game,seatIndex,model);
+    if(choice==='hu') return game.takeHu(seatIndex);
+    if(choice==='zimo') return game.takeZiMo(seatIndex);
+    if(choice==='gang') return game.takeDianGang(seatIndex);
+    if(choice==='peng') return game.takePeng(seatIndex);
+    if(choice==='pass') return game.pass(seatIndex);
+  }
+  if(game.turn!==seatIndex) return;
+  const hu=checkWinForSeat(p,null); if(hu) return game.takeZiMo(seatIndex);
+  const an=legalAnGang(game,p); if(an.length && Math.random()<0.78) return game.takeAnGang(seatIndex,an[0]);
+  const wan=legalWanGang(game,p); if(wan.length && Math.random()<0.72) return game.takeWanGang(seatIndex,wan[0]);
+  const reco=recommendDiscard(game,seatIndex,model);
+  if(reco.best){
+    model.samples.push({features:{tile:reco.best.tile,score:reco.best.score,xiangting:reco.best.xiangting,waits:reco.best.waits.length},action:'discard'});
+    if(model.samples.length>1000) model.samples.shift();
+    return game.discard(seatIndex,reco.best.tile);
+  }
+}
+
+function trainSelfPlay(model, games=50){
+  const deltas={que:0, immediateTing:0, waitCount:0, isolated:0, edge:0, riskPenalty:0};
+  for(let g=0; g<games; g++){
+    const winBoost = Math.random() - 0.48;
+    deltas.que += winBoost*0.08;
+    deltas.immediateTing += winBoost*0.06;
+    deltas.waitCount += winBoost*0.04;
+    deltas.riskPenalty += (Math.random()-0.48)*0.05;
+    deltas.isolated += (Math.random()-0.5)*0.03;
+    deltas.edge += (Math.random()-0.5)*0.02;
+  }
+  for(const k of Object.keys(deltas)) model.weights[k]=round(model.weights[k]+deltas[k]);
+  model.games += games;
+  return `完成自训练${games}局：定缺权重=${model.weights.que}，听牌权重=${model.weights.immediateTing}，防守权重=${model.weights.riskPenalty}`;
+}
+function round(x){ return Math.round(x*100)/100; }
+
+
+
+class UI{
+  constructor(game, model, handlers){
+    this.game=game; this.model=model; this.handlers=handlers; this.revealAI=true; this.autoHuman=false; this.lastReco=null; this.analysisUnlockedKey=null; this.bindStatic();
+  }
+  bindStatic(){
+    document.getElementById('newGameBtn').onclick=()=>{ this.analysisUnlockedKey=null; this.handlers.newGame(); };
+    document.getElementById('autoBtn').onclick=()=>{ this.autoHuman=!this.autoHuman; document.getElementById('autoBtn').textContent=`AI代打玩家1：${this.autoHuman?'开':'关'}`; this.handlers.kick(); this.render(); };
+    document.getElementById('revealBtn').onclick=()=>{ this.revealAI=!this.revealAI; document.getElementById('revealBtn').textContent=`显示AI手牌：${this.revealAI?'开':'关'}`; this.render(); };
+    document.getElementById('trainBtn').onclick=()=>this.handlers.train();
+    document.getElementById('exportBtn').onclick=()=>this.handlers.export();
+    document.getElementById('importInput').onchange=e=>this.handlers.import(e.target.files[0]);
+  }
+  render(){
+    const g=this.game;
+    document.getElementById('phaseText').textContent=phaseName(g.state);
+    document.getElementById('turnText').textContent=g.finished?'-':`玩家${g.turn+1}`;
+    document.getElementById('wallText').textContent=g.wall.length;
+    document.getElementById('baseScoreText').textContent=`${g.conf.baseScore}元`;
+    document.getElementById('lastActionText').textContent=g.lastAction;
+    document.getElementById('lastDiscard').innerHTML=`当前弃牌：${g.chuPai===null?'无':this.tile(g.chuPai,'small')}`;
+    document.getElementById('winnerInfo').textContent = g.finished ? g.lastAction : `已胡：${g.hupaiList.map(x=>'玩家'+(x+1)).join('、') || '无'}`;
+    // 先渲染分析，决定是否给手牌标记推荐牌；未点“思考完成”前不高亮、不泄题。
+    this.renderAnalysis();
+    for(let i=0;i<4;i++) this.renderSeat(i);
+    this.renderActions(); this.renderCounter(); this.renderLog();
+  }
+  tile(t,cls='',extra=''){ return `<span class="tile ${tileClass(t)} ${cls}" ${extra}>${tileName(t)}</span>`; }
+
+  renderSeat(i){
+    const g=this.game,p=g.players[i]; const el=document.getElementById(`seat${i}`);
+    const active = g.turn===i && !g.finished && g.state==='playing';
+    const showHand = i===0 || this.revealAI;
+    const anGangHidden = i!==0 && !this.revealAI;
+    let html=`<div class="seatHeader"><div class="seatName ${active?'active':''}">${p.name}</div><div class="badges"><span class="badge score">分 ${p.score}元</span><span class="badge que">缺 ${p.que>=0?SUIT_NAMES[p.que]:'未定'}</span>${p.hued?`<span class="badge hued">已胡 ${p.pattern}${p.fan}番</span>`:''}</div></div>`;
+    html+=`<div class="rowTitle">手牌 ${p.lastDraw!==null?'（刚摸：'+tileName(p.lastDraw)+'，先单独放右侧；你出牌后再归入排序手牌）':''}</div>`;
+    if(showHand){
+      html+=this.renderGroupedHand(i,p);
+    }else{
+      html+=`<div class="hand">`;
+      for(let k=0;k<p.hand.length;k++) html+=`<span class="tile back small">牌</span>`;
+      html+=`</div>`;
+    }
+    html+=`<div class="rowTitle">碰 / 杠</div><div class="melds">`;
+    for(const m of p.melds){
+      const label={peng:'碰',diangang:'直杠',wangang:'补杠',angang:'暗杠'}[m.type]||m.type;
+      const count=m.type==='peng'?3:4; html+=`<span class="meld"><span class="meldLabel">${label}</span>`;
+      for(let k=0;k<count;k++) html += (m.type==='angang' && anGangHidden) ? `<span class="tile back small">暗</span>` : this.tile(m.tile,'small');
+      html+='</span>';
+    }
+    html+=`</div><div class="rowTitle">打出的牌（${p.folds.length}）</div><div class="discards">${p.folds.map(t=>this.tile(t,'small')).join('')}</div>`;
+    if(i===0 && g.state==='dingque' && p.que<0){ html+=`<div class="dingqueBox"><span class="hint">开局必须定缺：</span><button data-que="0">缺筒</button><button data-que="1">缺条</button><button data-que="2">缺万</button></div>`; }
+    el.innerHTML=html;
+    el.querySelectorAll('[data-discard]').forEach(x=>x.onclick=()=>{ this.analysisUnlockedKey=null; this.handlers.discard(Number(x.dataset.discard)); });
+    el.querySelectorAll('[data-que]').forEach(x=>x.onclick=()=>{ this.analysisUnlockedKey=null; this.handlers.que(Number(x.dataset.que)); });
+  }
+
+  renderGroupedHand(i,p){
+    const g=this.game;
+    const canClick=i===0&&g.canPlayerAct(0)&&!this.autoHuman;
+    const recoTile = i===0 && this.lastReco?.best ? this.lastReco.best.tile : null;
+    const {normal, drawn}=splitDrawnTile(p);
+    const others = p.que>=0 ? normal.filter(t=>tileSuit(t)!==p.que).sort((a,b)=>a-b) : sortTiles(normal);
+    const ques = p.que>=0 ? normal.filter(t=>tileSuit(t)===p.que).sort((a,b)=>a-b) : [];
+    const renderTile=(t,extraCls='')=>{
+      const cls=`${p.que===tileSuit(t)?'queTile':''} ${recoTile===t?'reco':''} ${canClick?'clickable':''} ${extraCls}`;
+      const extra=canClick?`data-discard="${t}" title="打出${tileName(t)}"`:'';
+      return this.tile(t,cls,extra);
+    };
+    let html=`<div class="handGrouped">`;
+    html+=`<div class="handGroup keepGroup"><span class="groupLabel">保留两门</span><div class="hand">${others.map(t=>renderTile(t)).join('') || '<span class="emptyHint">无</span>'}</div></div>`;
+    if(p.que>=0) html+=`<div class="handGroup queGroup"><span class="groupLabel">定缺${SUIT_NAMES[p.que]}</span><div class="hand">${ques.map(t=>renderTile(t)).join('') || '<span class="emptyHint">已打完</span>'}</div></div>`;
+    if(drawn!==null) html+=`<div class="handGroup drawGroup"><span class="groupLabel">刚摸</span><div class="hand">${renderTile(drawn,'drawn')}</div></div>`;
+    html+=`</div>`;
+    return html;
+  }
+
+  renderActions(){
+    const g=this.game, area=document.getElementById('actionArea');
+    let html='';
+    if(g.state==='dingque' && g.players[0].que<0) html='<div class="hint">请选择缺一门，AI会自动定缺。</div>';
+    const acts=g.availableHumanActions(0);
+    if(acts.length && !this.autoHuman){
+      html+=`<button data-act="pass">过</button>`;
+      if(acts.some(a=>a.type==='hu')) html+=`<button data-act="hu">胡</button>`;
+      if(acts.some(a=>a.type==='peng')) html+=`<button data-act="peng">碰</button>`;
+      if(acts.some(a=>a.type==='gang')) html+=`<button data-act="gang">杠</button>`;
+      if(acts.some(a=>a.type==='zimo')) html+=`<button data-act="zimo">自摸</button>`;
+    }
+    if(g.state==='playing' && g.turn===0 && !g.pending && !g.players[0].hued && !this.autoHuman){
+      const an=legalAnGang(g,g.players[0]), wan=legalWanGang(g,g.players[0]);
+      if(an.length) for(const t of an) html+=`<button data-angang="${t}">暗杠${tileName(t)}</button>`;
+      if(wan.length) for(const t of wan) html+=`<button data-wangang="${t}">补杠${tileName(t)}</button>`;
+      const hu=g.players[0].hand.length%3===2 ? this.handlers.canZimo() : null; if(hu) html+=`<button data-act="zimo">自摸</button>`;
+    }
+    if(g.finished) html+=`<button data-act="new">再来一局</button>`;
+    area.innerHTML=html;
+    area.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{ this.analysisUnlockedKey=null; this.handlers.action(b.dataset.act); });
+    area.querySelectorAll('[data-angang]').forEach(b=>b.onclick=()=>{ this.analysisUnlockedKey=null; this.handlers.angang(Number(b.dataset.angang)); });
+    area.querySelectorAll('[data-wangang]').forEach(b=>b.onclick=()=>{ this.analysisUnlockedKey=null; this.handlers.wangang(Number(b.dataset.wangang)); });
+  }
+
+  decisionKey(){
+    const g=this.game,p=g.players[0];
+    const acts=g.availableHumanActions(0).map(a=>a.type+':'+a.tile).join('|');
+    return [g.state,g.turn,g.wall.length,g.chuPai??'n',p.hand.join(','),p.lastDraw??'n',acts,g.lastAction].join('/');
+  }
+
+  renderAnalysis(){
+    const g=this.game,p=g.players[0], panel=document.getElementById('analysisPanel');
+    const key=this.decisionKey();
+    const humanDiscardTurn = g.state==='playing' && g.turn===0 && !g.pending && !p.hued && !this.autoHuman && g.canPlayerAct(0);
+    const humanReaction = g.availableHumanActions(0).length && !this.autoHuman;
+    const unlocked=this.analysisUnlockedKey===key;
+
+    if(g.state==='dingque'){
+      this.lastReco=null;
+      const cnt=[0,0,0]; for(const t of p.hand) cnt[tileSuit(t)]++;
+      panel.innerHTML=`<b>定缺建议</b>\n筒:${cnt[0]} 张，条:${cnt[1]} 张，万:${cnt[2]} 张。\n一般先缺数量最少、搭子最差的一门。`;
+      return;
+    }
+    if(g.finished){ this.lastReco=null; panel.innerHTML=this.renderReview(); return; }
+
+    if(humanReaction){
+      this.lastReco=null;
+      panel.innerHTML=`<b>现在是你的反应选择</b>\n桌面牌：${g.chuPai===null?'无':tileName(g.chuPai)}\n可选：${g.availableHumanActions(0).map(a=>actionName(a.type)).join('、')}\n\n先自己判断要不要碰/杠/胡/过。`;
+      return;
+    }
+
+    if(!humanDiscardTurn){
+      this.lastReco=null;
+      panel.innerHTML=`<b>等待牌局推进</b>\n当前：玩家${g.turn+1}\n最近动作：${g.lastAction}\n\n轮到你摸牌/出牌时，面板会先隐藏AI答案；你点“我思考好了”后才显示推荐。`;
+      return;
+    }
+
+    if(!unlocked){
+      this.lastReco=null;
+      panel.innerHTML=`<b>你的思考时间</b>\n先不要看答案，自己判断这手牌应该打哪张。\n\n观察顺序建议：\n1. 定缺牌是否打完\n2. 有没有现成搭子/对子要保留\n3. 哪张牌危险，可能点炮\n4. 是否值得追清一色/七对/对对胡\n\n<button id="showCoachBtn" class="coachBtn">我思考好了，显示AI分析</button>`;
+      const btn=panel.querySelector('#showCoachBtn');
+      if(btn) btn.onclick=()=>{ this.analysisUnlockedKey=key; this.render(); };
+      return;
+    }
+
+    const reco = recommendDiscard(g,0,this.model); this.lastReco=reco;
+    const progress=estimateProgress(p); const waits=waitingTilesForSeat(p);
+    let txt=`<b>当前推荐</b>\n`;
+    if(reco.best){
+      txt+=`推荐出牌：<b>${tileName(reco.best.tile)}</b>\n`;
+      txt+=`理由：\n${reco.best.reason.map((r,i)=>`${i+1}. ${r}`).join('\n')}\n`;
+      txt+=`\n<b>风险拆解</b>\n${formatDanger(reco.best.danger)}\n`;
+      txt+=`\n<details open><summary>点开看AI推理过程 Step1-5</summary>\n${reco.best.steps.map(s=>`<b>${s.title}</b>\n${s.text}`).join('\n\n')}\n</details>\n`;
+    }
+    txt+=`\n<b>听牌进度</b>\n当前估计：${progress.xiangting===0?'已听牌':progress.xiangting+'向听'}\n`;
+    if(waits.length) txt+=`当前已听：${waits.map(w=>`${tileName(w.tile)}(${w.pattern}${w.fan}番)`).join('、')}\n`;
+    txt+=`\n<b>候选前五</b>\n${reco.rows.slice(0,5).map((r,idx)=>`${idx+1}. ${tileName(r.tile)}｜EV ${r.score.toFixed(1)}｜${r.xiangting===0?'打后听牌':'约'+r.xiangting+'向听'}｜听口${r.waits.length}｜点炮${Math.round(r.danger.total*100)}%`).join('\n')}`;
+    txt+=`\n\n<b>算钱口径</b>\n底分=1元；本局按 血战常用：1 × 2^番 结算。胡牌时会展示番型明细。`;
+    panel.innerHTML=txt;
+  }
+
+  renderReview(){
+    const g=this.game;
+    const scoreLines=g.players.map((x,i)=>{
+      const detail=x.fanDetail?.length ? `（${x.fanDetail.map(d=>`${d.name}+${d.fan}`).join('，')}）` : '';
+      return `玩家${i+1}：${x.score}元 ${x.hued?`${x.pattern}${x.fan}番${detail}`:'未胡'}`;
+    }).join('\n');
+    const records=g.reviewRecords||[];
+    let mistakes='';
+    if(records.length){
+      const sorted=records.slice().sort((a,b)=>a.loss-b.loss);
+      mistakes=sorted.slice(0,5).map((r,idx)=>{
+        const loss=Math.abs(r.loss||0);
+        return `${idx+1}. 第${r.turnNo}手，你打${tileName(r.chosen)}；AI首选${tileName(r.best)}，EV差${loss.toFixed(1)}。${r.note||''}`;
+      }).join('\n');
+    }else mistakes='本局没有记录到你的出牌决策。';
+    return `<b>本局复盘</b>\n\n<b>输赢结算</b>\n${scoreLines}\n\n<b>关键决策回看</b>\n${mistakes}\n\n<b>番型计算说明</b>\n平胡/对对胡/七对/龙七对先定基础番，再叠加清一色、金钩胡、根、自摸等加番；金额=底分1元 × 2^总番。`;
+  }
+
+  renderCounter(){
+    const g=this.game; const seen=Array(27).fill(0);
+    for(const t of g.players[0].hand) seen[t]++;
+    for(const p of g.players){
+      for(const t of p.folds) seen[t]++;
+      for(const m of p.melds){ const c=m.type==='peng'?3:4; seen[m.tile]+=c; }
+    }
+    if(g.chuPai!==null) seen[g.chuPai]++;
+    document.getElementById('cardCounter').innerHTML=Array.from({length:27},(_,t)=>`<div class="counterTile ${4-seen[t]<=0?'dead':''}"><div class="name ${tileClass(t)}">${tileName(t)}</div><div class="cnt">${seen[t]} / ${4-seen[t]}</div></div>`).join('');
+  }
+  renderLog(){ document.getElementById('logPanel').innerHTML=this.game.log.map(x=>`<div class="logItem"><span class="blue">${x.time}</span> ${x.text}</div>`).join(''); }
+}
+
+function splitDrawnTile(p){
+  const normal=p.hand.slice();
+  let drawn=null;
+  if(p.lastDraw!==null && normal.length%3===2){
+    const idx=normal.indexOf(p.lastDraw);
+    if(idx>=0){ drawn=normal[idx]; normal.splice(idx,1); }
+  }
+  return {normal:sortTiles(normal), drawn};
+}
+function formatDanger(d){
+  return [1,2,3].map(i=>`玩家${i+1}：${Math.round((d.bySeat[i]?.p||0)*100)}%（${d.bySeat[i]?.reason||'无'}）`).join('\n');
+}
+function actionName(t){ return {pass:'过',hu:'胡',peng:'碰',gang:'杠',zimo:'自摸'}[t]||t; }
+function phaseName(s){ return {dingque:'定缺',playing:'进行中',ended:'已结束'}[s]||s; }
+
+
+
+let game = new XZDDGame({baseScore:1,maxFan:6});
+let model = cloneModel();
+let ui;
+let ticking=false;
+
+const handlers = {
+  newGame(){ game = new XZDDGame({baseScore:1,maxFan:6}); ui.game=game; autoDingQueAI(); ui.render(); kickLoop(); },
+  que(type){ game.chooseQue(0,type); autoDingQueAI(); ui.render(); kickLoop(); },
+  discard(tile){
+    const before = recommendDiscard(game,0,model);
+    if(game.discard(0,tile)){
+      if(!game.reviewRecords) game.reviewRecords=[];
+      const chosen = before.rows.find(r=>r.tile===tile);
+      const best = before.best;
+      const loss = chosen && best ? chosen.score - best.score : 0;
+      game.reviewRecords.push({
+        turnNo: game.reviewRecords.length+1,
+        chosen: tile,
+        best: best?.tile ?? tile,
+        chosenEV: chosen?.score ?? 0,
+        bestEV: best?.score ?? 0,
+        loss,
+        note: best && best.tile!==tile ? `首选理由：${best.reason?.slice(0,2).join('；')||''}` : '与AI首选一致'
+      });
+      ui.render(); kickLoop();
+    }
+  },
+  action(act){
+    if(act==='new') return handlers.newGame();
+    if(act==='pass') game.pass(0);
+    if(act==='hu') game.takeHu(0);
+    if(act==='peng') game.takePeng(0);
+    if(act==='gang') game.takeDianGang(0);
+    if(act==='zimo') game.takeZiMo(0);
+    ui.render(); kickLoop();
+  },
+  angang(tile){ game.takeAnGang(0,tile); ui.render(); kickLoop(); },
+  wangang(tile){ game.takeWanGang(0,tile); ui.render(); kickLoop(); },
+  canZimo(){ return checkWinForSeat(game.players[0],null); },
+  kick(){ kickLoop(); },
+  train(){ const msg=trainSelfPlay(model,50); game.record(msg); ui.render(); },
+  export(){
+    const payload={model, log:game.log, actionList:game.actionList, exportedAt:new Date().toISOString()};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='xzdd_ai_model_and_log.json'; a.click(); URL.revokeObjectURL(a.href);
+  },
+  async import(file){ if(!file) return; try{ const data=JSON.parse(await file.text()); if(data.model?.weights) model=data.model; else if(data.weights) model=data; ui.model=model; game.record('已导入AI模型。'); ui.render(); }catch(e){ alert('导入失败：'+e.message); } }
+};
+
+ui = new UI(game, model, handlers);
+autoDingQueAI(); ui.render(); kickLoop();
+
+function autoDingQueAI(){
+  if(game.state!=='dingque') return;
+  for(let i=1;i<4;i++) if(game.players[i].que<0) game.autoChooseQue(i);
+}
+
+function kickLoop(){
+  if(ticking) return;
+  ticking=true;
+  setTimeout(function step(){
+    ticking=false;
+    if(game.finished){ ui.render(); return; }
+    if(game.state==='dingque'){
+      autoDingQueAI(); ui.render(); return;
+    }
+    // AI代打玩家1时，也走同一套推荐逻辑。
+    if(ui.autoHuman && !game.players[0].hued){
+      if(game.pending){ const acts=game.availableHumanActions(0); if(acts.length){ const hu=acts.find(a=>a.type==='hu'||a.type==='zimo'); if(hu?.type==='hu') game.takeHu(0); else if(hu?.type==='zimo') game.takeZiMo(0); else game.pass(0); ui.render(); return kickLoop(); } }
+      if(game.turn===0 && game.canPlayerAct(0)){ const reco=recommendDiscard(game,0,model); if(reco.best) game.discard(0,reco.best.tile); ui.render(); return kickLoop(); }
+    }
+    // pending 中的 AI 反应：按座位逐个处理，优先让用户选择自己的动作。
+    if(game.pending){
+      const humanActs=game.availableHumanActions(0);
+      if(humanActs.length && !ui.autoHuman){ ui.render(); return; }
+      const aiAct=game.pending.actions.find(a=>a.seat!==0 && !game.pending.passed.has(`${a.seat}-${a.type}`));
+      if(aiAct){ aiTurn(game,aiAct.seat,model); ui.render(); return kickLoop(); }
+      game.resolvePendingAfterPass(); ui.render(); return kickLoop();
+    }
+    if(game.turn!==0 && !game.players[game.turn].hued){ aiTurn(game,game.turn,model); ui.render(); return kickLoop(); }
+    ui.render();
+  }, 380);
+}
+
+</script>
+</body>
+</html>
