@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>韩语字卡 · 掌握度测试</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#181b25; --panel2:#1f2331; --line:#2b3040;
+    --txt:#e8eaf0; --dim:#9aa3b8; --accent:#5b8cff; --good:#2ecc71;
+    --warn:#f5a623; --bad:#ff5c5c; --gold:#ffd166;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:-apple-system,"PingFang SC","Malgun Gothic","Apple SD Gothic Neo","Segoe UI",sans-serif;padding:16px;min-height:100vh}
+  .wrap{max-width:880px;margin:0 auto}
+  h1{font-size:20px;font-weight:600;margin-bottom:4px}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:16px;line-height:1.6}
+  .decks{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+  .deck{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;transition:.15s}
+  .deck:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .deck.on{border-color:var(--accent);background:var(--panel2);box-shadow:0 0 0 1px var(--accent) inset}
+  .deck .t{font-weight:600;font-size:14px}
+  .deck .d{color:var(--dim);font-size:12px;margin-top:3px;line-height:1.5}
+  .deck .p{height:4px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+  .deck .p i{display:block;height:100%;background:var(--good);width:0;transition:.3s}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  button{font-family:inherit;font-size:13px;padding:8px 14px;border-radius:9px;border:1px solid var(--line);
+    background:var(--panel);color:var(--txt);cursor:pointer;transition:.15s}
+  button:hover{border-color:var(--accent)}
+  button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+  .stats{margin-left:auto;color:var(--dim);font-size:12px;display:flex;gap:14px}
+  .stats b{color:var(--txt)}
+  .prog{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin:12px 0}
+  .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--good));width:0;transition:.3s}
+
+  .card{background:linear-gradient(160deg,#20263a,#161a26);border:1px solid var(--line);border-radius:20px;
+    min-height:470px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    cursor:pointer;position:relative;user-select:text;padding:54px 24px 48px}
+  .glyph{font-size:104px;line-height:1.2;font-weight:500;letter-spacing:2px;text-align:center}
+  .say{cursor:pointer;transition:.15s;border-radius:12px;padding:2px 14px}
+  .say:hover{background:rgba(91,140,255,.14)}
+  .say:active{transform:scale(.97)}
+  .say::after{content:"🔊";font-size:.32em;opacity:.35;margin-left:10px;vertical-align:middle}
+  .say.playing{background:rgba(91,140,255,.24)}
+  .word{margin-top:22px;text-align:center;border-top:1px solid var(--line);padding-top:18px;width:100%}
+  .word-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:start}
+  .word-entry{background:rgba(255,255,255,.02);border:1px solid var(--line);border-radius:10px;padding:8px 4px}
+  .word .kw{font-size:18px;font-weight:600;letter-spacing:.5px;line-height:1.45;display:block;word-break:keep-all}
+  .word .kw.say{padding:2px 4px}
+  .word .kw.say::after{font-size:10px;margin-left:4px}
+  .word .kr{font-size:11px;color:var(--gold);margin-top:3px;line-height:1.4;word-break:break-all}
+  .word .kc{font-size:11px;color:var(--dim);margin-top:3px;line-height:1.4}
+  .word .none{font-size:12px;color:var(--dim);font-style:italic;line-height:1.6}
+  .hl{color:var(--accent);font-weight:700}
+  .hl2{color:var(--accent);opacity:.85;border-bottom:1px dashed var(--accent)}
+  .sent{margin-top:18px;width:100%;text-align:center;border-top:1px dashed var(--line);padding-top:16px}
+  .sent .sk{font-size:21px;font-weight:600;line-height:1.6;display:inline-block}
+  .sent .sk.say{padding:4px 12px}
+  .sent .sk.say::after{font-size:12px;margin-left:8px}
+  .sent .sr{font-size:12px;color:var(--gold);margin-top:6px;line-height:1.5}
+  .sent .sc{font-size:12px;color:var(--dim);margin-top:4px;line-height:1.5}
+  .sent .src{font-size:11px;color:var(--dim);opacity:.75;margin-top:6px}
+  @media(max-width:640px){
+    .word-list{grid-template-columns:repeat(5,minmax(64px,1fr));overflow-x:auto}
+    .word .kw{font-size:15px}
+    .sent .sk{font-size:17px}
+  }
+  #front,#back{display:flex;flex-direction:column;align-items:center}
+  #back{animation:fade .2s}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  .rom{font-size:42px;font-weight:600;color:var(--gold);letter-spacing:1px;line-height:1.4;margin-top:6px}
+  .cn{font-size:15px;color:var(--dim);margin-top:10px;line-height:1.6;text-align:center}
+  .hint{color:var(--dim);font-size:12px;position:absolute;bottom:16px;left:0;right:0;text-align:center}
+  .tag{position:absolute;top:14px;left:16px;font-size:11px;color:var(--dim)}
+  .lvl{position:absolute;top:14px;right:16px;font-size:11px}
+  .grade{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .grade button{padding:14px;font-size:14px;font-weight:600}
+  #b0{border-color:var(--bad);color:var(--bad)} #b1{border-color:var(--warn);color:var(--warn)}
+  #b2{border-color:var(--good);color:var(--good)}
+  .chart{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:14px;overflow-x:auto}
+  table{border-collapse:collapse;font-size:13px;width:100%}
+  td,th{border:1px solid var(--line);padding:5px 4px;text-align:center;min-width:44px}
+  th{color:var(--dim);font-weight:500;background:var(--panel2)}
+  td span{display:block;font-size:16px} td small{color:var(--dim);font-size:10px}
+  td.k{background:#1b2c1e} td.m{background:#3a3118} td.w{background:#2e1f1f}
+  .hide{display:none}
+  .browse{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+  .bnote{color:var(--dim);font-size:13px;line-height:1.75;margin-bottom:16px;
+    border-left:3px solid var(--warn);padding-left:12px}
+  .bnote b{color:var(--txt)}
+  .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+  .bcell{background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+    padding:10px 4px;text-align:center;cursor:pointer;transition:.12s}
+  .bcell:hover{border-color:var(--accent);background:rgba(91,140,255,.12)}
+  .bcell.playing{border-color:var(--accent);background:rgba(91,140,255,.26)}
+  .bcell .bg{display:block;font-size:28px;line-height:1.3}
+  .bcell .br{display:block;font-size:11px;color:var(--gold);margin-top:2px}
+  .bcell .bc{display:block;font-size:10px;color:var(--dim);margin-top:2px}
+  .done{text-align:center;padding:30px 10px}
+  .done h2{font-size:26px;margin-bottom:8px}
+  .weak{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
+  .weak span{background:var(--panel2);border:1px solid var(--bad);border-radius:8px;padding:4px 8px;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>韩语字卡 · 掌握度测试</h1>
+  <div class="sub">正面：大字 + <b>同排最多 5 个例词</b>（歌词高频词，或发音贴近英文 / 中文的词）+ <b>1 句歌词风例句</b>。例词与例句都<b>只收含有这个字本身</b>的内容，该字以蓝色高亮；字母卡则高亮所有含该字母的音节。点<b>字</b>、<b>词</b>、<b>句子</b>都可发音（0.7 倍速，可反复点）；点卡片空白处或空格键翻面看拼读。点「已掌握」会暂时出库；点「有点会，再出现几次」会在本轮回归；点「不会，后面再学」会封存到下一轮。每次点「开始 / 重新洗牌」就算开启新一轮学习。生僻音节已单独归到第 ⑤ 组，只看不背。</div>
+
+  <div class="decks" id="decks"></div>
+
+  <div class="bar">
+    <button class="pri" id="btnStart">开始 / 重新洗牌</button>
+    <button id="btnWeak">只练 1 / 2 类</button>
+    <button id="btnHard">查看 1 类清单</button>
+    <button id="btnSound">🔊 重听 (R)　0.7x</button>
+    <button id="btnChart">查看全表</button>
+    <button id="btnExport">导出已掌握</button>
+    <button id="btnReset">清空记录</button>
+    <div class="stats">
+      <span>剩余 <b id="sLeft">0</b></span>
+      <span>已掌握 <b id="sDone">0</b></span>
+      <span>待巩固 <b id="sAcc">0</b></span>
+    </div>
+  </div>
+
+  <div class="prog"><i id="progBar"></i></div>
+
+  <div id="stage"></div>
+  <div id="chart" class="chart hide"></div>
+  <div id="hardBox" class="chart hide"></div>
+  <div id="exportBox" class="chart hide"></div>
+</div>
+
+<script>
+/* ================= 字表数据 ================= */
+const CHO   = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+const CHO_R = ["g","kk","n","d","tt","r","m","b","pp","s","ss","","j","jj","ch","k","t","p","h"];
+const JUNG   = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
+const JUNG_R = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+const JUNG_CN= ["啊","诶","呀","耶","哦(嘴不圆)","诶","哟(约)","耶","喔(嘴圆)","哇","歪","威","哟","乌","我","喂","威(wi)","优","呃(扁嘴)","呃衣","衣"];
+const CHO_CN = ["g/k 介于「哥」与「科」","kk 硬音，紧喉的「嘎」","n 那","d/t 介于「德」与「特」","tt 硬音，紧喉的「搭」","r/l 舌尖轻弹","m 妈","b/p 介于「波」与「坡」","pp 硬音，紧喉的「波」","s 思","ss 硬音，紧喉的「思」","首位不发音，收尾读 ng","j 介于「知」与「吃」","jj 硬音，紧喉的「基」","ch 送气的「吃」","k 送气的「科」","t 送气的「特」","p 送气的「坡」","h 喝"];
+
+const JAMO=[];
+CHO.forEach((c,i)=>JAMO.push({g:c,r:CHO_R[i]||"ng / 无声",cn:CHO_CN[i],t:"辅音"}));
+JUNG.forEach((v,i)=>JAMO.push({g:v,r:JUNG_R[i],cn:JUNG_CN[i],t:"元音"}));
+
+const syl=(c,v,f=0)=>String.fromCharCode(0xAC00+(c*21+v)*28+f);
+const mk =(c,v)=>({g:syl(c,v),r:(CHO_R[c]||"")+JUNG_R[v],cn:CHO[c]+" + "+JUNG[v],t:"音节"});
+
+const BASIC_C=[0,2,3,5,6,7,9,11,12,14,15,16,17,18], BASIC_V=[0,2,4,6,8,12,13,17,18,20];
+const T140=[]; BASIC_C.forEach(c=>BASIC_V.forEach(v=>T140.push(mk(c,v))));
+const T399=[]; CHO.forEach((_,c)=>JUNG.forEach((_,v)=>T399.push(mk(c,v))));
+
+const BJ=[["ㄱ","k"],["ㄲ","k"],["ㄳ","k"],["ㄴ","n"],["ㄵ","n"],["ㄶ","n"],["ㄷ","t"],["ㄹ","l"],
+["ㄺ","k"],["ㄻ","m"],["ㄼ","l"],["ㄽ","l"],["ㄾ","l"],["ㄿ","p"],["ㅀ","l"],["ㅁ","m"],["ㅂ","p"],
+["ㅄ","p"],["ㅅ","t"],["ㅆ","t"],["ㅇ","ng"],["ㅈ","t"],["ㅊ","t"],["ㅋ","k"],["ㅌ","t"],["ㅍ","p"],["ㅎ","t"]];
+const BATCHIM=BJ.map((x,i)=>({g:syl(11,0,i+1),r:"a"+x[1],cn:"收音 "+x[0]+" → 实际读 ["+x[1]+"]",t:"받침"}));
+
+/* 生僻音节：理论上拼得出、日常几乎不成词，只看不背 */
+const RARE=new Set("궈긔꺄꺠꼐꾜뀨끠냬녜놰눼댸뎨돠뒈듸땨떄뗘뗴뙈뙤뚀뚸뛔뜌럐뢔뤄뤠뤼릐먜뫄뫠뭬뮈믜뱨볘붜붸븨뺘뺴뻬뼤뽜뽸뾔뿨쀄쀠쀼쁴솨숴싀쌰썌쎄쎠쎼쏴쑈쒜쒸쓔졔좨줴즤쨔쨰쩨쪠쫴쬬쮀쮜쮸쯔쯰챼쳬촤쵀츼컈켸쾨킈턔톄톼퇘퉈퉤퍠퐈퐤푀풔풰퓌픠햬훠뇨뉘뫼몌쇄췌".split(""));
+const T_USE  = [];   // 实用音节
+const T_RARE = [];   // 生僻音节
+
+const DECKS={
+  jamo:{name:"① 基础字母 40",desc:"19 辅音 + 21 元音，入门必背",data:JAMO},
+  t140:{name:"② 反切表 140",desc:"14 常用辅音 × 10 基本元音",data:T140},
+  t399:{name:"③ 实用音节",desc:"无收音全表 + 现有词中实际出现的带收音音节",data:T_USE},
+  bat :{name:"④ 收音 받침 27",desc:"终声字母与实际发音",data:BATCHIM},
+  rare:{name:"⑤ 生僻音节",desc:"只浏览不测试，点击可发音",data:T_RARE,browse:true}
+};
+
+/* ================= 例词库 ================= */
+const W={
+// —— 字母 ——
+"ㄱ":["가방","gabang","包"],"ㄲ":["꽃","kkot","花"],"ㄴ":["나무","namu","树"],"ㄷ":["다리","dari","腿 / 桥"],
+"ㄸ":["딸","ttal","女儿"],"ㄹ":["라디오","radio","收音机"],"ㅁ":["물","mul","水"],"ㅂ":["바다","bada","海"],
+"ㅃ":["빵","ppang","面包"],"ㅅ":["산","san","山"],"ㅆ":["쌀","ssal","大米"],"ㅇ":["우유","uyu","牛奶"],
+"ㅈ":["집","jip","家"],"ㅉ":["짜다","jjada","咸"],"ㅊ":["책","chaek","书"],"ㅋ":["코","ko","鼻子"],
+"ㅌ":["토끼","tokki","兔子"],"ㅍ":["팔","pal","手臂 / 八"],"ㅎ":["하늘","haneul","天空"],
+"ㅏ":["아빠","appa","爸爸"],"ㅐ":["개","gae","狗"],"ㅑ":["야채","yachae","蔬菜"],"ㅒ":["얘기","yaegi","话、故事"],
+"ㅓ":["어머니","eomeoni","母亲"],"ㅔ":["게","ge","螃蟹"],"ㅕ":["여자","yeoja","女子"],"ㅖ":["예의","yeui","礼仪"],
+"ㅗ":["오이","oi","黄瓜"],"ㅘ":["과자","gwaja","点心"],"ㅙ":["왜","wae","为什么"],"ㅚ":["외국","oeguk","外国"],
+"ㅛ":["요리","yori","料理"],"ㅜ":["우산","usan","雨伞"],"ㅝ":["뭐","mwo","什么"],"ㅞ":["웨딩","weding","婚礼"],
+"ㅟ":["귀","gwi","耳朵"],"ㅠ":["유리","yuri","玻璃"],"ㅡ":["그림","geurim","图画"],"ㅢ":["의사","uisa","医生"],
+"ㅣ":["이름","ireum","名字"],
+// —— ㄱ ——
+"가":["가방","gabang","包"],"개":["개","gae","狗"],"걔":["걔","gyae","那孩子(口语)"],
+"거":["거울","geoul","镜子"],"게":["게임","geim","游戏"],"겨":["겨울","gyeoul","冬天"],"계":["계란","gyeran","鸡蛋"],
+"고":["고마워","gomawo","谢谢"],"과":["과일","gwail","水果"],"괘":["괘씸하다","gwaessimhada","可恶、讨厌"],"괴":["괴로워","goerowo","难受、痛苦"],
+"교":["학교","hakgyo","学校"],"구":["구름","gureum","云"],"궤":["궤도","gwedo","轨道"],
+"귀":["귀","gwi","耳朵"],"규":["규현","Gyuhyeon","圭贤（歌手名）"],"그":["그리고","geurigo","还有、然后"],
+"기":["기차","gicha","火车"],
+// —— ㄲ ——
+"까":["까먹다","kkameokda","忘掉"],"깨":["깨끗하다","kkaekkeuthada","干净"],
+"꺼":["꺼내다","kkeonaeda","拿出"],"께":["함께","hamkke","一起"],"껴":["껴안다","kkyeoanda","拥抱"],
+"꼬":["꼬마","kkoma","小孩"],"꽈":["꽈당","kkwadang","扑通摔倒声"],"꽤":["꽤","kkwae","相当、颇"],"꾀":["꾀병","kkoebyeong","装病"],
+"꾸":["꾸미다","kkumida","装饰"],"꿔":["꿔주다","kkwojuda","借出"],"꿰":["꿰매다","kkwemaeda","缝补"],
+"뀌":["방귀","banggwi","屁"],"끄":["끄다","kkeuda","关(灯/机)"],
+"끼":["끼다","kkida","戴上 / 夹住"],
+// —— ㄴ ——
+"나":["나무","namu","树"],"내":["내일","naeil","明天"],"냐":["냐옹","nyaong","喵"],
+"너":["너무","neomu","太、非常"],"네":["네","ne","是"],"녀":["소녀","sonyeo","少女"],
+"노":["노래","norae","歌"],"놔":["놔","nwa","放下、放着"],"뇌":["뇌","noe","脑"],
+"누":["누나","nuna","姐姐(男性称)"],"눠":["나눠","nanwo","分开"],
+"뉘":["뉘앙스","nwiangseu","语感、细微差别"],"뉴":["뉴스","nyuseu","新闻"],"느":["느리다","neurida","慢"],"늬":["무늬","munui","花纹"],
+"니":["어머니","eomeoni","母亲"],
+// —— ㄷ ——
+"다":["다리","dari","腿 / 桥"],"대":["대학","daehak","大学"],
+"더":["더","deo","更、再"],"데":["데이트","deiteu","约会"],
+"도":["도시","dosi","城市"],"돼":["돼요","dwaeyo","可以 / 是"],"되":["되다","doeda","成为"],
+"두":["두부","dubu","豆腐"],"둬":["둬","dwo","放着(口语)"],"뒈":["뒈","dwe","(俗语)"],
+"뒤":["뒤","dwi","后面"],"듀":["듀엣","dyuet","二重唱"],"드":["드라마","deurama","电视剧"],
+"디":["디자인","dijain","设计"],
+// —— ㄸ ——
+"따":["따뜻하다","ttatteuthada","温暖"],"때":["때","ttae","时候 / 污垢"],
+"떠":["떠나다","tteonada","离开"],"떼":["떼","tte","群、堆"],
+"또":["또","tto","又、再"],"똬":["똬리","ttwari","(蛇)盘绕"],
+"뚜":["뚜껑","ttukkeong","盖子"],
+"뛰":["뛰다","ttwida","跑、跳"],"뜨":["뜨겁다","tteugeopda","烫"],"띄":["띄어쓰기","ttuieosseugi","分写法"],
+"띠":["띠","tti","生肖 / 带子"],
+// —— ㄹ ——
+"라":["라면","ramyeon","方便面"],"래":["미래","mirae","未来"],
+"러":["러브","reobeu","love、爱"],"레":["레벨","rebel","level、等级"],"려":["기다려","gidaryeo","等我"],"례":["실례","sillye","失礼、不好意思"],
+"로":["로맨틱","romaentik","浪漫的"],"뢰":["신뢰","silloe","信赖"],
+"료":["종료","jongnyo","结束"],"루":["하루","haru","一天"],
+"류":["한류","hallyu","韩流"],"르":["노르웨이","Noreuwei","挪威"],
+"리":["우리","uri","我们"],
+// —— ㅁ ——
+"마":["마음","maeum","心"],"매":["매일","maeil","每天"],
+"머":["머리","meori","头、头发"],"메":["메뉴","menyu","菜单"],"며":["며칠","myeochil","几天"],
+"모":["모자","moja","帽子"],
+"묘":["미묘하다","mimyohada","微妙"],"무":["무료","muryo","免费"],"뭐":["뭐","mwo","什么"],
+"뮤":["뮤직","myujik","music、音乐"],
+"미":["미안","mian","抱歉"],
+// —— ㅂ ——
+"바":["바다","bada","海"],"배":["배","bae","梨 / 船 / 肚子"],
+"버":["버스","beoseu","公交车"],"베":["베개","begae","枕头"],"벼":["벼락","byeorak","雷"],
+"보":["보다","boda","看"],"봐":["봐","bwa","看吧"],"봬":["봬요","bwaeyo","(敬语)见面吧"],"뵈":["뵈다","boeda","拜见"],
+"부":["부모","bumo","父母"],
+"뷔":["뷔","Bwi","V（防弹少年团成员）"],"뷰":["뷰","byu","景观、view"],"브":["브이","beui","V 手势"],
+"비":["비","bi","雨"],
+// —— ㅃ ——
+"빠":["빠르다","ppareuda","快"],"빼":["빼다","ppaeda","抽出、减去"],
+"뻐":["뻐근하다","ppeogeunhada","酸胀"],"뼈":["뼈","ppyeo","骨头"],
+"뽀":["뽀뽀","ppoppo","亲亲"],
+"뾰":["뾰족","ppyojok","尖尖"],"뿌":["뿌리","ppuri","根"],
+"쁘":["예쁘다","yeppeuda","漂亮"],
+"삐":["삐다","ppida","扭伤"],
+// —— ㅅ ——
+"사":["사랑","sarang","爱"],"새":["새","sae","鸟"],"샤":["샤워","syawo","淋浴"],"섀":["섀도","syaedo","眼影"],
+"서":["서울","Seoul","首尔"],"세":["세계","segye","世界"],"셔":["셔츠","syeocheu","衬衫"],"셰":["셰프","syepeu","主厨"],
+"소":["소금","sogeum","盐"],"쇄":["쇄국","swaeguk","锁国"],"쇠":["쇠","soe","铁"],
+"쇼":["쇼핑","syoping","购物"],"수":["수업","sueop","课"],"쉐":["쉐어","sweeo","share、共享"],
+"쉬":["쉬다","swida","休息"],"슈":["슈퍼","syupeo","超市"],"스":["스포츠","seupocheu","体育"],
+"시":["시간","sigan","时间"],
+// —— ㅆ ——
+"싸":["싸다","ssada","便宜"],"쌔":["쌔다","ssaeda","多得是"],
+"써":["써요","sseoyo","写 / 用（敬语）"],"쎄":["쎄다","sseda","厉害、强（口语）"],
+"쏘":["쏘다","ssoda","请客 / 开枪"],"쏴":["쏴","sswa","(风声)"],"쐐":["쐐기","sswaegi","楔子"],"쐬":["쐬다","ssoeda","吹风、晒太阳"],
+"쑤":["쑤다","ssuda","戳 / 熬"],
+"쓰":["쓰다","sseuda","写 / 苦"],"씌":["씌우다","ssuiuda","给…戴上"],
+"씨":["씨","ssi","先生·女士 / 种子"],
+// —— ㅇ ——
+"아":["아기","agi","婴儿"],"애":["애인","aein","恋人"],"야":["야구","yagu","棒球"],"얘":["얘기","yaegi","话、故事"],
+"어":["어머니","eomeoni","母亲"],"에":["에어컨","eeokeon","空调"],"여":["여름","yeoreum","夏天"],"예":["예의","yeui","礼仪"],
+"오":["오늘","oneul","今天"],"와":["와인","wain","葡萄酒"],"왜":["왜","wae","为什么"],"외":["외국","oeguk","外国"],
+"요":["요리","yori","料理"],"우":["우유","uyu","牛奶"],"워":["샤워","syawo","淋浴"],"웨":["웨이터","weiteo","服务员"],
+"위":["위","wi","上面 / 胃"],"유":["유리","yuri","玻璃"],"으":["으악","euak","啊呀（惊叫）"],"의":["의사","uisa","医生"],
+"이":["이름","ireum","名字"],
+// —— ㅈ ——
+"자":["자동차","jadongcha","汽车"],"재":["재미","jaemi","趣味"],"쟤":["쟤","jyae","那孩子(口语)"],
+"저":["저녁","jeonyeok","晚上"],"제":["제일","jeil","最"],"져":["가져","gajyeo","拿着"],
+"조":["조금","jogeum","一点点"],"좌":["좌우","jwau","左右"],"죄":["죄송","joesong","抱歉"],
+"죠":["그렇죠","geureochyo","对吧"],"주":["주말","jumal","周末"],"줘":["줘","jwo","给我"],
+"쥐":["쥐","jwi","老鼠"],"쥬":["쥬스","jyuseu","果汁"],"즈":["치즈","chijeu","奶酪"],
+"지":["지도","jido","地图"],
+// —— ㅉ ——
+"짜":["짜다","jjada","咸"],"째":["째","jjae","第…个"],
+"쩌":["쩔어","jjeoreo","太强了、绝了"],"쪄":["쪄요","jjyeoyo","蒸（敬语）"],
+"쪼":["쪼개다","jjogaeda","劈开"],"쬐":["쬐다","jjoeda","晒"],
+"쭈":["쭈꾸미","jjukkumi","章鱼"],"쭤":["쭤요","jjwoyo","请问（敬语）"],
+"찌":["찌개","jjigae","汤锅"],
+// —— ㅊ ——
+"차":["차","cha","茶 / 车"],"채":["채소","chaeso","蔬菜"],
+"처":["처음","cheoeum","第一次"],"체":["체육","cheyuk","体育"],"쳐":["쳐요","chyeoyo","打、弹奏（敬语）"],
+"초":["초콜릿","chokollit","巧克力"],"최":["최고","choego","最棒"],
+"추":["추억","chueok","回忆"],"춰":["춤춰","chumchwo","跳舞吧"],"췌":["췌장","chwejang","胰腺"],
+"취":["취미","chwimi","爱好"],"츄":["츄","Chuu","츄（歌手名）"],
+"치":["치마","chima","裙子"],
+// —— ㅋ ——
+"카":["카페","kape","咖啡厅"],"캐":["캐릭터","kaerikteo","角色、人物"],
+"커":["커피","keopi","咖啡"],"케":["케이크","keikeu","蛋糕"],"켜":["켜다","kyeoda","开(灯)"],
+"코":["코","ko","鼻子"],"콰":["콰르릉","kwareureung","(轰隆声)"],"쾌":["상쾌하다","sangkwaehada","清爽"],
+"쿄":["도쿄","Dokyo","东京"],"쿠":["쿠키","kuki","饼干"],"쿼":["스쿼트","seukwoteu","深蹲"],"퀘":["퀘스트","kweseuteu","任务"],
+"퀴":["퀴즈","kwijeu","问答"],"큐":["큐티","kyuti","cute、可爱风"],"크":["크다","keuda","大"],
+"키":["키","ki","身高 / 钥匙"],
+// —— ㅌ ——
+"타":["타다","tada","乘坐"],"태":["태양","taeyang","太阳"],
+"터":["버터","beoteo","黄油"],"테":["스테이크","seuteikeu","牛排"],
+"토":["토요일","toyoil","星期六"],"퇴":["퇴근","toegeun","下班"],
+"투":["투표","tupyo","投票"],
+"튀":["튀김","twigim","炸物"],"튜":["유튜브","yutyubeu","YouTube"],"트":["트럭","teureok","卡车"],"틔":["틔우다","tuiuda","使发芽"],
+"티":["티셔츠","tisyeocheu","T恤"],
+// —— ㅍ ——
+"파":["파랑","parang","蓝色"],"패":["패션","paesyeon","时尚"],
+"퍼":["퍼센트","peosenteu","百分比、percent"],"페":["카페","kape","咖啡馆"],"펴":["펴다","pyeoda","展开"],"폐":["폐","pye","肺"],
+"포":["포도","podo","葡萄"],
+"표":["표","pyo","票"],"푸":["푸르다","pureuda","青绿"],
+"퓨":["퓨처","pyucheo","future、未来"],"프":["프로","peuro","pro、职业级"],
+"피":["피자","pija","披萨"],
+// —— ㅎ ——
+"하":["하늘","haneul","天空"],"해":["해","hae","太阳"],
+"허":["허리","heori","腰"],"헤":["헤어지다","heeojida","分手"],"혀":["혀","hyeo","舌头"],"혜":["지혜","jihye","智慧"],
+"호":["호랑이","horangi","老虎"],"화":["화요일","hwayoil","星期二"],"홰":["홰","hwae","(鸡)架"],"회":["회사","hoesa","公司"],
+"효":["효과","hyogwa","效果"],"후":["후회","huhoe","后悔"],"훼":["훼방","hwebang","捣乱"],
+"휘":["휘파람","hwiparam","口哨"],"휴":["휴가","hyuga","休假"],"흐":["흐리다","heurida","阴、模糊"],"희":["희망","huimang","希望"],
+"히":["조용히","joyonghi","安静地"]
+};
+
+/* 共享常用词：每个词会自动归入其中所有韩语音节的字卡，按主题维护且韩语词不重复 */
+const COMMON_WORDS=[
+  // 问候与基础表达
+  ["안녕하세요","annyeonghaseyo","你好"],
+  ["감사합니다","gamsahamnida","谢谢"],
+  ["미안합니다","mianhamnida","对不起"],
+  ["괜찮아요","gwaenchanayo","没关系 / 还好"],
+  ["사랑해요","saranghaeyo","我爱你"],
+  ["반갑습니다","bangapseumnida","很高兴见到你"],
+  ["잘 부탁드립니다","jal butakdeurimnida","请多关照"],
+  ["알겠습니다","algesseumnida","明白了"],
+  ["모르겠어요","moreugesseoyo","我不知道"],
+  ["잠시만요","jamsimanyo","请稍等"],
+
+  // 人与日常生活
+  ["가족","gajok","家人 / 家庭"],
+  ["친구","chingu","朋友"],
+  ["선생님","seonsaengnim","老师"],
+  ["학생","haksaeng","学生"],
+  ["남자친구","namjachingu","男朋友"],
+  ["여자친구","yeojachingu","女朋友"],
+  ["할머니","halmeoni","奶奶 / 外婆"],
+  ["할아버지","harabeoji","爷爷 / 外公"],
+  ["아침","achim","早晨 / 早餐"],
+  ["점심","jeomsim","午餐"],
+  ["저녁","jeonyeok","晚上 / 晚餐"],
+  ["주말","jumal","周末"],
+  ["휴대전화","hyudaejeonhwa","手机"],
+  ["지하철","jihacheol","地铁"],
+  ["편의점","pyeonuijeom","便利店"],
+
+  // 高频动作与状态
+  ["좋아하다","joahada","喜欢"],
+  ["싫어하다","sireohada","讨厌"],
+  ["먹다","meokda","吃"],
+  ["마시다","masida","喝"],
+  ["공부하다","gongbuhada","学习"],
+  ["일하다","ilhada","工作"],
+  ["기다리다","gidarida","等待"],
+  ["만나다","mannada","见面"],
+  ["이야기하다","iyagihada","聊天 / 讲述"],
+  ["생각하다","saenggakhada","思考 / 觉得"],
+  ["재미있다","jaemiitda","有趣"],
+  ["맛있다","masitda","好吃"],
+  ["행복하다","haengbokhada","幸福"],
+  ["피곤하다","pigonhada","疲倦"],
+  ["보고 싶어요","bogo sipeoyo","想见你"],
+
+  // 韩剧、歌曲与流行文化常见词
+  ["드라마","deurama","电视剧"],
+  ["노래","norae","歌曲"],
+  ["음악","eumak","音乐"],
+  ["영화","yeonghwa","电影"],
+  ["배우","baeu","演员"],
+  ["가수","gasu","歌手"],
+  ["주인공","juingong","主角"],
+  ["첫사랑","cheotsarang","初恋"],
+  ["약속","yaksok","约定"],
+  ["추억","chueok","回忆"],
+
+  // 数字、时间与日期
+  ["하나","hana","一（固有数词）"],
+  ["둘","dul","二（固有数词）"],
+  ["셋","set","三（固有数词）"],
+  ["넷","net","四（固有数词）"],
+  ["다섯","daseot","五（固有数词）"],
+  ["여섯","yeoseot","六（固有数词）"],
+  ["일곱","ilgop","七（固有数词）"],
+  ["여덟","yeodeol","八（固有数词）"],
+  ["아홉","ahop","九（固有数词）"],
+  ["열","yeol","十（固有数词）"],
+  ["지금","jigeum","现在"],
+  ["오늘","oneul","今天"],
+  ["어제","eoje","昨天"],
+  ["내일","naeil","明天"],
+  ["모레","more","后天"],
+  ["매일","maeil","每天"],
+  ["이번","ibeon","这次 / 本次"],
+  ["다음","daeum","下一个 / 接下来"],
+  ["지난주","jinanju","上周"],
+  ["이번 주","ibeon ju","本周"],
+  ["다음 주","daeum ju","下周"],
+  ["월요일","woryoil","星期一"],
+  ["화요일","hwayoil","星期二"],
+  ["수요일","suyoil","星期三"],
+  ["목요일","mogyoil","星期四"],
+  ["금요일","geumyoil","星期五"],
+  ["토요일","toyoil","星期六"],
+  ["일요일","iryoil","星期日"],
+  ["오전","ojeon","上午"],
+  ["오후","ohu","下午"],
+  ["새벽","saebyeok","凌晨"],
+  ["시간","sigan","时间"],
+  ["분","bun","分钟 / 位"],
+  ["생일","saengil","生日"],
+  ["방학","banghak","假期"],
+
+  // 地点、交通与出行
+  ["한국","hanguk","韩国"],
+  ["서울","Seoul","首尔"],
+  ["고향","gohyang","故乡"],
+  ["집","jip","家"],
+  ["학교","hakgyo","学校"],
+  ["회사","hoesa","公司"],
+  ["사무실","samusil","办公室"],
+  ["교실","gyosil","教室"],
+  ["도서관","doseogwan","图书馆"],
+  ["병원","byeongwon","医院"],
+  ["약국","yakguk","药店"],
+  ["은행","eunhaeng","银行"],
+  ["우체국","ucheguk","邮局"],
+  ["시장","sijang","市场"],
+  ["백화점","baekhwajeom","百货商店"],
+  ["식당","sikdang","餐厅"],
+  ["카페","kape","咖啡馆"],
+  ["공원","gongwon","公园"],
+  ["화장실","hwajangsil","洗手间"],
+  ["공항","gonghang","机场"],
+  ["호텔","hotel","酒店"],
+  ["바다","bada","大海"],
+  ["산","san","山"],
+  ["길","gil","路"],
+  ["여기","yeogi","这里"],
+  ["거기","geogi","那里"],
+  ["저기","jeogi","那边"],
+  ["어디","eodi","哪里"],
+  ["버스","beoseu","公交车"],
+  ["택시","taeksi","出租车"],
+  ["기차","gicha","火车"],
+  ["비행기","bihaenggi","飞机"],
+  ["자전거","jajeongeo","自行车"],
+  ["자동차","jadongcha","汽车"],
+  ["정류장","jeongnyujang","车站"],
+  ["지하철역","jihacheolyeok","地铁站"],
+  ["표","pyo","票"],
+  ["여행","yeohaeng","旅行"],
+  ["출발","chulbal","出发"],
+  ["도착","dochak","到达"],
+  ["왼쪽","oenjjok","左边"],
+  ["오른쪽","oreunjjok","右边"],
+  ["앞","ap","前面"],
+  ["뒤","dwi","后面"],
+  ["안","an","里面"],
+  ["밖","bak","外面"],
+
+  // 饮食与购物
+  ["음식","eumsik","食物"],
+  ["밥","bap","饭"],
+  ["물","mul","水"],
+  ["커피","keopi","咖啡"],
+  ["우유","uyu","牛奶"],
+  ["차","cha","茶"],
+  ["맥주","maekju","啤酒"],
+  ["소주","soju","烧酒"],
+  ["김치","gimchi","泡菜"],
+  ["불고기","bulgogi","韩式烤肉"],
+  ["비빔밥","bibimbap","韩式拌饭"],
+  ["떡볶이","tteokbokki","辣炒年糕"],
+  ["김밥","gimbap","紫菜包饭"],
+  ["라면","ramyeon","方便面"],
+  ["고기","gogi","肉"],
+  ["생선","saengseon","鱼"],
+  ["과일","gwail","水果"],
+  ["사과","sagwa","苹果"],
+  ["바나나","banana","香蕉"],
+  ["딸기","ttalgi","草莓"],
+  ["수박","subak","西瓜"],
+  ["채소","chaeso","蔬菜"],
+  ["빵","ppang","面包"],
+  ["계란","gyeran","鸡蛋"],
+  ["아이스크림","aiseukeurim","冰淇淋"],
+  ["맛","mat","味道"],
+  ["메뉴","menyu","菜单"],
+  ["주문","jumun","点单 / 订单"],
+  ["가격","gagyeok","价格"],
+  ["돈","don","钱"],
+  ["카드","kadeu","卡 / 信用卡"],
+  ["현금","hyeongeum","现金"],
+  ["영수증","yeongsujeung","收据"],
+  ["얼마예요","eolmayeyo","多少钱"],
+  ["주세요","juseyo","请给我"],
+  ["계산해 주세요","gyesanhae juseyo","请结账"],
+  ["잘 먹겠습니다","jal meokgesseumnida","我开动了"],
+  ["잘 먹었습니다","jal meogeosseumnida","谢谢款待"],
+
+  // 家庭、身体与生活用品
+  ["부모님","bumonim","父母"],
+  ["아버지","abeoji","父亲"],
+  ["어머니","eomeoni","母亲"],
+  ["아빠","appa","爸爸"],
+  ["엄마","eomma","妈妈"],
+  ["형","hyeong","哥哥（男性称）"],
+  ["오빠","oppa","哥哥（女性称）"],
+  ["누나","nuna","姐姐（男性称）"],
+  ["언니","eonni","姐姐（女性称）"],
+  ["동생","dongsaeng","弟弟 / 妹妹"],
+  ["아이","ai","孩子"],
+  ["이름","ireum","名字"],
+  ["나이","nai","年龄"],
+  ["사람","saram","人"],
+  ["마음","maeum","心 / 心意"],
+  ["머리","meori","头 / 头发"],
+  ["얼굴","eolgul","脸"],
+  ["눈","nun","眼睛 / 雪"],
+  ["코","ko","鼻子"],
+  ["입","ip","嘴"],
+  ["귀","gwi","耳朵"],
+  ["손","son","手"],
+  ["발","bal","脚"],
+  ["몸","mom","身体"],
+  ["옷","ot","衣服"],
+  ["신발","sinbal","鞋"],
+  ["가방","gabang","包"],
+  ["안경","angyeong","眼镜"],
+  ["우산","usan","雨伞"],
+  ["열쇠","yeolsoe","钥匙"],
+  ["책","chaek","书"],
+  ["사진","sajin","照片"],
+  ["컴퓨터","keompyuteo","电脑"],
+  ["텔레비전","tellebijeon","电视"],
+  ["냉장고","naengjanggo","冰箱"],
+  ["에어컨","eeokeon","空调"],
+  ["방","bang","房间"],
+  ["문","mun","门"],
+  ["창문","changmun","窗户"],
+  ["침대","chimdae","床"],
+  ["의자","uija","椅子"],
+  ["탁자","takja","桌子"],
+
+  // 学习、工作与沟通
+  ["한국어","hangugeo","韩语"],
+  ["중국어","junggugeo","中文"],
+  ["영어","yeongeo","英语"],
+  ["단어","daneo","单词"],
+  ["문법","munbeop","语法"],
+  ["발음","bareum","发音"],
+  ["문제","munje","问题 / 题目"],
+  ["질문","jilmun","提问"],
+  ["대답","daedap","回答"],
+  ["시험","siheom","考试"],
+  ["숙제","sukje","作业"],
+  ["수업","sueop","课"],
+  ["회의","hoeui","会议"],
+  ["전화","jeonhwa","电话"],
+  ["문자","munja","短信 / 文字"],
+  ["이메일","imeil","电子邮件"],
+  ["인터넷","inteonet","互联网"],
+  ["뉴스","nyuseu","新闻"],
+  ["직업","jigeop","职业"],
+  ["일","il","工作 / 事情"],
+  ["이해하다","ihaehada","理解"],
+  ["배우다","baeuda","学习"],
+  ["가르치다","gareuchida","教"],
+  ["읽다","ikda","读"],
+  ["쓰다","sseuda","写 / 使用"],
+  ["듣다","deutda","听"],
+  ["말하다","malhada","说"],
+  ["물어보다","mureoboda","询问"],
+  ["대답하다","daedaphada","回答"],
+  ["연습하다","yeonseuphada","练习"],
+  ["기억하다","gieokhada","记得"],
+  ["잊어버리다","ijeobeorida","忘记"],
+
+  // 高频动作
+  ["가다","gada","去"],
+  ["오다","oda","来"],
+  ["보다","boda","看"],
+  ["자다","jada","睡觉"],
+  ["일어나다","ireonada","起床 / 发生"],
+  ["앉다","antda","坐"],
+  ["서다","seoda","站"],
+  ["걷다","geotda","走路"],
+  ["뛰다","ttwida","跑 / 跳"],
+  ["타다","tada","乘坐"],
+  ["내리다","naerida","下车 / 下落"],
+  ["들어가다","deureogada","进去"],
+  ["나오다","naoda","出来"],
+  ["돌아가다","doragada","回去"],
+  ["사다","sada","买"],
+  ["팔다","palda","卖"],
+  ["주다","juda","给"],
+  ["받다","batda","收到"],
+  ["만들다","mandeulda","制作"],
+  ["사용하다","sayonghada","使用"],
+  ["열다","yeolda","打开"],
+  ["닫다","datda","关上"],
+  ["켜다","kyeoda","打开（电器）"],
+  ["끄다","kkeuda","关闭（电器）"],
+  ["입다","ipda","穿"],
+  ["벗다","beotda","脱"],
+  ["씻다","ssitda","洗"],
+  ["요리하다","yorihada","做饭"],
+  ["청소하다","cheongsohada","打扫"],
+  ["운동하다","undonghada","运动"],
+  ["쉬다","swida","休息"],
+  ["놀다","nolda","玩"],
+  ["살다","salda","生活 / 居住"],
+  ["도와주다","dowajuda","帮助"],
+  ["시작하다","sijakhada","开始"],
+  ["끝나다","kkeunnada","结束"],
+  ["준비하다","junbihada","准备"],
+  ["선택하다","seontaekhada","选择"],
+  ["찾다","chatda","寻找"],
+  ["보내다","bonaeda","发送 / 度过"],
+  ["찍다","jjikda","拍摄"],
+  ["웃다","utda","笑"],
+  ["울다","ulda","哭"],
+
+  // 状态、感受与描述
+  ["있다","itda","有 / 在"],
+  ["없다","eopda","没有 / 不在"],
+  ["알다","alda","知道"],
+  ["모르다","moreuda","不知道"],
+  ["필요하다","piryohada","需要"],
+  ["원하다","wonhada","想要"],
+  ["가능하다","ganeunghada","可能 / 可行"],
+  ["중요하다","jungyohada","重要"],
+  ["좋다","jota","好"],
+  ["나쁘다","nappeuda","坏 / 不好"],
+  ["크다","keuda","大"],
+  ["작다","jakda","小"],
+  ["많다","manta","多"],
+  ["적다","jeokda","少"],
+  ["길다","gilda","长"],
+  ["짧다","jjalda","短"],
+  ["높다","nopda","高"],
+  ["낮다","natda","低"],
+  ["빠르다","ppareuda","快"],
+  ["느리다","neurida","慢"],
+  ["쉽다","swipda","容易"],
+  ["어렵다","eoryeopda","困难"],
+  ["비싸다","bissada","贵"],
+  ["싸다","ssada","便宜"],
+  ["덥다","deopda","热（天气）"],
+  ["춥다","chupda","冷（天气）"],
+  ["따뜻하다","ttatteuthada","温暖"],
+  ["시원하다","siwonhada","凉爽"],
+  ["예쁘다","yeppeuda","漂亮"],
+  ["귀엽다","gwiyeopda","可爱"],
+  ["멋있다","meositda","帅 / 酷"],
+  ["친절하다","chinjeolhada","亲切"],
+  ["바쁘다","bappeuda","忙"],
+  ["아프다","apeuda","疼 / 生病"],
+  ["배고프다","baegopeuda","饿"],
+  ["목마르다","mongmareuda","渴"],
+  ["졸리다","jollida","困"],
+  ["기쁘다","gippeuda","高兴"],
+  ["슬프다","seulpeuda","伤心"],
+  ["무섭다","museopda","害怕"],
+  ["걱정하다","geokjeonghada","担心"],
+  ["화나다","hwanada","生气"],
+  ["놀라다","nollada","惊讶"],
+
+  // 天气、自然与休闲娱乐
+  ["날씨","nalssi","天气"],
+  ["봄","bom","春天"],
+  ["여름","yeoreum","夏天"],
+  ["가을","gaeul","秋天"],
+  ["겨울","gyeoul","冬天"],
+  ["비","bi","雨"],
+  ["바람","baram","风"],
+  ["하늘","haneul","天空"],
+  ["해","hae","太阳"],
+  ["달","dal","月亮 / 月"],
+  ["별","byeol","星星"],
+  ["꽃","kkot","花"],
+  ["나무","namu","树"],
+  ["강아지","gangaji","小狗"],
+  ["고양이","goyangi","猫"],
+  ["취미","chwimi","爱好"],
+  ["축구","chukgu","足球"],
+  ["야구","yagu","棒球"],
+  ["농구","nonggu","篮球"],
+  ["수영","suyeong","游泳"],
+  ["산책","sanchaek","散步"],
+  ["게임","geim","游戏"],
+  ["쇼핑","syoping","购物"],
+  ["춤","chum","舞蹈"],
+  ["노래하다","noraehada","唱歌"],
+  ["춤추다","chumchuda","跳舞"],
+  ["콘서트","konseoteu","演唱会"],
+  ["인기","ingi","人气"],
+  ["팬","paen","粉丝"],
+  ["아이돌","aidol","偶像组合 / 偶像"],
+  ["방송","bangsong","广播 / 节目"],
+  ["장면","jangmyeon","场景 / 镜头"],
+  ["결말","gyeolmal","结局"],
+  ["눈물","nunmul","眼泪"],
+  ["꿈","kkum","梦"],
+  ["운명","unmyeong","命运"],
+  ["키스","kiseu","接吻"],
+  ["데이트","deiteu","约会"],
+  ["결혼","gyeolhon","结婚"],
+
+  // 常用音节定向补充
+  ["소개","sogae","介绍"],
+  ["이것","igeot","这个"],
+  ["그것","geugeot","那个"],
+  ["시계","sigye","钟表"],
+  ["관계","gwangye","关系"],
+  ["계획","gyehoek","计划"],
+  ["결과","gyeolgwa","结果"],
+  ["귀국","gwiguk","回国"],
+  ["귀신","gwisin","鬼 / 鬼神"],
+  ["그래요","geuraeyo","是吗 / 好的"],
+  ["그럼","geureom","那么 / 当然"],
+  ["안내","annae","指引 / 咨询服务"],
+  ["노력","noryeok","努力"],
+  ["노트","noteu","笔记本"],
+  ["드리다","deurida","给（敬语）"],
+  ["드세요","deuseyo","请吃 / 请用"],
+  ["디지털","dijiteol","数字的"],
+  ["디저트","dijeoteu","甜点"],
+  ["나라","nara","国家"],
+  ["원래","wollae","本来"],
+  ["거래","georae","交易"],
+  ["레스토랑","reseutorang","餐馆"],
+  ["카레","kare","咖喱"],
+  ["서로","seoro","互相"],
+  ["도로","doro","道路"],
+  ["먼저","meonjeo","首先 / 先"],
+  ["머물다","meomulda","停留"],
+  ["바로","baro","马上 / 正是"],
+  ["배달","baedal","外送 / 配送"],
+  ["보통","botong","通常 / 普通"],
+  ["브랜드","beuraendeu","品牌"],
+  ["브런치","beureonchi","早午餐"],
+  ["바빠요","bappayo","很忙"],
+  ["빠지다","ppajida","掉入 / 缺席"],
+  ["서점","seojeom","书店"],
+  ["세상","sesang","世界"],
+  ["야외","yaoe","户外"],
+  ["야간","yagan","夜间"],
+  ["예약","yeyak","预约"],
+  ["예전","yejeon","以前"],
+  ["더워요","deowoyo","很热"],
+  ["추워요","chuwoyo","很冷"],
+  ["고마워요","gomawoyo","谢谢"],
+  ["스웨터","seuweteo","毛衣"],
+  ["자유","jayu","自由"],
+  ["유명","yumyeong","有名"],
+  ["제목","jemok","标题"],
+  ["주차","jucha","停车"],
+  ["차례","charye","顺序 / 轮次"],
+  ["치킨","chikin","炸鸡"],
+  ["크리스마스","keuriseumaseu","圣诞节"],
+  ["키우다","kiuda","养育 / 培养"],
+  ["스키","seuki","滑雪"],
+  ["피아노","piano","钢琴"],
+  ["피하다","pihada","避开"],
+  ["올해","olhae","今年"],
+  ["회식","hoesik","聚餐"],
+  ["기회","gihoe","机会"],
+  ["악기","akgi","乐器"],
+  ["최악","choeak","最糟"],
+  ["악몽","angmong","噩梦"],
+  ["알바","alba","兼职"],
+  ["알림","allim","通知"],
+  ["거짓말","geojinmal","谎话"],
+  ["머리카락","meorikarak","头发"],
+  ["해외","haeoe","海外"],
+  ["외출","oechul","外出"],
+  ["웨이브","weibeu","波浪 / 卷发"],
+  ["저희","jeohui","我们（谦称）"],
+  ["추천","chucheon","推荐"],
+  ["추석","chuseok","中秋节"],
+  ["카메라","kamera","相机"],
+  ["카카오","kakao","可可 / Kakao"],
+  ["토마토","tomato","番茄"],
+  ["토스트","toseuteu","吐司"],
+  ["메일","meil","邮件"],
+  ["메모","memo","备忘 / 记录"],
+
+  // 常用音节五词定向补充
+  ["겨울철","gyeoulcheol","冬季"],["겨자","gyeoja","芥末"],["겨우","gyeou","勉强 / 好不容易"],["겨드랑이","gyeodeurangi","腋下"],
+  ["교사","gyosa","教师"],["교통","gyotong","交通"],["교육","gyoyuk","教育"],["종교","jonggyo","宗教"],
+  ["까다","kkada","剥 / 削"],["가까이","gakkai","靠近地"],["까맣다","kkamata","乌黑"],["까다롭다","kkadaropda","挑剔 / 复杂"],
+  ["깨다","kkaeda","打破 / 醒来"],["깨달다","kkaedalda","领悟"],["참깨","chamkkae","芝麻"],["어깨","eokkae","肩膀"],
+  ["꺼지다","kkeojida","熄灭 / 消失"],["꺼꾸로","kkeokkuro","颠倒地"],["껍질","kkeopjil","外皮"],["꺼림칙하다","kkeorimchikhada","觉得不自在"],
+  ["함께하다","hamkkehada","一同参与"],["께서","kkeseo","主格助词（敬语）"],["부모님께","bumonimkke","向父母"],["선생님께","seonsaengnimkke","向老师"],
+  ["껴입다","kkyeoipda","套穿衣服"],["끼어들다","kkieodeulda","插入 / 插嘴"],["안겨요","angyeoyo","被抱 / 依偎"],["섞여요","seokkyeoyo","混在一起"],
+  ["꾸다","kkuda","做梦 / 借"],["꿈꾸다","kkumkkuda","梦想"],["꾸준하다","kkujunhada","坚持不懈"],["꾸러미","kkureomi","包裹 / 一捆"],
+  ["끼우다","kkiuda","插入 / 戴上"],["토끼풀","tokkipul","白车轴草"],["새끼","saekki","幼崽"],["끼니","kkini","一顿饭"],
+  ["너무나","neomuna","非常"],["너희","neohui","你们"],["건너다","geonneoda","穿过"],["에너지","eneoji","能源"],
+  ["뉴욕","nyuyok","纽约"],["뉴질랜드","nyujillaendeu","新西兰"],["뉴진스","Nyujinseu","NewJeans"],["뉴미디어","nyumidieo","新媒体"],
+  ["느낌","neukkim","感觉"],["느끼다","neukkida","感受"],["어느","eoneu","哪个 / 某个"],["하느님","haneunim","上帝（天主教称谓）"],
+  ["뒤쪽","dwijjok","后方"],["뒤집다","dwijipda","翻转"],["뒤늦다","dwineutda","迟来的"],["뒤돌아보다","dwidoraboda","回头看"],
+  ["따라가다","ttaragada","跟着去"],["따로","ttaro","另外 / 分开"],["따님","ttanim","令爱"],["따다","ttada","摘 / 赢得"],
+  ["그때","geuttae","那时"],["이때","ittae","这时"],["때문","ttaemun","因为"],["때때로","ttaettaero","有时"],
+  ["또한","ttohan","此外 / 也"],["또다시","ttodasi","再一次"],["또래","ttorae","同龄人"],["또는","ttoneun","或者"],
+  ["뜨다","tteuda","睁开 / 浮起"],["뜨개질","tteugaejil","编织"],["뜨끔하다","tteukkeumhada","刺痛 / 心虚"],["눈뜨다","nuntteuda","睁眼 / 觉醒"],
+  ["매주","maeju","每周"],["매달","maedal","每月"],["매년","maenyeon","每年"],["매장","maejang","卖场 / 店铺"],
+  ["라며","ramyeo","说是……"],["그러면서","geureomyeonseo","同时 / 一边那样做"],["웃으며","useumyeo","笑着"],["살며","salmyeo","生活着"],
+  ["묘사","myosa","描写"],["묘지","myoji","墓地"],["묘하다","myohada","奇妙"],["묘미","myomi","妙趣"],
+  ["벼","byeo","稻子"],["벼농사","byeonongsa","水稻种植"],["벼랑","byeorang","悬崖"],["벼룩","byeoruk","跳蚤"],
+  ["봐요","bwayo","请看 / 看（敬语）"],["봐도","bwado","即使看 / 看也"],["돌봐주다","dolbwajuda","照料"],["바라봐요","barabwayo","注视"],
+  ["뵙다","boepda","拜见（敬语）"],["뵐게요","boelgeyo","到时见（敬语）"],["뵙겠습니다","boepgetseumnida","届时拜见"],["찾아뵈다","chajaboeda","登门拜访"],
+  ["예쁜","yeppeun","漂亮的"],["예뻐요","yeppeoyo","很漂亮"],["나쁜","nappeun","坏的"],["바쁜","bappeun","忙碌的"],
+  ["새해","saehae","新年"],["새우","saeu","虾"],["새로","saero","新地 / 重新"],["새롭다","saeropda","新颖"],
+  ["샤워실","syawosil","淋浴间"],["샴푸","syampu","洗发水"],["샤프","syapeu","自动铅笔"],["샤넬","Syanel","香奈儿"],
+  ["셔틀","syeoteul","接驳车"],["패션쇼","paesyeonsyo","时装秀"],["오디션","odisyeon","试镜"],["미션","misyeon","任务"],
+  ["쉬운","swiun","容易的"],["쉬워요","swiwoyo","很容易"],["쉬는날","swineunnal","休息日"],["숨쉬다","sumswida","呼吸"],
+  ["싸움","ssaum","争吵 / 打斗"],["싸우다","ssauda","争吵"],["감싸다","gamssada","包裹 / 庇护"],["비쌉니다","bissamnida","很贵（敬语）"],
+  ["써도","sseodo","即使用 / 写也"],["써서","sseoseo","因为使用 / 写了后"],["글써요","geulsseoyo","写文章"],["힘써요","himsseoyo","努力"],
+  ["쓰레기","sseuregi","垃圾"],["쓰이다","sseuida","被使用 / 被写"],["글쓰기","geulsseugi","写作"],["쓴맛","sseunmat","苦味"],
+  ["얘들","yaedeul","这些孩子"],["얘기하다","yaegihada","谈话"],["얘기해요","yaegihaeyo","请说 / 聊聊"],["걔랑","gyaerang","和那孩子"],
+  ["가져가다","gajyeogada","带走"],["가져오다","gajyeooda","带来"],["헤어져요","heeojyeoyo","分手 / 分开"],["던져요","deonjyeoyo","扔（敬语）"],
+  ["죄","joe","罪"],["죄인","joein","罪人"],["범죄","beomjoe","犯罪"],["유죄","yujoe","有罪"],
+  ["도와줘요","dowajwoyo","请帮帮我"],["보여줘요","boyeojwoyo","请给我看"],["알려줘요","allyeojwoyo","请告诉我"],["빌려줘요","billyeojwoyo","请借给我"],
+  ["즈음","jeueum","大约 / ……之际"],["사이즈","saijeu","尺寸"],["재즈","jaejeu","爵士乐"],["렌즈","renjeu","镜片 / 隐形眼镜"],
+  ["찌다","jjida","蒸 / 发胖"],["찌르다","jjireuda","刺"],["김치찌개","gimchijjigae","泡菜汤"],["된장찌개","doenjangjjigae","大酱汤"],
+  ["처리","cheori","处理"],["처음부터","cheoeumbuteo","从一开始"],["근처","geuncheo","附近"],["천천히","cheoncheonhi","慢慢地"],
+  ["체험","cheheom","体验"],["체온","cheon","体温"],["전체","jeonche","全部 / 整体"],["단체","danche","团体"],
+  ["초등학교","chodeunghakgyo","小学"],["초대","chodae","邀请"],["초보","chobo","初学者"],["초록색","choroksaek","绿色"],
+  ["최선","choeseon","最佳 / 全力"],["최소","choeso","最少"],["최대","choedae","最大"],["최종","choejong","最终"],
+  ["커다랗다","keodarata","巨大"],["커지다","keojida","变大"],["커튼","keoteun","窗帘"],["팝콘","papkon","爆米花"],
+  ["켜요","kyeoyo","打开（敬语）"],["켜고","kyeogo","打开后"],["지켜보다","jikyeoboda","注视 / 观察"],["시켜요","sikyeoyo","使做 / 点单"],
+  ["코트","koteu","外套 / 球场"],["코끼리","kokkiri","大象"],["코로나","korona","新冠 / Corona"],["코너","koneo","角落 / 专栏"],
+  ["퀴즈쇼","kwijeusyo","问答节目"],["퀴즈대회","kwijeudaehoe","知识竞赛"],["퀴즈게임","kwijeugeim","问答游戏"],["퀴즈문제","kwijeumunje","竞猜题"],
+  ["테이블","teibeul","桌子"],["테니스","teniseu","网球"],["테스트","teseuteu","测试"],["테마","tema","主题"],
+  ["퇴근하다","toegeunhada","下班"],["퇴원","toewon","出院"],["퇴직","toejik","退休 / 离职"],["후퇴","hutoe","后退"],
+  ["튀다","twida","弹起 / 溅起"],["튀어나오다","twieonaoda","蹦出来"],["튀김옷","twigimot","油炸面衣"],["물튀김","multwigim","水花飞溅"],
+  ["튜브","tyubeu","管 / 充气泳圈"],["튜터","tyuteo","导师"],["튜토리얼","tyutorieol","教程"],["스튜디오","seutyudio","演播室 / 工作室"],
+  ["티켓","tiket","票券"],["티비","tibi","电视（口语）"],["파티","pati","派对"],["레몬티","remonti","柠檬茶"],
+  ["파도","pado","海浪"],["파란색","paransaek","蓝色"],["파스타","paseuta","意大利面"],["파리","pari","苍蝇 / 巴黎"],
+  ["패배","paebae","失败"],["패턴","paeteon","模式 / 花样"],["실패","silpae","失败"],["택배","taekbae","快递"],
+  ["퍼지다","peojida","扩散"],["퍼즐","peojeul","拼图"],["퍼레이드","peoreideu","游行"],["슈퍼마켓","syupeomaket","超市"],
+  ["페인트","peinteu","油漆"],["페스티벌","peseutibeol","节庆"],["스페인","seupein","西班牙"],["뷔페","bwipe","自助餐"],
+  ["펼치다","pyeolchida","展开"],["펴고","pyeogo","展开后"],["펴요","pyeoyo","展开（敬语）"],["살펴보다","salpyeoboda","察看"],
+  ["포장","pojang","包装 / 外带"],["포기하다","pogihada","放弃"],["포크","pokeu","叉子"],["포함하다","pohamhada","包含"],
+  ["표현","pyohyeon","表达"],["목표","mokpyo","目标"],["발표","balpyo","发表"],["대표","daepyo","代表"],
+  ["푸른색","pureunsaek","蓝绿色"],["아프리카","apeurika","非洲"],["슬픔","seulpeum","悲伤"],["샴푸하다","syampuhada","洗头"],
+  ["퓨전","pyujeon","融合 / Fusion"],["큐피드","kyupideu","丘比特"],["퓨마","pyuma","美洲狮 / Puma"],["퓨처리즘","pyucheorijeum","未来主义"],
+  ["허락","heorak","允许"],["허리띠","heoritti","腰带"],["허전하다","heojeonhada","空落落"],["허용하다","heoyonghada","准许"],
+  ["헤어","heeo","头发 / 发型"],["헤엄치다","heeomchida","游泳"],["헤드폰","hedeupon","耳机"],["헤매다","hemaeda","徘徊 / 迷路"],
+  ["혀끝","hyeokkeut","舌尖"],["혀를차다","hyeoreulchada","咂舌"],["혀짧은소리","hyeojjalbeunsori","口齿不清的声音"],["혀뿌리","hyeoppuri","舌根"],
+  ["혜택","hyetaek","优惠 / 好处"],["은혜","eunhye","恩惠"],["혜성","hyeseong","彗星"],["혜진","Hyejin","惠珍（人名）"],
+  ["호수","hosu","湖"],["번호","beonho","号码"],["보호하다","bohohada","保护"],["호주","Hoju","澳大利亚"],
+  ["효율","hyoyul","效率"],["효도","hyodo","孝顺"],["효능","hyoneung","效能 / 功效"],["효자","hyoja","孝子"],
+  ["휘발유","hwibaryu","汽油"],["휘다","hwida","弯曲"],["휘젓다","hwijeotda","搅动"],["어휘","eohwi","词汇"],
+  ["휴일","hyuil","休息日"],["휴식","hyusik","休息"],["휴게소","hyugeso","休息站"],["휴지","hyuji","纸巾 / 废纸"],
+  ["흐르다","heureuda","流淌"],["흐름","heureum","流动 / 趋势"],["흔들다","heundeulda","摇晃"],["흐뭇하다","heumuthada","欣慰"],
+  ["희생","huisaeng","牺牲"],["희망하다","huimanghada","希望"],["희다","huida","洁白"],["희귀하다","huigwihada","稀有"],
+  ["열심히","yeolsimhi","努力地"],["특히","teukhi","尤其"],["확실히","hwaksilhi","确实地"],["솔직히","soljikhi","坦率地"],
+  ["꺼내요","kkeonaeyo","拿出来（敬语）"],
+  ["사귀어요","sagwieoyo","交往（敬语）"],["바뀌어요","bakkwieoyo","发生改变"],["잠겨요","jamgyeoyo","被锁 / 被淹"],
+  ["뵈어요","boeeoyo","拜见（敬语）"],["뵈면","boemyeon","若见面"],["내일뵈어요","naeilboeeoyo","明天见（敬语）"],
+  ["기쁜","gippeun","高兴的"],
+  ["샤워하다","syawohada","洗淋浴"],
+  ["마셔요","masyeoyo","喝（敬语）"],["주무셔요","jumusyeoyo","睡觉（敬语）"],
+  ["얘야","yaeya","孩子啊"],
+  ["커요","keoyo","很大"],
+  ["펼쳐요","pyeolchyeoyo","展开（敬语）"],
+  ["푸다","puda","舀 / 盛"],
+  ["흐려요","heuryeoyo","阴沉 / 模糊（敬语）"],
+  ["껴요","kkyeoyo","戴 / 夹（敬语）"],["껴서","kkyeoseo","戴上后 / 因夹着"],["껴안아요","kkyeoanayo","拥抱（敬语）"],
+  ["며느리","myeoneuri","儿媳"],
+  ["예쁘고","yeppeugo","漂亮而且……"],
+  ["펴세요","pyeoseyo","请展开"]
+];
+/* 补位词：优先收录「听起来像英文 / 像中文」的外来语与汉字词，帮低产音节凑满 5 个 */
+COMMON_WORDS.push(
+  ["꼬리","kkori","尾巴"],["꼬치","kkochi","串儿"],["꽃다발","kkotdabal","花束"],["꼼꼼하다","kkomkkomhada","细心"],
+  ["네온","neon","霓虹 neon"],["네모","nemo","方形"],["넥타이","nektai","领带 necktie"],["넷플릭스","netpeulrikseu","Netflix"],
+  ["그녀","geunyeo","她"],["남녀","namnyeo","男女"],["미녀","minyeo","美女"],["선녀","seonnyeo","仙女"],
+  ["누구","nugu","谁"],["누르다","nureuda","按"],["누룽지","nurungji","锅巴"],
+  ["데이터","deiteo","数据 data"],["데뷔","debwi","出道 debut"],["데려가다","deryeogada","带走"],["데스크","deseukeu","服务台 desk"],
+  ["되게","doege","非常（口语）"],["됐어요","dwaesseoyo","够了 / 算了"],["되돌아가다","doedoragada","返回"],
+  ["두다","duda","放置"],["두근두근","dugeundugeun","心怦怦跳"],["두려워","duryeowo","害怕"],["두 사람","du saram","两个人"],
+  ["떠오르다","tteooreuda","浮现 / 想起"],["떠들다","tteodeulda","吵闹"],["떠올려요","tteoollyeoyo","回想起来"],
+  ["사례","sarye","事例 / 谢礼"],["세례","serye","洗礼"],["혼례","hollye","婚礼"],
+  ["루머","rumeo","传闻 rumor"],["루틴","rutin","日常 routine"],["다루다","daruda","处理 / 操作"],
+  ["종류","jongnyu","种类"],["인류","illyu","人类"],["오류","oryu","错误 / 故障"],
+  ["뭐야","mwoya","什么呀"],["뭐예요","mwoyeyo","是什么"],["뭔가","mwonga","总觉得 / 某种"],["뭐든지","mwodeunji","无论什么"],
+  ["베트남","beteunam","越南"],["베이비","beibi","宝贝 baby"],["베스트","beseuteu","最佳 best"],["베란다","beranda","阳台"],
+  ["슈트","syuteu","西装 suit"],["슈즈","syujeu","鞋 shoes"],["슈퍼맨","syupeomaen","超人"],
+  ["씨앗","ssiat","种子"],["아저씨","ajeossi","大叔"],["아가씨","agassi","小姐"],["씨름","ssireum","摔跤"],
+  ["애교","aegyo","撒娇"],["애플","aepeul","苹果 Apple"],["애정","aejeong","爱情"],["애완동물","aewandongmul","宠物"],
+  ["에피소드","episodeu","一集 episode"],["에이스","eiseu","王牌 ace"],["에스컬레이터","eseukeolleiteo","自动扶梯"],
+  ["와요","wayo","来（敬语）"],["와우","wau","哇 wow"],["와플","wapeul","华夫饼 waffle"],
+  ["왜냐하면","waenyahamyeon","因为"],["왜요","waeyo","为什么呀"],["왜곡","waegok","歪曲"],
+  ["위험","wiheom","危险"],["위로","wiro","安慰"],["위치","wichi","位置"],["위스키","wiseuki","威士忌 whisky"],
+  ["재킷","jaekit","夹克 jacket"],["재료","jaeryo","材料"],["재채기","jaechaegi","喷嚏"],
+  ["쟤네","jyaene","他们那伙人"],["쟤들","jyaedeul","那些孩子"],
+  ["쥬얼리","jyueolli","珠宝 jewelry"],["쥬라기","jyuragi","侏罗纪 Jurassic"],["쥬시","jyusi","多汁 juicy"],
+  ["진짜","jinjja","真的"],["가짜","gajja","假的"],["짜장면","jjajangmyeon","炸酱面"],["짜증","jjajeung","烦躁"],
+  ["채널","chaeneol","频道 channel"],["채우다","chaeuda","填满"],["채팅","chaeting","聊天 chatting"],
+  ["취소","chwiso","取消"],["취직","chwijik","就业"],["취하다","chwihada","喝醉"],["취향","chwihyang","喜好"],
+  ["캐나다","kaenada","加拿大 Canada"],["캐시","kaesi","现金 cash"],["캐리어","kaerieo","行李箱 carrier"],["캐주얼","kaejueol","休闲 casual"],
+  ["케이팝","keipap","K-pop"],["케첩","kecheop","番茄酱 ketchup"],["케이스","keiseu","案例 / 外壳 case"],["케어","keeo","照护 care"],
+  ["쿠폰","kupon","优惠券 coupon"],["쿠션","kusyeon","靠垫 cushion"],["쿠바","kuba","古巴 Cuba"],
+  ["타이밍","taiming","时机 timing"],["타월","tawol","毛巾 towel"],["타입","taip","类型 type"],["기타","gita","吉他 / 其他"],
+  ["투자","tuja","投资"],["투명","tumyeong","透明"],["투어","tueo","巡演 tour"],["투수","tusu","投手"],
+  ["이후","ihu","以后"],["후추","huchu","胡椒"],["후배","hubae","后辈"],["후배들","hubaedeul","后辈们"],
+  ["괜히","gwaenhi","白白地 / 无端"],["괜찮다","gwaenchanta","没关系"],["괜찮은","gwaenchaneun","还不错的"],
+  ["향기","hyanggi","香气"],["방향","banghyang","方向"],["영향","yeonghyang","影响"],["향수","hyangsu","香水 / 乡愁"],
+  ["한쪽","hanjjok","一边"],["쪽지","jjokji","小纸条"],["쪼그리다","jjogeurida","蹲下"],
+  ["되찾다","doechatda","找回"],["되풀이","doepuri","重复"],
+  ["왜 그래요","wae geuraeyo","怎么了 / 你干嘛"],["쟤가","jyaega","那孩子（主语）"],["쟤한테","jyaehante","对那孩子"],
+  ["쥬크박스","jyukeubakseu","点唱机 jukebox"],["쿠데타","kudeta","政变 coup"],
+  ["더위","deowi","暑热"],["더하다","deohada","加上"],["더욱","deouk","更加"],["더구나","deoguna","况且"],
+  ["러시아","reosia","俄罗斯 Russia"],["러닝","reoning","跑步 running"],["그러나","geureona","但是"],["그러니까","geureonikka","所以说"],
+  ["조용하다","joyonghada","安静"],["조심하다","josimhada","小心"],["조카","joka","侄子 / 外甥"],["조사","josa","调查 / 助词"],
+  ["누구나","nuguna","任何人"],["누워요","nuwoyo","躺着（敬语）"],
+  ["루비","rubi","红宝石 ruby"],["하루하루","haruharu","一天天"],
+  ["부츠","bucheu","靴子 boots"],["콘텐츠","kontencheu","内容 contents"],
+  ["쇼","syo","表演 show"],["쇼핑몰","syopingmol","购物中心 shopping mall"],["토크쇼","tokeusyo","脱口秀 talk show"],
+  ["자료","jaryo","资料"],["완료","wallyo","完成"],
+  ["큐브","kyubeu","方块 cube"],["바비큐","babikyu","烧烤 barbecue"],
+  ["먹으면","meogeumyeon","如果吃"],["읽으면","ilgeumyeon","如果读"],["들으면","deureumyeon","如果听"],
+  ["규칙","gyuchik","规则"],["규모","gyumo","规模"],["신규","singyu","新增 / 新的"],["규정","gyujeong","规定"],
+  ["가르쳐요","gareuchyeoyo","教（敬语）"],["쳐다보다","chyeodaboda","注视"],["놓쳐요","nochyeoyo","错过"],
+  ["빵집","ppangjip","面包店"],["식빵","sikppang","吐司面包"],["크림빵","keurimppang","奶油面包"],
+  ["등산","deungsan","登山"],["부산","Busan","釜山"],["계산","gyesan","结算 / 计算"],
+  ["집중","jipjung","集中"],["집안","jiban","家里 / 家族"],["술집","suljip","酒馆"],
+  ["책상","chaeksang","书桌"],["공책","gongchaek","笔记本"],["만화책","manhwachaek","漫画书"],
+  ["팔월","parwol","八月"],["팔찌","paljji","手镯"],["팔십","palsip","八十"],
+  ["벚꽃","beotkkot","樱花"],["꽃집","kkotjip","花店"],["꽃병","kkotbyeong","花瓶"],
+  ["딸기우유","ttalgiuyu","草莓牛奶"],["딸꾹질","ttalkkukjil","打嗝"],["딸아이","ttarai","女儿"],
+  ["쌀밥","ssalbap","米饭"],["찹쌀떡","chapssaltteok","糯米糕"],["쌀가루","ssalgaru","米粉"],
+  ["태도","taedo","态度"],["상태","sangtae","状态"],["태권도","taegwondo","跆拳道"],["태풍","taepung","台风"],
+  ["사람들","saramdeul","人们"],["바람직하다","baramjikhada","可取 / 值得提倡"],
+  ["자랑","jarang","自豪 / 炫耀"],["나랑","narang","和我"],["너랑","neorang","和你"],
+  ["먹방","meokbang","吃播"],["먹이","meogi","饲料 / 食物"],
+  ["함부로","hamburo","随便地"],["함정","hamjeong","陷阱"],["포함","poham","包含"],
+  ["맨발","maenbal","赤脚"],["맨손","maenson","徒手"],["맨날","maennal","天天"],
+  ["칠","chil","七"],["칠판","chilpan","黑板"],["칠월","chirwol","七月"],
+  ["연락","yeollak","联络"],["락","rak","摇滚 rock"],["연락처","yeollakcheo","联系方式"],
+  ["취업","chwieop","就业"],["사업","saeop","事业"],["업무","eommu","业务"],
+  ["발송","balsong","发送"],["배송","baesong","配送"],["송아지","songaji","小牛"],
+  ["육아","yuga","育儿"],["육십","yuksip","六十"],["육개장","yukgaejang","辣牛肉汤"],
+  ["기억","gieok","记忆"],["억울하다","eogulhada","冤枉 / 委屈"],["억","eok","亿"],
+  ["센스","senseu","品味 sense"],["센터","senteo","中心 center"],
+  ["콜라","kolla","可乐 cola"],["콜택시","koltaeksi","叫车 call taxi"],["콜센터","kolsenteo","呼叫中心"],
+  ["드라마틱","deuramatik","戏剧性的 dramatic"],["판타스틱","pantaseutik","奇妙的 fantastic"],
+  ["뜻","tteut","意思"],["뜻밖에","tteutbakke","出乎意料"],["뜻하다","tteuthada","意味着"],
+  ["겁","geop","害怕"],["겁쟁이","geopjaengi","胆小鬼"],["무겁다","mugeopda","重"],
+  ["럭키","reoki","幸运 lucky"],["럭셔리","reoksyeori","奢华 luxury"],
+  ["늘","neul","总是"],["하늘색","haneulsaek","天蓝色"],["늘어나다","neureonada","增加 / 伸长"],
+  ["빌딩","bilding","大楼 building"],["푸딩","puding","布丁 pudding"],["딩동","dingdong","叮咚"],
+  ["크림","keurim","奶油 cream"],["혼란","hollan","混乱"],["초콜릿바","chokollitba","巧克力棒"],
+  ["트럭운전","teureogunjeon","卡车驾驶"],["오늘날","oneulnal","如今"]
+);
+
+const W_RARE={
+// —— ㄱ ——
+"갸":["갸름하다","gyareumhada","(脸)瘦长"],"궈":["궈","gwo","(音译用)"],"긔":["긔","geui","(古字·今의)"],
+// —— ㄲ ——
+"꺄":["꺄악","kkyaak","(尖叫声)"],"꺠":["꺠","kkyae","(罕用)"],"꼐":["꼐","kkye","(罕用)"],"꾜":["꾜","kkyo","(罕用)"],"뀨":["뀨","kkyu","(拟声)"],"끠":["끠","kkeui","(罕用)"],
+// —— ㄴ ——
+"냬":["냬","nyae","(罕用)"],"녜":["녜","nye","(方言·是)"],"놰":["놰","nwae","(罕用)"],"뇨":["뇨","nyo","(现代韩语中极少单独使用)"],"눼":["눼","nwe","(罕用)"],
+// —— ㄷ ——
+"댜":["댜","dya","(罕用)"],"댸":["댸","dyae","(罕用)"],"뎌":["뎌","dyeo","(古语·今저)"],"뎨":["뎨","dye","(古语)"],"돠":["돠","dwa","(罕用)"],"됴":["됴","dyo","(古语·今조)"],"듸":["듸","deui","(古语)"],
+// —— ㄸ ——
+"땨":["땨","ttya","(罕用)"],"떄":["떄","ttyae","(罕用)"],"뗘":["뗘","ttyeo","(罕用)"],"뗴":["뗴","ttye","(罕用)"],"뙈":["뙈","ttwae","(罕用)"],"뙤":["뙤","ttoe","(罕用)"],"뚀":["뚀","ttyo","(罕用)"],"뚸":["뚸","ttwo","(罕用)"],"뛔":["뛔","ttwe","(罕用)"],"뜌":["뜌","ttyu","(罕用)"],
+// —— ㄹ ——
+"랴":["랴","rya","(语尾)"],"롸":["롸","rwa","(口语)"],"럐":["럐","ryae","(罕用)"],"뢔":["뢔","rwae","(罕用)"],"뤄":["뤄","rwo","(音译用)"],"뤠":["뤠","rwe","(罕用)"],"뤼":["뤼","rwi","(音译用)"],"릐":["릐","reui","(罕用)"],
+// —— ㅁ ——
+"먀":["먀","mya","(罕用)"],"먜":["먜","myae","(罕用)"],"몌":["몌별","myebyeol","袂别"],"뫄":["뫄","mwa","(罕用)"],"뫠":["뫠","mwae","(罕用)"],"뫼":["뫼","moe","坟墓(古)"],"뭬":["뭬","mwe","(罕用)"],"뮈":["뮈","mwi","(罕用)"],"므":["므","meu","(拼读练习)"],"믜":["믜","meui","(古语)"],
+// —— ㅂ ——
+"뱌":["뱌","bya","(罕用)"],"뱨":["뱨","byae","(罕用)"],"볘":["볘","bye","(罕用)"],"뵤":["뵤","byo","(罕用)"],"붜":["붜","bwo","(罕用)"],"붸":["붸","bwe","(罕用)"],"븨":["븨","beui","(罕用)"],
+// —— ㅃ ——
+"뺘":["뺘","ppya","(罕用)"],"뺴":["뺴","ppyae","(罕用)"],"뻬":["뻬","ppe","(罕用)"],"뼤":["뼤","ppye","(罕用)"],"뽜":["뽜","ppwa","(罕用)"],"뽸":["뽸","ppwae","(罕用)"],"뾔":["뾔","ppoe","(罕用)"],"뿨":["뿨","ppwo","(罕用)"],"쀄":["쀄","ppwe","(罕用)"],"쀠":["쀠","ppwi","(罕用)"],"쀼":["쀼","ppyu","(罕用)"],"쁴":["쁴","ppeui","(罕用)"],
+// —— ㅅ ——
+"솨":["솨","swa","(水声)"],"숴":["숴","swo","(拟声)"],"싀":["싀","seui","(古语)"],
+// —— ㅆ ——
+"쌰":["쌰","ssya","(罕用)"],"썌":["썌","ssyae","(罕用)"],"쎠":["쎠","ssyeo","(罕用)"],"쎼":["쎼","ssye","(罕用)"],"쑈":["쑈","ssyo","(表演·俗)"],"쒀":["쒀","sswo","(煮·口语)"],"쒜":["쒜","sswe","(罕用)"],"쒸":["쒸","sswi","(罕用)"],"쓔":["쓔","ssyu","(罕用)"],
+// —— ㅈ ——
+"쟈":["쟈","jya","(罕用)"],"졔":["졔","jye","(罕用)"],"좨":["좨","jwae","(罕用)"],"줴":["줴","jwe","(罕用)"],"즤":["즤","jeui","(罕用)"],
+// —— ㅉ ——
+"쨔":["쨔","jjya","(罕用)"],"쨰":["쨰","jjyae","(罕用)"],"쩨":["쩨","jje","(罕用)"],"쪠":["쪠","jjye","(罕用)"],"쫘":["쫘","jjwa","(拟声)"],"쫴":["쫴","jjwae","(罕用)"],"쬬":["쬬","jjyo","(罕用)"],"쮀":["쮀","jjwe","(罕用)"],"쮜":["쮜","jjwi","(罕用)"],"쮸":["쮸","jjyu","(拟声)"],"쯔":["쯔","jjeu","(拟声)"],"쯰":["쯰","jjeui","(罕用)"],
+// —— ㅊ ——
+"챠":["챠","chya","(罕用)"],"챼":["챼","chyae","(罕用)"],"쳬":["쳬","chye","(罕用)"],"촤":["촤","chwa","(水声)"],"쵀":["쵀","chwae","(罕用)"],"쵸":["쵸","chyo","(罕用)"],"츠":["츠","cheu","(拼读练习)"],"츼":["츼","cheui","(罕用)"],
+// —— ㅋ ——
+"캬":["캬","kya","(叹声)"],"컈":["컈","kyae","(罕用)"],"켸":["켸","kye","(罕用)"],"쾨":["쾨","koe","(罕用)"],"킈":["킈","keui","(罕用)"],
+// —— ㅌ ——
+"탸":["탸","tya","(罕用)"],"턔":["턔","tyae","(罕用)"],"텨":["텨","tyeo","(古语)"],"톄":["톄","tye","(罕用)"],"톼":["톼","twa","(罕用)"],"퇘":["퇘","twae","(罕用)"],"툐":["툐","tyo","(罕用)"],"퉈":["퉈","two","(拟声)"],"퉤":["퉤","twe","(吐声)"],
+// —— ㅍ ——
+"퍄":["퍄","pya","(罕用)"],"퍠":["퍠","pyae","(罕用)"],"퐈":["퐈","pwa","(拟声)"],"퐤":["퐤","pwae","(罕用)"],"푀":["푀","poe","(罕用)"],"풔":["풔","pwo","(罕用)"],"풰":["풰","pwe","(罕用)"],"퓌":["퓌","pwi","(罕用)"],"픠":["픠","peui","(罕用)"],
+// —— ㅎ ——
+"햐":["햐","hya","(叹声)"],"햬":["햬","hyae","(罕用)"],"훠":["훠","hwo","(拟声)"]
+};
+// 难以稳定提供五个现代自然例词的低产音节，只浏览不测试。
+["걔","괘","괴","궤","규","꽈","꽤","꾀","꿔","꿰","뀌","끄","냐","놔","뇌","눠","뉘","늬","돼","둬","뒈","듀","떼","똬","뚜","뛰","띄","띠","뢰","료","뮤","봬","뷔","뷰","빼","뻐","뼈","뽀","뾰","뿌","삐","섀","셰","쇄","쇠","쇼","쉐","쌔","쎄","쏘","쏴","쐐","쐬","쑤","씌","으","좌","죠","쥐","째","쩌","쪄","쪼","쬐","쭈","쭤","쳐","춰","췌","츄","콰","쾌","쿄","쿼","퀘","큐","틔","폐","홰","훼"].forEach(g=>{
+  if(W[g]){ W_RARE[g]=W[g]; delete W[g]; }
+});
+// 收音例词
+const WB=[["학교","hakgyo","学校"],["밖","bak","外面"],["몫","mok","份额"],["산","san","山"],
+["앉다","antta","坐"],["많다","manta","多"],["곧","got","马上"],["물","mul","水"],
+["닭","dak","鸡"],["삶","sam","生活、人生"],["넓다","neolda","宽"],["외곬","oegol","一条道"],
+["핥다","haltta","舔"],["읊다","eupta","吟诵"],["싫다","silta","讨厌"],["봄","bom","春天"],
+["밥","bap","饭"],["없다","eopta","没有"],["옷","ot","衣服"],["있다","itta","有"],
+["강","gang","江"],["낮","nat","白天"],["꽃","kkot","花"],["부엌","bueok","厨房"],
+["끝","kkeut","结束"],["앞","ap","前面"],["좋다","jota","好"]];
+BATCHIM.forEach((b,i)=>{ W[b.g]=WB[i]; });
+const PRESET_MASTERED={
+  // 把你本来就已经很熟的字手动写在这里，它们会默认当作「已掌握」并跳过练习。
+  // 你后面可按组往数组里填，导出按钮生成的结果也能直接粘回这里。
+  jamo:{
+    consonants:[],
+    vowels:["ㅟ" ]
+  },
+  syllable:{
+    "ㄱ":["가","개","거","게","고","과","구","귀","그","기" ],
+    "ㄲ":["꼬" ],
+    "ㄴ":["나","내","네","녀","노","누" ],
+    "ㄷ":["다","더","데","되","두","드" ],
+    "ㄸ":["떠" ],
+    "ㄹ":["라","러","레","려","례","루","류","리" ],
+    "ㅁ":["마","머","모","뭐","미" ],
+    "ㅂ":["바","배","베","부","비" ],
+    "ㅃ":[],
+    "ㅅ":["사","슈","스","시" ],
+    "ㅆ":["씨" ],
+    "ㅇ":["아","애","야","어","에","여","오","와","왜","외","요","우","웨","위","유","의" ],
+    "ㅈ":["자","재","쟤","저","조","주","쥬","지" ],
+    "ㅉ":["짜" ],
+    "ㅊ":["채","취","치" ],
+    "ㅋ":["카","캐","케","쿠","크" ],
+    "ㅌ":["타","태","투" ],
+    "ㅍ":[],
+    "ㅎ":["후" ]
+  },
+  bat:[]
+};
+
+const W_MASTERED={
+  jamo:{
+    consonants:{},
+    vowels:{
+      "ㅟ":["귀","gwi","耳朵"]
+    }
+  },
+  syllable:{
+    "ㄱ":{
+      "가":["가방","gabang","包"],
+      "개":["개","gae","狗"],
+      "거":["거울","geoul","镜子"],
+      "게":["게임","geim","游戏"],
+      "고":["고마워","gomawo","谢谢"],
+      "과":["과일","gwail","水果"],
+      "구":["구름","gureum","云"],
+      "귀":["귀","gwi","耳朵"],
+      "그":["그리고","geurigo","还有、然后"],
+      "기":["기차","gicha","火车"]
+    },
+    "ㄲ":{
+      "꼬":["꼬마","kkoma","小孩"]
+    },
+    "ㄴ":{
+      "나":["나무","namu","树"],
+      "내":["내일","naeil","明天"],
+      "네":["네","ne","是"],
+      "녀":["소녀","sonyeo","少女"],
+      "노":["노래","norae","歌"],
+      "누":["누나","nuna","姐姐(男性称)"]
+    },
+    "ㄷ":{
+      "다":["다리","dari","腿 / 桥"],
+      "더":["더","deo","更、再"],
+      "데":["데이트","deiteu","约会"],
+      "되":["되다","doeda","成为"],
+      "두":["두부","dubu","豆腐"],
+      "드":["드라마","deurama","电视剧"]
+    },
+    "ㄸ":{
+      "떠":["떠나다","tteonada","离开"]
+    },
+    "ㄹ":{
+      "라":["라면","ramyeon","方便面"],
+      "러":["러브","reobeu","love、爱"],
+      "레":["레벨","rebel","level、等级"],
+      "려":["기다려","gidaryeo","等我"],
+      "례":["실례","sillye","失礼、不好意思"],
+      "루":["하루","haru","一天"],
+      "류":["한류","hallyu","韩流"],
+      "리":["우리","uri","我们"]
+    },
+    "ㅁ":{
+      "마":["마음","maeum","心"],
+      "머":["머리","meori","头、头发"],
+      "모":["모자","moja","帽子"],
+      "뭐":["뭐","mwo","什么"],
+      "미":["미안","mian","抱歉"]
+    },
+    "ㅂ":{
+      "바":["바다","bada","海"],
+      "배":["배","bae","梨 / 船 / 肚子"],
+      "베":["베개","begae","枕头"],
+      "부":["부모","bumo","父母"],
+      "비":["비","bi","雨"]
+    },
+    "ㅃ":{},
+    "ㅅ":{
+      "사":["사랑","sarang","爱"],
+      "슈":["슈퍼","syupeo","超市"],
+      "스":["스포츠","seupocheu","体育"],
+      "시":["시간","sigan","时间"]
+    },
+    "ㅆ":{
+      "씨":["씨","ssi","先生·女士 / 种子"]
+    },
+    "ㅇ":{
+      "아":["아기","agi","婴儿"],
+      "애":["애인","aein","恋人"],
+      "야":["야구","yagu","棒球"],
+      "어":["어머니","eomeoni","母亲"],
+      "에":["에어컨","eeokeon","空调"],
+      "여":["여름","yeoreum","夏天"],
+      "오":["오늘","oneul","今天"],
+      "와":["와인","wain","葡萄酒"],
+      "왜":["왜","wae","为什么"],
+      "외":["외국","oeguk","外国"],
+      "요":["요리","yori","料理"],
+      "우":["우유","uyu","牛奶"],
+      "웨":["웨이터","weiteo","服务员"],
+      "위":["위","wi","上面 / 胃"],
+      "유":["유리","yuri","玻璃"],
+      "의":["의사","uisa","医生"]
+    },
+    "ㅈ":{
+      "자":["자동차","jadongcha","汽车"],
+      "재":["재미","jaemi","趣味"],
+      "쟤":["쟤","jyae","那孩子(口语)"],
+      "저":["저녁","jeonyeok","晚上"],
+      "조":["조금","jogeum","一点点"],
+      "주":["주말","jumal","周末"],
+      "쥬":["쥬스","jyuseu","果汁"],
+      "지":["지도","jido","地图"]
+    },
+    "ㅉ":{
+      "짜":["짜다","jjada","咸"]
+    },
+    "ㅊ":{
+      "채":["채소","chaeso","蔬菜"],
+      "취":["취미","chwimi","爱好"],
+      "치":["치마","chima","裙子"]
+    },
+    "ㅋ":{
+      "카":["카페","kape","咖啡厅"],
+      "캐":["캐릭터","kaerikteo","角色、人物"],
+      "케":["케이크","keikeu","蛋糕"],
+      "쿠":["쿠키","kuki","饼干"],
+      "크":["크다","keuda","大"]
+    },
+    "ㅌ":{
+      "타":["타다","tada","乘坐"],
+      "태":["태양","taeyang","太阳"],
+      "투":["투표","tupyo","投票"]
+    },
+    "ㅍ":{},
+    "ㅎ":{
+      "후":["후회","huhoe","后悔"]
+    }
+  },
+  bat:{}
+};
+const W_MASTERED_FLAT={};
+const setMasteredWord=(store,g,word)=>{
+  if(CHO.includes(g)){ store.jamo.consonants[g]=word; return; }
+  if(JUNG.includes(g)){ store.jamo.vowels[g]=word; return; }
+  if(g && g.length===1 && g.charCodeAt(0)>=0xAC00 && g.charCodeAt(0)<=0xD7A3){
+    const ci=Math.floor((g.charCodeAt(0)-0xAC00)/(21*28));
+    const bucket=CHO[ci];
+    if(bucket){ store.syllable[bucket][g]=word; return; }
+  }
+  store.bat[g]=word;
+};
+function rebuildMasteredFlat(){
+  Object.keys(W_MASTERED_FLAT).forEach(g=>delete W_MASTERED_FLAT[g]);
+  Object.assign(W_MASTERED_FLAT, W_MASTERED.jamo.consonants, W_MASTERED.jamo.vowels, W_MASTERED.bat);
+  CHO.forEach(c=>Object.assign(W_MASTERED_FLAT, W_MASTERED.syllable[c]));
+}
+
+function refreshRareDecks(){
+  const rareSet=new Set(RARE);
+  Object.keys(W_RARE).forEach(g=>rareSet.add(g));
+  const cardOf=g=>{
+    const offset=g.charCodeAt(0)-0xAC00;
+    const consonant=Math.floor(offset/(21*28));
+    const vowel=Math.floor((offset%(21*28))/28);
+    const final=offset%28;
+    return {
+      g,
+      r:(CHO_R[consonant]||"")+JUNG_R[vowel]+(final?BJ[final-1][1]:""),
+      cn:CHO[consonant]+" + "+JUNG[vowel]+(final?" + 받침 "+BJ[final-1][0]:""),
+      t:"音节"
+    };
+  };
+  const practical=T399.filter(x=>!rareSet.has(x.g));
+  const practicalSet=new Set(practical.map(x=>x.g));
+  [...Object.values(W),...Object.values(W_MASTERED_FLAT),...COMMON_WORDS].forEach(word=>{
+    [...word[0]].filter(isSyllableChar).forEach(g=>{
+      if(!rareSet.has(g) && !practicalSet.has(g)){
+        practical.push(cardOf(g)); practicalSet.add(g);
+      }
+    });
+  });
+  const rare=T399.filter(x=>rareSet.has(x.g));
+  const rareSetBuilt=new Set(rare.map(x=>x.g));
+  Object.keys(W_RARE).filter(isSyllableChar).forEach(g=>{
+    if(!rareSetBuilt.has(g)){ rare.push(cardOf(g)); rareSetBuilt.add(g); }
+  });
+  T_USE.splice(0,T_USE.length,...practical);
+  T_RARE.splice(0,T_RARE.length,...rare);
+  DECKS.t399.name="③ 实用音节 "+T_USE.length;
+  DECKS.rare.name="⑤ 生僻音节 "+T_RARE.length;
+}
+
+/* ================= 状态 ================= */
+let deckKey="jamo", queue=[], cur=null, flipped=false;
+let mem=JSON.parse(localStorage.getItem("kr_mem")||"{}");
+let round=Number(localStorage.getItem("kr_round")||"1");
+const save=()=>localStorage.setItem("kr_mem",JSON.stringify(mem));
+const saveRound=()=>localStorage.setItem("kr_round",String(round));
+const key=(d,g)=>d+"|"+g;
+const flattenPreset=value=>Array.isArray(value)?value:Object.values(value).flat();
+const PRESET_MASTERED_SETS={
+  jamo:new Set(flattenPreset(PRESET_MASTERED.jamo)),
+  syllable:new Set(flattenPreset(PRESET_MASTERED.syllable)),
+  bat:new Set(PRESET_MASTERED.bat)
+};
+const isPresetMastered=(deck,g)=>{
+  if(deck==="jamo") return PRESET_MASTERED_SETS.jamo.has(g);
+  if(deck==="bat") return PRESET_MASTERED_SETS.bat.has(g);
+  return PRESET_MASTERED_SETS.syllable.has(g);
+};
+function refreshMasteredWords(){
+  rebuildMasteredFlat();
+  [...PRESET_MASTERED_SETS.jamo, ...PRESET_MASTERED_SETS.syllable, ...PRESET_MASTERED_SETS.bat].forEach(g=>{
+    if(W_MASTERED_FLAT[g]){ delete W[g]; delete W_RARE[g]; return; }
+    if(W[g]){ setMasteredWord(W_MASTERED,g,W[g]); delete W[g]; }
+    else if(W_RARE[g]){ setMasteredWord(W_MASTERED,g,W_RARE[g]); delete W_RARE[g]; }
+  });
+}
+const isSyllableChar=g=>g && g.length===1 && g.charCodeAt(0)>=0xAC00 && g.charCodeAt(0)<=0xD7A3;
+const choseOf=g=>isSyllableChar(g)?CHO[Math.floor((g.charCodeAt(0)-0xAC00)/(21*28))]:null;
+const sortedUnique=list=>Array.from(new Set(list)).sort((a,b)=>a.localeCompare(b,"ko"));
+const wordOf=g=>W[g]||W_MASTERED_FLAT[g]||W_RARE[g];
+refreshMasteredWords();
+rebuildMasteredFlat();
+refreshRareDecks();
+const WORD_INDEX={};
+function rebuildWordIndex(){
+  Object.keys(WORD_INDEX).forEach(g=>delete WORD_INDEX[g]);
+  const seenWords=new Set();
+  [...Object.values(W),...Object.values(W_MASTERED_FLAT),...Object.values(W_RARE),...COMMON_WORDS].forEach(word=>{
+    const id=word[0];
+    if(seenWords.has(id)) return;
+    seenWords.add(id);
+    Array.from(new Set([...word[0]].filter(isSyllableChar))).forEach(g=>{
+      (WORD_INDEX[g]||(WORD_INDEX[g]=[])).push(word);
+    });
+  });
+}
+rebuildWordIndex();
+/* 同一「初声+中声」的基底音节：네 ↔ 넷、따 ↔ 딸，用来在例词不足 5 个时补位 */
+const baseSyl=g=>isSyllableChar(g)?String.fromCharCode(0xAC00+Math.floor((g.charCodeAt(0)-0xAC00)/28)*28):g;
+const BASE_INDEX={};
+function rebuildBaseIndex(){
+  Object.keys(BASE_INDEX).forEach(k=>delete BASE_INDEX[k]);
+  const seen=new Set();
+  [...Object.values(W),...Object.values(W_MASTERED_FLAT),...Object.values(W_RARE),...COMMON_WORDS].forEach(word=>{
+    if(seen.has(word[0])) return;
+    seen.add(word[0]);
+    Array.from(new Set([...word[0]].filter(isSyllableChar).map(baseSyl))).forEach(b=>{
+      (BASE_INDEX[b]||(BASE_INDEX[b]=[])).push(word);
+    });
+  });
+}
+rebuildBaseIndex();
+/* 字母卡：按初声 / 中声 / 终声反查含该字母的词 */
+const jamoOf=g=>{
+  const o=g.charCodeAt(0)-0xAC00, f=o%28;
+  return [CHO[Math.floor(o/(21*28))], JUNG[Math.floor((o%(21*28))/28)], f?BJ[f-1][0]:null].filter(Boolean);
+};
+const charHasJamo=(ch,j)=>isSyllableChar(ch)&&jamoOf(ch).includes(j);
+const isJamoChar=g=>CHO.includes(g)||JUNG.includes(g);
+const JAMO_INDEX={};
+function rebuildJamoIndex(){
+  Object.keys(JAMO_INDEX).forEach(k=>delete JAMO_INDEX[k]);
+  const seen=new Set();
+  [...Object.values(W),...Object.values(W_MASTERED_FLAT),...COMMON_WORDS].forEach(word=>{
+    if(seen.has(word[0])) return;
+    seen.add(word[0]);
+    const set=new Set();
+    [...word[0]].filter(isSyllableChar).forEach(ch=>jamoOf(ch).forEach(j=>set.add(j)));
+    set.forEach(j=>{ (JAMO_INDEX[j]||(JAMO_INDEX[j]=[])).push(word); });
+  });
+}
+rebuildJamoIndex();
+const BAT_SET=new Set(BATCHIM.map(x=>x.g));
+const batOf=g=>{ const f=(g.charCodeAt(0)-0xAC00)%28; return f?BJ[f-1][0]:null; };
+const charHasBat=(ch,b)=>isSyllableChar(ch)&&batOf(ch)===b;
+function wordsOf(g){
+  const direct=wordOf(g);
+  if(BAT_SET.has(g)){
+    const b=batOf(g);
+    const list=[...(direct?[direct]:[]),...[...Object.values(W),...Object.values(W_MASTERED_FLAT),...COMMON_WORDS]
+      .filter(w=>[...w[0]].some(ch=>charHasBat(ch,b)))];
+    return list.filter((w,i,l)=>l.findIndex(x=>x[0]===w[0])===i).slice(0,5);
+  }
+  if(isJamoChar(g)){
+    const list=[...(direct?[direct]:[]),...(JAMO_INDEX[g]||[])];
+    return list.filter((w,i,l)=>l.findIndex(x=>x[0]===w[0])===i).slice(0,5);
+  }
+  if(!isSyllableChar(g)) return direct?[direct]:[];
+  const exact=direct?[direct,...(WORD_INDEX[g]||[])]:(WORD_INDEX[g]||[]);
+  return exact.filter((w,i,list)=>list.findIndex(x=>x[0]===w[0])===i).slice(0,5);
+}
+function highlightedWord(text,g){
+  if(BAT_SET.has(g)){
+    const b=batOf(g);
+    return [...text].map(ch=>charHasBat(ch,b)?`<span class="hl2">${ch}</span>`:ch).join("");
+  }
+  if(isJamoChar(g)){
+    return [...text].map(ch=>charHasJamo(ch,g)?`<span class="hl2">${ch}</span>`:ch).join("");
+  }
+  return [...text].map(ch=>ch===g?`<span class="hl">${ch}</span>`:ch).join("");
+}
+function wordListHTML(g,words,highlight=true){
+  if(!words.length) return `<div class="none">（暂无常用例词）</div>`;
+  return `<div class="word-list" style="grid-template-columns:repeat(${Math.min(words.length,5)},minmax(0,1fr))">${words.map(w=>`<div class="word-entry">
+    <div class="kw say word-say" data-word="${w[0]}">${highlight?highlightedWord(w[0],g):w[0]}</div>
+    <div class="kr">${w[1]}</div><div class="kc">${w[2]}</div>
+  </div>`).join("")}</div>`;
+}
+function bindWordSounds(){
+  document.querySelectorAll(".word-say,.sent-say").forEach(el=>{
+    el.onclick=e=>{ e.stopPropagation(); play(el.dataset.word,el); };
+  });
+}
+/* ================= 歌词风例句库 =================
+   为避免版权问题，这里不直接照搬现代流行歌曲歌词，而是用
+   ① 传统民谣（如 아리랑，公共领域）
+   ② 韩语抒情歌里最典型的句式与高频词，自行改写成的原创短句
+   句子可被不同的字重复使用，卡片会自动挑一条含该字的句子并高亮。 */
+const SENTENCES=[
+  ["아리랑 아리랑 아라리요","arirang arirang arariyo","阿里郎 阿里郎 阿拉里哟（传统民谣）"],
+  ["나를 버리고 가시는 님","nareul beorigo gasineun nim","抛下我而去的那个人（传统民谣）"],
+  ["오늘도 너를 생각해","oneuldo neoreul saenggakhae","今天我也在想你"],
+  ["사랑한다는 그 말 한마디","saranghandaneun geu mal hanmadi","「我爱你」那一句话"],
+  ["보고 싶다 많이 보고 싶다","bogo sipda mani bogo sipda","想你，好想你"],
+  ["우리 다시 만날 수 있을까","uri dasi mannal su isseulkka","我们还能再见面吗"],
+  ["너의 목소리가 들려오는 밤","neoui moksoriga deullyeooneun bam","能听见你声音的夜晚"],
+  ["그 여름의 바다를 기억해","geu yeoreumui badareul gieokhae","记得那年夏天的海"],
+  ["하늘에 별이 쏟아지던 날","haneure byeori ssodajideon nal","星星洒落天空的那一天"],
+  ["비가 내리는 거리를 걸어","biga naerineun georireul georeo","走在下雨的街上"],
+  ["눈물이 흐르는 이유를 몰라","nunmuri heureuneun iyureul molla","不明白眼泪为何流下"],
+  ["첫사랑은 아직 내 마음에","cheotsarangeun ajik nae maeume","初恋还留在我心里"],
+  ["바람이 부는 대로 걸어가","barami buneun daero georeoga","随着风走下去"],
+  ["꽃이 피고 지는 계절처럼","kkochi pigo jineun gyejeolcheoreom","像花开花落的季节"],
+  ["잊지 못할 그날의 약속","itji mothal geunarui yaksok","忘不掉的那天的约定"],
+  ["혼자 걷는 밤길이 길어","honja geotneun bamgiri gireo","独自走的夜路很长"],
+  ["창밖에 눈이 내려요","changbakke nuni naeryeoyo","窗外下着雪"],
+  ["너와 나의 계절이 지나가","neowa naui gyejeori jinaga","你我的季节正在过去"],
+  ["웃으며 안녕이라 말할게","useumyeo annyeongira malhalge","我会笑着说再见"],
+  ["가슴이 뜨거워지는 순간","gaseumi tteugeowojineun sungan","胸口变热的瞬间"],
+  ["같이 걸어줄래 이 길을","gachi georeojullae i gireul","愿意陪我走这条路吗"],
+  ["따뜻한 손을 잡아줘요","ttatteuthan soneul jabajwoyo","请握住我温暖的手"],
+  ["멀리 있어도 괜찮아요","meolli isseodo gwaenchanayo","即使相隔很远也没关系"],
+  ["시간이 흘러도 변하지 않아","sigani heulleodo byeonhaji ana","时间流逝也不会改变"],
+  ["꿈속에서 너를 만났어","kkumsogeseo neoreul mannasseo","在梦里遇见了你"],
+  ["추억은 노래처럼 남아","chueogeun noraecheoreom nama","回忆像歌一样留下"],
+  ["뜨거운 여름밤의 축제","tteugeoun yeoreumbamui chukje","炎热夏夜的庆典"],
+  ["파란 하늘 위로 날아가","paran haneul wiro naraga","飞向蓝色的天空"],
+  ["조용히 내 이름을 불러줘","joyonghi nae ireumeul bulleojwo","请安静地叫我的名字"],
+  ["행복한 하루가 되기를","haengbokhan haruga doegireul","愿今天是幸福的一天"],
+  ["처음 본 순간 알았어","cheoeum bon sungan arasseo","第一眼就知道了"],
+  ["커피 한 잔에 담은 마음","keopi han jane dameun maeum","装在一杯咖啡里的心意"],
+  ["춤을 춰요 이 밤이 새도록","chumeul chwoyo i bami saedorok","跳舞吧，直到天亮"],
+  ["뛰는 심장 소리가 커져","ttwineun simjang soriga keojyeo","跳动的心跳声变大"],
+  ["쓸쓸한 겨울이 찾아와","sseulsseulhan gyeouri chajawa","寂寞的冬天到来"],
+  ["예쁜 미소를 기억할게","yeppeun misoreul gieokhalge","我会记住那漂亮的笑容"],
+  ["또 하루가 저물어 가네","tto haruga jeomureo gane","又一天渐渐落幕"],
+  ["떠나가는 너의 뒷모습","tteonaganeun neoui dwitmoseup","你离去的背影"],
+  ["끝나지 않을 이야기처럼","kkeutnaji aneul iyagicheoreom","像不会结束的故事"],
+  ["빛나는 별처럼 살고 싶어","bitnaneun byeolcheoreom salgo sipeo","想像闪耀的星星一样活着"],
+  ["기다릴게 언제까지나","gidarilge eonjekkajina","我会一直等下去"],
+  ["소중한 사람이 되고 싶어","sojunghan sarami doego sipeo","想成为珍贵的人"],
+  ["쭉 이대로 함께 있자","jjuk idaero hamkke itja","就这样一直在一起吧"],
+  ["짙어지는 밤이 좋아","jiteojineun bami joa","喜欢渐渐变浓的夜"],
+  ["퇴근길 지하철 창가에서","toegeungil jihacheol changgaeseo","下班路上地铁的窗边"],
+  ["휘파람을 불며 걸어가","hwiparameul bulmyeo georeoga","吹着口哨走着"],
+  ["희미한 불빛 아래에서","huimihan bulbit araeeseo","在微弱的灯光下"],
+  ["티 없이 맑은 너의 눈","ti eopsi malgeun neoui nun","你那清澈无瑕的眼睛"],
+  ["표정 없이 웃어 보였어","pyojeong eopsi useo boyeosseo","面无表情地笑了笑"],
+  ["쉬어가도 괜찮아 천천히","swieogado gwaenchana cheoncheonhi","歇一歇也没关系，慢慢来"]
+];
+/* 兜底模板：用该字自己的例词现造一句歌词味的短句，保证一定含有这个字 */
+const SENT_TEMPLATES=[
+  w=>[`${w[0]} 그 한마디가 남았어`,`${w[1]} geu hanmadiga namasseo`,`只留下「${w[2]}」这一句`],
+  w=>[`${w[0]} 생각나는 밤이야`,`${w[1]} saenggangnaneun bamiya`,`是想起「${w[2]}」的夜晚`],
+  w=>[`${w[0]} 하나로 충분해요`,`${w[1]} hanaro chungbunhaeyo`,`有「${w[2]}」一个就够了`],
+  w=>[`${w[0]} 노래처럼 흘러가`,`${w[1]} noraecheoreom heulleoga`,`「${w[2]}」像歌一样流淌`],
+  w=>[`${w[0]} 다시 부르고 싶어`,`${w[1]} dasi bureugo sipeo`,`想再唱一次「${w[2]}」`]
+];
+const SENT_INDEX={};
+SENTENCES.forEach(s=>{
+  Array.from(new Set([...s[0]].filter(isSyllableChar))).forEach(g=>{
+    (SENT_INDEX[g]||(SENT_INDEX[g]=[])).push(s);
+  });
+});
+const hashOf=g=>[...g].reduce((a,c)=>a+c.charCodeAt(0),0);
+function sentenceOf(g,words){
+  if(isSyllableChar(g)&&!BAT_SET.has(g)){
+    const list=SENT_INDEX[g];
+    if(list&&list.length) return list[hashOf(g)%list.length];
+  }
+  if(BAT_SET.has(g)){
+    const b=batOf(g);
+    const list=SENTENCES.filter(s=>[...s[0]].some(ch=>charHasBat(ch,b)));
+    if(list.length) return list[hashOf(g)%list.length];
+  }
+  if(isJamoChar(g)){
+    const list=SENTENCES.filter(s=>[...s[0]].some(ch=>charHasJamo(ch,g)));
+    if(list.length) return list[hashOf(g)%list.length];
+  }
+  const pool=(words||[]).filter(w=>[...w[0]].includes(g));
+  const w=pool[0]||(words||[])[0];
+  if(!w) return null;
+  return SENT_TEMPLATES[hashOf(g)%SENT_TEMPLATES.length](w);
+}
+function sentenceHTML(g,words){
+  const s=sentenceOf(g,words);
+  if(!s) return "";
+  return `<div class="sent">
+    <div class="sk say sent-say" data-word="${s[0]}">${highlightedWord(s[0],g)}</div>
+    <div class="sr">${s[1]}</div><div class="sc">${s[2]}</div>
+    <div class="src">🎵 歌词风例句（传统民谣 / 原创改写）</div>
+  </div>`;
+}
+function currentMastered(){
+  const out={
+    jamo:{consonants:[],vowels:[]},
+    syllable:Object.fromEntries(CHO.map(c=>[c,[]])),
+    bat:[]
+  };
+  JAMO.forEach(x=>{ if(stateOf("jamo",x.g).s>=2){ (x.t==="辅音"?out.jamo.consonants:out.jamo.vowels).push(x.g); } });
+  T399.forEach(x=>{
+    if(stateOf("t399",x.g).s>=2 || stateOf("t140",x.g).s>=2){
+      const c=choseOf(x.g);
+      if(c) out.syllable[c].push(x.g);
+    }
+  });
+  BATCHIM.forEach(x=>{ if(stateOf("bat",x.g).s>=2) out.bat.push(x.g); });
+  out.jamo.consonants=sortedUnique(out.jamo.consonants);
+  out.jamo.vowels=sortedUnique(out.jamo.vowels);
+  CHO.forEach(c=>{ out.syllable[c]=sortedUnique(out.syllable[c]); });
+  out.bat=sortedUnique(out.bat);
+  return out;
+}
+function currentMasteredWordGroups(data){
+  const out={
+    jamo:{consonants:{},vowels:{}},
+    syllable:Object.fromEntries(CHO.map(c=>[c,{}])),
+    bat:{}
+  };
+  [...data.jamo.consonants, ...data.jamo.vowels, ...data.bat].forEach(g=>{ const w=wordOf(g); if(w) setMasteredWord(out,g,w); });
+  CHO.forEach(c=>data.syllable[c].forEach(g=>{ const w=wordOf(g); if(w) setMasteredWord(out,g,w); }));
+  return out;
+}
+function presetText(data){
+  const syl=CHO.map(c=>`    "${c}":[${data.syllable[c].map(x=>`"${x}"`).join(",")} ]`.replace(",[ ]",'[]')).join(",\n");
+  return `const PRESET_MASTERED={\n  // 把你本来就已经很熟的字手动写在这里，它们会默认当作「已掌握」并跳过练习。\n  // 你后面可按组往数组里填，导出按钮生成的结果也能直接粘回这里。\n  jamo:{\n    consonants:[${data.jamo.consonants.map(x=>`"${x}"`).join(",")}],\n    vowels:[${data.jamo.vowels.map(x=>`"${x}"`).join(",")} ]\n  },\n  syllable:{\n${syl}\n  },\n  bat:[${data.bat.map(x=>`"${x}"`).join(",")} ]\n};`
+    .replace(/\[ \]/g,"[]")
+    .replace(/,\]/g,"]");
+}
+function renderWordMap(obj, baseIndent){
+  const entries=Object.entries(obj);
+  if(!entries.length) return "{}";
+  const entryIndent=baseIndent+"  ";
+  return `{
+${entries.map(([g,w])=>`${entryIndent}"${g}":["${w[0]}","${w[1]}","${w[2]}"]`).join(",\n")}
+${baseIndent}}`;
+}
+function masteredWordText(groups){
+  const syl=CHO.map(c=>`    "${c}":${renderWordMap(groups.syllable[c],"    ")}`).join(",\n");
+  return `const W_MASTERED={
+  jamo:{
+    consonants:${renderWordMap(groups.jamo.consonants,"    ")},
+    vowels:${renderWordMap(groups.jamo.vowels,"    ")}
+  },
+  syllable:{
+${syl}
+  },
+  bat:${renderWordMap(groups.bat,"  ")}
+};`;
+}
+function renderExportBox(){
+  const data=currentMastered();
+  const words=currentMasteredWordGroups(data);
+  const text=`${presetText(data)}\n\n${masteredWordText(words)}`;
+  exportBox.innerHTML=`<div style="font-size:13px;color:var(--dim);margin-bottom:10px">这里汇总了你当前已掌握的字，也把对应例词一起按代码模板排好了。可直接复制后覆盖代码里的 PRESET_MASTERED 和 W_MASTERED。</div>
+    <textarea id="exportText" style="width:100%;min-height:300px;background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:12px;font:12px/1.6 Consolas, 'Courier New', monospace">${text}</textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button id="btnCopyExport">复制清单</button>
+    </div>`;
+  const textarea=document.getElementById("exportText");
+  textarea.focus();
+  textarea.select();
+  document.getElementById("btnCopyExport").onclick=async()=>{
+    try{
+      await navigator.clipboard.writeText(textarea.value);
+      document.getElementById("btnCopyExport").textContent="已复制";
+    }catch{
+      textarea.focus();
+      textarea.select();
+      document.getElementById("btnCopyExport").textContent="请按 Ctrl+C";
+    }
+  };
+}
+const stateOf=(deck,g)=>{
+  if(isPresetMastered(deck,g)) return {s:2, hard:0, review:0, deferUntil:0};
+  const raw=mem[key(deck,g)]||{};
+  return {s:raw.s||0, hard:raw.hard||0, review:raw.review||raw.w||0, deferUntil:raw.deferUntil||0};
+};
+const rec=g=>stateOf(deckKey,g);
+const isJamo=c=>c.t==="辅音"||c.t==="元音";
+
+/* ================= 发音（点击触发，0.7 倍速） ================= */
+function play(t,el){
+  if(!window.speechSynthesis||!t) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang="ko-KR"; u.rate=0.7; u.pitch=1;
+  const v=speechSynthesis.getVoices().find(x=>x.lang.replace("_","-").startsWith("ko"));
+  if(v) u.voice=v;
+  if(el){ el.classList.add("playing"); u.onend=u.onerror=()=>el.classList.remove("playing"); }
+  speechSynthesis.speak(u);
+}
+if(window.speechSynthesis) speechSynthesis.onvoiceschanged=()=>{};
+const hasSelection=()=>{
+  const sel=window.getSelection&&window.getSelection();
+  return !!(sel && String(sel).trim());
+};
+
+/* ================= 渲染 ================= */
+function renderDecks(){
+  decks.innerHTML=Object.entries(DECKS).map(([k,d])=>{
+    const tot=d.data.length, done=d.data.filter(x=>stateOf(k,x.g).s>=2).length;
+    return `<div class="deck ${k===deckKey?'on':''}" data-k="${k}">
+      <div class="t">${d.name}</div><div class="d">${d.desc}</div>
+      ${d.browse
+        ? `<div class="d" style="margin-top:10px;color:var(--warn)">👁 仅浏览 · 不计入进度</div>`
+        : `<div class="p"><i style="width:${tot?done/tot*100:0}%"></i></div>
+           <div class="d" style="margin-top:5px">${done} / ${tot} 已掌握</div>`}</div>`;
+  }).join("");
+  decks.querySelectorAll(".deck").forEach(el=>el.onclick=()=>{deckKey=el.dataset.k;build();});
+}
+
+function getHardItems(){
+  return DECKS[deckKey].data
+    .map(x=>({card:x, rec:rec(x.g)}))
+    .filter(x=>x.rec.hard>0)
+    .sort((a,b)=>b.rec.hard-a.rec.hard || b.rec.review-a.rec.review || a.card.g.localeCompare(b.card.g));
+}
+
+function renderHardBox(){
+  const items=getHardItems();
+  if(!items.length){
+    hardBox.innerHTML=`<div style="font-size:13px;color:var(--dim)">${DECKS[deckKey].name} 里还没有标记成「不会，后面再学」的字。</div>`;
+    return;
+  }
+  hardBox.innerHTML=`<div style="font-size:13px;color:var(--dim);margin-bottom:10px">${DECKS[deckKey].name} · 你当前标成 1 类、顺延到下一轮的字。</div>
+    <div class="weak">${items.map(({card})=>`<span>${card.g} <small style="color:var(--dim)">${card.r}</small></span>`).join("")}</div>`;
+}
+
+function build(weakOnly=false){
+  if(DECKS[deckKey].browse){ queue=[]; cur=null; renderBrowse(); return; }
+  const d=DECKS[deckKey].data;
+  let pool=weakOnly
+    ? d.filter(x=>{ const r=rec(x.g); return r.deferUntil<=round&&(r.hard>0||r.review>0); })
+    : d.filter(x=>{ const r=rec(x.g); return r.deferUntil<=round&&r.s<2; });
+  queue=[];
+  pool.forEach(x=>{
+    const r=rec(x.g);
+    const n=1+Math.min(r.review,2)+Math.min(r.hard*2,4);
+    for(let i=0;i<n;i++) queue.push(x);
+  });
+  queue.sort(()=>Math.random()-.5);
+  next();
+}
+
+function renderBrowse(){
+  const d=DECKS[deckKey].data;
+  sLeft.textContent="–"; sDone.textContent="–"; sAcc.textContent="–";
+  progBar.style.width="0%";
+  chart.classList.add("hide"); btnChart.textContent="查看全表";
+  hardBox.classList.add("hide"); btnHard.textContent="查看 1 类清单";
+  exportBox.classList.add("hide"); btnExport.textContent="导出已掌握";
+  stage.innerHTML=`<div class="browse">
+    <div class="bnote">这 ${d.length} 个音节拼写合法，但现代韩语里几乎不构成词，多来自古语、方言、拟声词或外来语音译。<b>认得出怎么拼读即可，不必背。</b>点任意一格可听发音。</div>
+    <div class="bgrid">${d.map(x=>`<div class="bcell" data-g="${x.g}">
+        <span class="bg">${x.g}</span><span class="br">${x.r}</span>
+        <span class="bc">${wordOf(x.g)?wordOf(x.g)[2]:""}</span></div>`).join("")}</div>
+  </div>`;
+  stage.querySelectorAll(".bcell").forEach(el=>{
+    el.onclick=()=>play(el.dataset.g, el);
+  });
+  renderDecks();
+}
+
+function stats(){
+  const d=DECKS[deckKey].data, tot=d.length;
+  const done=d.filter(x=>rec(x.g).s>=2).length;
+  sLeft.textContent=new Set(queue.map(x=>x.g)).size;
+  sDone.textContent=done+" / "+tot;
+  sAcc.textContent=d.filter(x=>{ const r=rec(x.g); return (r.hard>0||r.review>0)&&r.s<2; }).length;
+  progBar.style.width=(tot?done/tot*100:0)+"%";
+  renderDecks();
+  if(!hardBox.classList.contains("hide")) renderHardBox();
+}
+
+function next(){
+  stats();
+  if(!queue.length){ finish(); return; }
+  cur=queue[0]; flipped=false;
+  const jam=isJamo(cur), words=wordsOf(cur.g), r=rec(cur.g);
+  stage.innerHTML=`
+    <div class="card" id="card">
+      <div class="tag">${cur.t}</div>
+      <div class="lvl">${r.hard?`<span style="color:var(--bad)">1 类</span>`:(r.review?`<span style="color:var(--warn)">2 类 ${r.review} 次</span>`:(r.s?`<span style="color:var(--good)">已掌握</span>`:"新卡"))}</div>
+      <div id="front">
+        <div class="glyph ${jam?"":"say"}" id="g1">${cur.g}</div>
+        <div class="word">${wordListHTML(cur.g,words)}</div>
+        ${sentenceHTML(cur.g,words)}
+      </div>
+      <div class="hint">${jam?"点词 / 句子":"点字、词或句子"}可发音　·　点空白处 / 空格键 翻面</div>
+    </div>
+    <div class="grade hide" id="grade">
+      <button id="b0">不会，后面再学 (1)</button><button id="b1">有点会，再出现几次 (2)</button><button id="b2">已掌握 (3)</button>
+    </div>`;
+  document.getElementById("card").onclick=flip;
+  if(!jam){ const g1=document.getElementById("g1"); g1.onclick=e=>{e.stopPropagation();play(cur.g,g1);} }
+  bindWordSounds();
+}
+
+function flip(){
+  if(hasSelection()) return;
+  if(flipped||!cur) return; flipped=true;
+  const jam=isJamo(cur), words=wordsOf(cur.g);
+  document.getElementById("front").outerHTML=`
+    <div id="back">
+      <div class="glyph ${jam?"":"say"}" id="g2" style="font-size:62px">${cur.g}</div>
+      <div class="rom">[ ${cur.r} ]</div>
+      <div class="cn">${cur.cn}</div>
+      <div class="word">${wordListHTML(cur.g,words)}</div>
+      ${sentenceHTML(cur.g,words)}
+    </div>`;
+  document.querySelector(".hint").textContent=(jam?"点词 / 句子":"点字、词或句子")+"可反复听　·　评分：键盘 1 / 2 / 3";
+  document.getElementById("grade").classList.remove("hide");
+  if(!jam){ const g2=document.getElementById("g2"); g2.onclick=e=>{e.stopPropagation();play(cur.g,g2);} }
+  bindWordSounds();
+  b0.onclick=e=>{e.stopPropagation();grade(0)};
+  b1.onclick=e=>{e.stopPropagation();grade(1)};
+  b2.onclick=e=>{e.stopPropagation();grade(2)};
+}
+
+function grade(v){
+  if(!flipped||!cur) return;
+  const g=cur.g, k=key(deckKey,g), r=rec(g), c=cur;
+  queue.shift();
+  if(v===2){
+    r.s=2;
+    r.hard=0;
+    r.deferUntil=0;
+    queue=queue.filter(x=>x.g!==g);
+  }
+  else if(v===1){
+    r.s=0;
+    r.hard=0;
+    r.review++;
+    r.deferUntil=0;
+    queue.splice(Math.min(3,queue.length),0,c);
+    queue.splice(Math.min(8,queue.length),0,c);
+  }
+  else {
+    r.s=0;
+    r.hard=1;
+    r.deferUntil=round+1;
+  }
+  mem[k]=r; save(); next();
+}
+
+function finish(){
+  const d=DECKS[deckKey].data;
+  const remain=d.filter(x=>rec(x.g).s<2);
+  const deferred=remain.filter(x=>rec(x.g).deferUntil>round);
+  const hard=d.filter(x=>rec(x.g).hard>0).sort((a,b)=>rec(b.g).hard-rec(a.g).hard).slice(0,24);
+  const review=d.filter(x=>rec(x.g).review>0).sort((a,b)=>rec(b.g).review-rec(a.g).review).slice(0,24);
+  stage.innerHTML=`<div class="card" style="cursor:default"><div class="done">
+    <h2>${remain.length?"这一轮先到这里":"🎉 本组全部掌握"}</h2>
+    <div style="color:var(--dim)">${DECKS[deckKey].name} · 共 ${d.length} 个</div>
+    ${deferred.length?`<div style="color:var(--dim);margin-top:12px;font-size:13px">有 ${deferred.length} 个 1 类字已顺延到下一轮。点「开始 / 重新洗牌」继续下一轮学习。</div>`:""}
+    ${hard.length?`<div style="color:var(--dim);margin-top:18px;font-size:13px">你标成 1 类的字：</div>
+      <div class="weak">${hard.map(x=>`<span>${x.g} <small style="color:var(--dim)">${x.r}</small></span>`).join("")}</div>`:""}
+    ${review.length?`<div style="color:var(--dim);margin-top:18px;font-size:13px">你标成 2 类的字：</div>
+      <div class="weak">${review.map(x=>`<span>${x.g} <small style="color:var(--dim)">${x.r}</small></span>`).join("")}</div>`:""}
+  </div></div>`;
+  renderDecks();
+}
+
+/* ================= 交互 ================= */
+document.onkeydown=e=>{
+  if(e.code==="Space"){ e.preventDefault(); if(!flipped) flip(); }
+  if(e.key==="r"||e.key==="R"){ const w=cur&&wordOf(cur.g); if(cur) play(w?w[0]:cur.g); }
+  if(e.key==="1")grade(0); if(e.key==="2")grade(1); if(e.key==="3")grade(2);
+};
+btnStart.onclick=()=>{ round++; saveRound(); build(); };
+btnWeak.onclick=()=>{ if(DECKS[deckKey].browse) return; build(true); };
+btnHard.onclick=()=>{
+  if(DECKS[deckKey].browse) return;
+  hardBox.classList.toggle("hide");
+  if(hardBox.classList.contains("hide")){
+    btnHard.textContent="查看 1 类清单";
+    return;
+  }
+  btnHard.textContent="收起 1 类清单";
+  renderHardBox();
+};
+btnExport.onclick=()=>{
+  exportBox.classList.toggle("hide");
+  if(exportBox.classList.contains("hide")){
+    btnExport.textContent="导出已掌握";
+    return;
+  }
+  btnExport.textContent="收起已掌握";
+  renderExportBox();
+};
+btnSound.onclick=()=>{ const w=cur&&wordOf(cur.g); if(cur) play(w?w[0]:cur.g); };
+btnReset.onclick=()=>{ if(confirm("清空全部学习记录？")){ mem={}; round=1; save(); saveRound(); build(); } };
+btnChart.onclick=()=>{
+  chart.classList.toggle("hide");
+  if(chart.classList.contains("hide")){ btnChart.textContent="查看全表"; return; }
+  btnChart.textContent="收起全表";
+  let h=`<div style="font-size:13px;color:var(--dim);margin-bottom:8px">完整 19 × 21 = 399 音节表　<span style="color:var(--good)">绿=已掌握</span>　<span style="color:var(--warn)">黄=2 类</span>　<span style="color:var(--bad)">红=1 类</span></div>`;
+  h+="<table><tr><th></th>"+JUNG.map((v,i)=>`<th>${v}<br><small>${JUNG_R[i]}</small></th>`).join("")+"</tr>";
+  CHO.forEach((c,ci)=>{
+    h+=`<tr><th>${c}<br><small>${CHO_R[ci]||"–"}</small></th>`;
+    JUNG.forEach((_,vi)=>{ const g=syl(ci,vi);
+      const r399=stateOf("t399",g), r140=stateOf("t140",g);
+      const r={s:Math.max(r399.s,r140.s), hard:Math.max(r399.hard,r140.hard), review:Math.max(r399.review,r140.review)};
+      h+=`<td class="${r.s>=2?'k':(r.hard?'w':(r.review?'m':''))}"><span>${g}</span><small>${(CHO_R[ci]||"")+JUNG_R[vi]}</small></td>`; });
+    h+="</tr>";
+  });
+  chart.innerHTML=h+"</table>";
+};
+saveRound();
+build();
+</script>
+</body>
+</html>
