@@ -1,247 +1,255 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-财联社（CLS）电报 API 抓取工具
+JoinQuant strategy: CLS news rotation between CSI 300 ETF and Gold ETF.
+Backtest setup in JoinQuant UI:
+    start: 2025-01-01
+    end:   2026-09-07
+    frequency: minute
+    initial cash: e.g. 1,000,000 CNY
 
-逆向了财联社网站的 API 签名机制，可直接通过 HTTP 请求获取电报数据。
-签名算法：MD5(SHA1(sorted_query_string))
-  1. 参数按 key 字母升序排序
-  2. 拼接为 key=value&key2=value2 格式
-  3. 对拼接字符串做 SHA1 → 40位 hex
-  4. 对 SHA1 结果再做 MD5 → 32位 hex（即最终 sign）
+Required private file (recommended): cls_telegraph_2025.json
+JSON should be a list of CLS telegraph dicts from cls.py, each item containing at least:
+    ctime (Unix timestamp), and one or more of title/brief/content/subjects.
+Upload the file to JoinQuant's Strategy -> Research/Data/private-file area.
 
-主要接口：
-  - /api/cache?name=telegraph       获取最新电报列表（首页20条）
-  - /v1/roll/get_roll_list          翻页获取历史电报
-  - /api/cache?name=refreshTenTelegraph  增量刷新（获取新消息）
+Important anti-look-ahead rule:
+At 14:50 on trading day T, only records with publish time <= T 14:45 are used.
+The signal window starts at previous trading day's 14:45.
 """
-
-import hashlib
-import time
+from jqdata import *
 import json
-import argparse
-from datetime import datetime
-from typing import Optional
-
-import requests
+import re
+import datetime as dt
 
 
-class CLSTelegraph:
-    """财联社电报 API 客户端"""
+def initialize(context):
+    # Products: Huatai-PB CSI 300 ETF and Huaan Gold ETF.
+    g.equity = '510300.XSHG'
+    g.gold = '518880.XSHG'
+    g.assets = [g.equity, g.gold]
 
-    BASE_URL = "https://www.cls.cn"
-    DEFAULT_PARAMS = {
-        "app": "CailianpressWeb",
-        "os": "web",
-        "sv": "8.7.9",
-    }
-    HEADERS = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0.0.0 Safari/537.36"
-        ),
-        "Referer": "https://www.cls.cn/telegraph",
-        "Accept": "application/json, text/plain, */*",
-    }
+    set_benchmark(g.equity)
+    set_option('use_real_price', True)
+    set_option('avoid_future_data', True)
+    log.set_level('order', 'error')
 
-    @staticmethod
-    def _sign(params: dict) -> str:
-        """
-        计算财联社 API 签名
+    # Explicit ETF transaction-cost assumptions. Adjust to the broker account.
+    set_order_cost(OrderCost(open_tax=0, close_tax=0,
+                             open_commission=0.00025,
+                             close_commission=0.00025,
+                             close_today_commission=0,
+                             min_commission=5), type='fund')
+    set_slippage(FixedSlippage(0.001), type='fund')
 
-        算法: MD5(SHA1(sorted_query_string))
-        """
-        if not params:
-            sha1 = hashlib.sha1(b"").hexdigest()
-            return hashlib.md5(sha1.encode()).hexdigest()
+    # Strategy parameters.
+    g.news_file = 'cls_telegraph_2025.json'
+    g.min_confidence = 2.0       # minimum score advantage to switch asset
+    g.switch_buffer = 1.5        # hysteresis to reduce turnover
+    g.max_news_per_window = 5000
+    g.stop_loss = 0.08           # portfolio-level defensive exit
+    g.reentry_days = 3
+    g.cooldown_until = None
+    g.high_watermark = context.portfolio.total_value
 
-        # 参数按 key 字母升序排序，拼接为 key=value&...
-        sorted_keys = sorted(params.keys())
-        sign_str = "&".join(f"{k}={params[k]}" for k in sorted_keys)
+    g.news = load_cls_archive(g.news_file)
+    g.last_signal = None
 
-        # 先 SHA1，再 MD5
-        sha1 = hashlib.sha1(sign_str.encode()).hexdigest()
-        md5 = hashlib.md5(sha1.encode()).hexdigest()
-        return md5
+    run_daily(risk_check, time='14:40', reference_security=g.equity)
+    run_daily(rebalance_by_cls, time='14:50', reference_security=g.equity)
+    run_daily(after_close_report, time='after_close', reference_security=g.equity)
 
-    def _request(self, path: str, extra_params: Optional[dict] = None) -> dict:
-        """发送带签名的 GET 请求"""
-        params = dict(self.DEFAULT_PARAMS)
-        if extra_params:
-            params.update(extra_params)
 
-        # 计算 sign 并追加到参数中
-        params["sign"] = self._sign(params)
-
-        url = f"{self.BASE_URL}{path}"
-        resp = requests.get(url, params=params, headers=self.HEADERS, timeout=10)
-        resp.raise_for_status()
-        return resp.json()
-
-    def get_latest(self) -> list[dict]:
-        """
-        获取最新电报列表（首页，约20条）
-
-        Returns:
-            电报列表，每条包含 id, title, brief, content, ctime, subjects 等字段
-        """
-        data = self._request("/api/cache", {"name": "telegraph"})
-        if data.get("errno") != 0:
-            raise RuntimeError(f"API 返回错误: {data.get('errno')} - {data.get('msg')}")
-        return data.get("data", {}).get("roll_data", [])
-
-    def get_history(self, last_time: int, rn: int = 20) -> list[dict]:
-        """
-        翻页获取历史电报（向过去翻页）
-
-        Args:
-            last_time: 上一次获取的最后一条电报的 ctime（Unix 时间戳）
-            rn: 每页条数，默认20
-
-        Returns:
-            历史电报列表
-        """
-        data = self._request(
-            "/v1/roll/get_roll_list",
-            {"refresh_type": 1, "rn": rn, "last_time": last_time},
-        )
-        if data.get("errno") != 0:
-            raise RuntimeError(f"API 返回错误: {data.get('errno')} - {data.get('msg')}")
-        return data.get("data", {}).get("roll_data", [])
-
-    def get_refresh(self, last_time: int) -> list[dict]:
-        """
-        增量刷新：获取指定时间之后的新电报
-
-        Args:
-            last_time: 当前已获取的最新一条电报的 ctime
-
-        Returns:
-            新增的电报列表
-        """
-        data = self._request(
-            "/api/cache",
-            {"name": "refreshTenTelegraph", "lastTime": last_time},
-        )
-        if data.get("errno") != 0:
-            raise RuntimeError(f"API 返回错误: {data.get('errno')} - {data.get('msg')}")
-
-        # refreshTenTelegraph 返回格式不同，新消息在 data["l"] 字典中
-        result = data.get("data", {})
-        if isinstance(result, dict) and "l" in result:
-            return list(result["l"].values())
+def load_cls_archive(filename):
+    """Load and normalize CLS historical telegraphs from a JoinQuant private file."""
+    try:
+        raw = read_file(filename)
+        if isinstance(raw, bytes):
+            raw = raw.decode('utf-8')
+        items = json.loads(raw)
+        out = []
+        seen = set()
+        for x in items:
+            ts = safe_int(x.get('ctime', 0))
+            uid = str(x.get('id', '')) or (str(ts) + text_of(x)[:80])
+            if ts <= 0 or uid in seen:
+                continue
+            seen.add(uid)
+            out.append({'ctime': ts, 'text': text_of(x)})
+        out.sort(key=lambda z: z['ctime'])
+        log.info('Loaded %d deduplicated CLS telegraphs', len(out))
+        return out
+    except Exception as e:
+        log.error('Cannot load %s: %s', filename, e)
+        log.error('Historical backtest requires an archived CLS JSON file; no synthetic news will be used.')
         return []
 
-    def fetch_all(
-        self,
-        pages: int = 5,
-        rn: int = 20,
-    ) -> list[dict]:
-        """
-        批量抓取多页电报
 
-        Args:
-            pages: 抓取页数（首页 + pages-1 页历史）
-            rn: 每页条数
+def safe_int(x):
+    try:
+        return int(x)
+    except Exception:
+        return 0
 
-        Returns:
-            全部电报列表（按时间倒序）
-        """
-        all_items = self.get_latest()
-        print(f"[第1页] 获取 {len(all_items)} 条")
 
-        for page in range(2, pages + 1):
-            if not all_items:
+def text_of(item):
+    parts = [item.get('title', ''), item.get('brief', ''), item.get('content', '')]
+    for s in item.get('subjects', []) or []:
+        if isinstance(s, dict):
+            parts.append(s.get('subject_name', ''))
+    txt = ' '.join([str(x) for x in parts if x])
+    txt = re.sub(r'<[^>]+>', ' ', txt)
+    return re.sub(r'\s+', ' ', txt).strip()
+
+
+# Weighted dictionaries. Positive means supportive of the corresponding asset.
+EQUITY_POS = {
+    '降准': 4, '降息': 4, '逆回购': 2, '流动性投放': 3, '增量资金': 2,
+    '回购': 2, '增持': 2, '业绩预增': 3, '超预期': 2, '稳增长': 2,
+    '财政刺激': 3, '专项债': 2, '房地产支持': 2, '外资流入': 2,
+    '成交额放大': 1, '大涨': 2, '创新高': 2, '牛市': 3,
+}
+EQUITY_NEG = {
+    '业绩预亏': -3, '爆雷': -4, '违约': -4, '立案调查': -3, '减持': -2,
+    '外资流出': -2, '大跌': -3, '暴跌': -4, '跳水': -3, '跌停': -3,
+    '经济衰退': -3, '通缩': -2, '关税升级': -3, '制裁': -2,
+    '地缘冲突': -2, '风险偏好下降': -2,
+}
+GOLD_POS = {
+    '黄金': 2, '金价': 2, '避险': 3, '地缘冲突': 3, '战争': 4,
+    '制裁': 2, '降息': 3, '美元走弱': 2, '美元下跌': 2,
+    '通胀': 2, '央行购金': 4, '黄金储备': 3, '创历史新高': 3,
+    '金融风险': 3, '银行危机': 4, '债务危机': 4,
+}
+GOLD_NEG = {
+    '金价下跌': -3, '黄金下跌': -3, '美元走强': -2, '美元上涨': -2,
+    '加息': -3, '鹰派': -2, '实际利率上升': -3, '避险降温': -2,
+    '黄金减持': -2,
+}
+NEGATIONS = ('不', '未', '否认', '辟谣', '无意', '不会')
+
+
+def keyword_score(text, dictionary):
+    score = 0.0
+    hits = []
+    for word, weight in dictionary.items():
+        start = 0
+        while True:
+            idx = text.find(word, start)
+            if idx < 0:
                 break
-            last_time = all_items[-1]["ctime"]
-            time.sleep(0.5)  # 礼貌性延迟
-            history = self.get_history(last_time, rn=rn)
-            if not history:
-                print(f"[第{page}页] 已无更多数据")
-                break
-            all_items.extend(history)
-            print(f"[第{page}页] 获取 {len(history)} 条，累计 {len(all_items)} 条")
-
-        return all_items
+            prefix = text[max(0, idx - 5):idx]
+            w = -0.6 * weight if any(n in prefix for n in NEGATIONS) else weight
+            score += w
+            hits.append(word)
+            start = idx + len(word)
+    return score, hits
 
 
-def format_telegraph(item: dict) -> str:
-    """格式化单条电报为可读文本"""
-    ts = item.get("ctime", 0)
-    time_str = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+def score_window(start_dt, end_dt):
+    start_ts = int(start_dt.timestamp())
+    end_ts = int(end_dt.timestamp())
+    selected = [x for x in g.news if start_ts < x['ctime'] <= end_ts]
+    selected = selected[-g.max_news_per_window:]
 
-    title = item.get("title", "").strip()
-    brief = item.get("brief", "").strip()
-    content = item.get("content", "").strip()
+    eq = 0.0
+    au = 0.0
+    hit_count = 0
+    for x in selected:
+        text = x['text']
+        a, h1 = keyword_score(text, EQUITY_POS)
+        b, h2 = keyword_score(text, EQUITY_NEG)
+        c, h3 = keyword_score(text, GOLD_POS)
+        d, h4 = keyword_score(text, GOLD_NEG)
+        if h1 or h2 or h3 or h4:
+            hit_count += 1
+        eq += a + b
+        au += c + d
 
-    # 优先级: title > brief > content
-    main_text = title or brief or content
-
-    # 话题标签
-    subjects = item.get("subjects", [])
-    tags = " ".join(f"#{s['subject_name']}" for s in subjects if s.get("subject_name"))
-
-    # 阅读数 / 评论数
-    reading_num = item.get("reading_num", 0)
-    comment_num = item.get("comment_num", 0)
-    share_num = item.get("share_num", 0)
-
-    line = f"[{time_str}] {main_text}"
-    if tags:
-        line += f"\n  📎 {tags}"
-    line += f"\n  👁 {reading_num}  💬 {comment_num}  🔗 {share_num}"
-    return line
+    # Normalize by sqrt(number of stories), preserving intensity while reducing volume bias.
+    denom = max(1.0, len(selected) ** 0.5)
+    return eq / denom, au / denom, len(selected), hit_count
 
 
-def save_to_json(items: list[dict], filepath: str):
-    """保存为 JSON 文件"""
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-    print(f"\n已保存 {len(items)} 条到 {filepath}")
+def previous_trade_day(day):
+    days = get_trade_days(end_date=day, count=2)
+    if len(days) >= 2:
+        return days[-2]
+    return day - dt.timedelta(days=1)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="财联社电报 API 抓取工具")
-    parser.add_argument(
-        "-n", "--pages",
-        type=int,
-        default=3,
-        help="抓取页数，每页约20条（默认: 3）",
-    )
-    parser.add_argument(
-        "-o", "--output",
-        type=str,
-        default="",
-        help="保存到 JSON 文件（不指定则只打印）",
-    )
-    parser.add_argument(
-        "--latest-only",
-        action="store_true",
-        help="只获取最新一页（不翻页）",
-    )
-    args = parser.parse_args()
+def tradable(security):
+    d = get_current_data()[security]
+    return not (d.paused or d.is_st or d.last_price >= d.high_limit or d.last_price <= d.low_limit)
 
-    client = CLSTelegraph()
 
-    print("=" * 60)
-    print("  财联社电报 API 抓取工具")
-    print("=" * 60)
+def current_asset(context):
+    values = []
+    for s in g.assets:
+        p = context.portfolio.positions[s]
+        values.append((p.value if p else 0, s))
+    values.sort(reverse=True)
+    return values[0][1] if values and values[0][0] > 0 else None
 
-    if args.latest_only:
-        items = client.get_latest()
-        print(f"\n获取最新 {len(items)} 条电报:\n")
+
+def risk_check(context):
+    value = context.portfolio.total_value
+    g.high_watermark = max(g.high_watermark, value)
+    drawdown = 1.0 - value / max(g.high_watermark, 1.0)
+    if drawdown >= g.stop_loss:
+        for s in g.assets:
+            order_target_value(s, 0)
+        trade_days = list(get_trade_days(start_date=context.current_dt.date(),
+                                         end_date=context.current_dt.date() + dt.timedelta(days=15)))
+        if len(trade_days) > g.reentry_days:
+            g.cooldown_until = trade_days[g.reentry_days]
+        log.warn('Risk exit: drawdown %.2f%%, cooldown until %s', drawdown * 100, g.cooldown_until)
+
+
+def rebalance_by_cls(context):
+    if not g.news:
+        return
+    today = context.current_dt.date()
+    if g.cooldown_until is not None and today < g.cooldown_until:
+        return
+
+    prev = previous_trade_day(today)
+    start_dt = dt.datetime.combine(prev, dt.time(14, 45))
+    end_dt = dt.datetime.combine(today, dt.time(14, 45))
+    eq_score, gold_score, n_news, n_hits = score_window(start_dt, end_dt)
+    diff = eq_score - gold_score
+    held = current_asset(context)
+
+    # Hysteresis: keep the current asset unless the alternative wins decisively.
+    target = held
+    if held == g.equity:
+        if diff < -g.switch_buffer:
+            target = g.gold
+    elif held == g.gold:
+        if diff > g.switch_buffer:
+            target = g.equity
     else:
-        items = client.fetch_all(pages=args.pages)
-        print(f"\n共获取 {len(items)} 条电报\n")
+        if diff >= g.min_confidence:
+            target = g.equity
+        elif diff <= -g.min_confidence:
+            target = g.gold
+        else:
+            target = None
 
-    print("-" * 60)
-    for item in items:
-        print(format_telegraph(item))
-        print("-" * 60)
+    g.last_signal = (str(today), eq_score, gold_score, n_news, n_hits, target)
+    if target is None or target == held or not tradable(target):
+        record(cls_equity=eq_score, cls_gold=gold_score, cls_diff=diff)
+        return
 
-    if args.output:
-        save_to_json(items, args.output)
+    # Sell first, then buy. Reserve 1% for commission/slippage.
+    for s in g.assets:
+        if s != target and context.portfolio.positions[s].value > 0:
+            order_target_value(s, 0)
+    order_target_value(target, context.portfolio.total_value * 0.99)
+    log.info('CLS rotation %s -> %s | eq=%.3f gold=%.3f news=%d hits=%d',
+             held, target, eq_score, gold_score, n_news, n_hits)
+    record(cls_equity=eq_score, cls_gold=gold_score, cls_diff=diff)
 
 
-if __name__ == "__main__":
-    main()
+def after_close_report(context):
+    if g.last_signal:
+        log.info('Daily CLS signal: %s', str(g.last_signal))
