@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>粤语逐字点读</title>
+  <style>
+    :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#667085;--brand:#2563eb;--line:#e4e7ec;--hover:#eff6ff}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","PingFang HK","Microsoft JhengHei",sans-serif}
+    main{max-width:none;margin:0;padding:28px 24px 60px}
+    h1{margin:0 0 8px;font-size:28px} .tip{margin:0 0 22px;color:var(--muted);line-height:1.65}
+    .toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:18px}
+    label{font-size:14px;color:var(--muted)} select,input{margin-left:6px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:white}
+    .layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;align-items:start}.sidebar{position:sticky;top:20px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}.toc-title{margin:0 0 12px;font-size:16px}.toc-list{display:flex;flex-direction:column;gap:8px}.toc-link{display:block;padding:8px 10px;border-radius:10px;color:var(--ink)}.toc-link:hover{background:var(--hover)}.content{min-width:0}
+    .sentence{display:grid;grid-template-columns:44px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 8px #1018280a}
+    .play{width:40px;height:40px;border:0;border-radius:50%;background:var(--brand);color:white;cursor:pointer;font-size:17px}.play:hover{filter:brightness(.93)}
+    .tokens{display:flex;flex-wrap:wrap;align-items:flex-end;gap:7px 4px;min-height:48px}
+    .token{min-width:30px;padding:4px 6px;border:1px solid transparent;border-radius:9px;background:transparent;cursor:pointer;text-align:center;color:var(--ink)}
+    .token:hover,.token:focus{background:var(--hover);border-color:#bfdbfe;outline:none}.token.speaking{background:#dbeafe;border-color:#60a5fa}
+    .han{display:block;font-size:20px;line-height:1.15}.jyut{display:block;margin-top:3px;font-size:11px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+    .punct{font-size:20px;padding:4px 1px;align-self:flex-start}.error{padding:14px;color:#b42318;background:#fef3f2;border-radius:10px}
+    a{text-decoration:none;color:#464feb} tr th,tr td{border:1px solid #e6e6e6} tr th{background-color:#f5f5f5}
+    h2{margin:28px 0 12px;font-size:21px}.topic{margin:28px 0 36px;scroll-margin-top:24px}.topic-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.topic-title{margin:0;font-size:24px}.topic-actions{display:flex;gap:10px;flex-wrap:wrap}.loop-topic{border:0;border-radius:999px;padding:10px 14px;background:#172033;color:#fff;cursor:pointer}.paragraph{display:grid;grid-template-columns:44px 1fr;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 8px #1018280a}.paragraph-text{font-size:16px;line-height:1.8}.english-text{font-size:15px;line-height:1.8}.english-token{font-size:15px;line-height:1.5;min-width:auto;padding:6px 8px}.paragraph .tokens{align-items:flex-end}
+    footer{margin-top:22px;color:var(--muted);font-size:13px;line-height:1.6} code{background:#eef2f6;padding:2px 5px;border-radius:4px}
+    @media (max-width: 980px){main{padding:20px 14px 44px}.layout{grid-template-columns:1fr}.sidebar{position:static;order:-1}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>粤语逐字点读</h1>
+  <p class="tip">点击单个字可逐字发音，点击播放按钮可读出整句或整段。粤语和英语段落分别使用对应的系统声音。</p>
+  <section class="toolbar" aria-label="播放设置">
+    <label>粤语声音<select id="cantoneseVoice"></select></label>
+    <label>英语声音<select id="englishVoice"></select></label>
+    <label>语速 <input id="rate" type="range" min="0.5" max="1.4" step="0.1" value="0.85"><span id="rateValue">0.8</span></label>
+    <button id="stop" type="button">停止</button>
+  </section>
+  <div class="layout">
+    <nav id="toc" class="sidebar" aria-label="目录"></nav>
+    <div id="app" class="content"></div>
+  </div>
+  <footer>说明：发音由浏览器和操作系统提供。若没有粤语声音，请在系统语言或语音设置中安装“粤语／中文（香港）”语音。</footer>
+</main>
+<script>
+// 在数组末尾继续添加即可：每句用反引号包住，句子之间必须有英文逗号。
+// 最后一项后面也可以保留逗号，方便持续追加。
+const CONTENT = [
+  `我(ngo5) 細(sai3) 個(go3) 嗰(go2) 陣(zan6) 時(si4) 去(heoi3) 過(gwo3) 廣(gwong2) 州(zau1) 同(tung4) 深(sam1) 圳(zan3) 旅(leoi5) 遊(jau4)，而(ji4) 家(gaa1) 計(gai3) 劃(waak6) 再(zoi3) 去(heoi3) 睇(tai2) 吓(haa5)。`,
+  `我(ngo5) 今(gam1) 日(jat6) 想(soeng2) 早(zou2) 啲(di1) 收(sau1) 工(gung1)`,
+  `呢(ni1) 個(go3) 功(gung1) 能(nang4) 已(ji5) 經(ging1) 搞(gaau2) 掂(dim6) 咗(zo2)，但(daan6) 係(hai6) 仲(zung6) 需(seoi1) 要(jiu3) 測(cak1) 試(si3)。`,
+  `呢(ni1)度(dou6)個(go3) comment 還(waan4)有(jau5)一(jat1)個(go3)問(man6)題(tai4)，可(ho2)唔(m4)可(ho2)以(ji5)幫(bong1)手(sau2)同(tung4) user 確(kok3)認(jing6)一(jat1)下(haa5)呢(ne1)？`
+  // `我(ngo5) 今(gam1) 日(jat6) 好(hou2) 開(hoi1) 心(sam1)。`,
+  // `聽(ting1) 日(jat6) 再(zoi3) 去(heoi3) 行(haang4) 吓(haa5)。`,
+];
+
+// 新 topic 直接加在 TOPICS 数组末尾。
+// 每个 topic 需要：title、cantoneseParagraphs、englishParagraphs。
+const TOPICS = [
+  {
+    title: '饮食主题',
+    cantoneseParagraphs: [
+      `我(ngo5) 係(hai6) 四(sei3) 川(cyun1) 人(jan4)，不(bat1) 過(gwo3) 我(ngo5) 其(kei4) 實(sat6) 唔(m4) 算(syun3) 太(taai3) 鍾(zung1) 意(ji3) 食(sik6) 辣(laat6)。相(soeng1) 反(faan2)，我(ngo5) 一(jat1) 直(zik6) 都(dou1) 好(hou2) 鍾(zung1) 意(ji3) 粵(jyut6) 菜(coi3)。因(jan1) 為(wai6) 粵(jyut6) 菜(coi3) 嘅(ge3) 口(hau2) 味(mei6) 比(bei2) 較(gaau3) 清(cing1) 淡(daam6)，唔(m4) 會(wui5) 太(taai3) 重(zung6) 口(hau2)，而(ji4) 且(ce2) 可(ho2) 以(ji5) 食(sik6) 得(dak1) 出(cet1) 食(sik6) 材(coi4) 本(bun2) 身(san1) 嘅(ge3) 鮮(sin1) 味(mei6)，對(deoi3) 我(ngo5) 嚟(lai4) 講(gong2) 非(fei1) 常(soeng4) 啱(ngaam1) 口(hau2) 味(mei6)。`,
+      `我(ngo5) 細(sai3) 個(go3) 嗰(go2) 陣(zan6)，屋(uk1) 企(kei2) 附(fu6) 近(gan6) 開(hoi1) 咗(zo2) 一(jat1) 間(gaan1) 粵(jyut6) 菜(coi3) 餐(caan1) 廳(teng1)。我(ngo5) 哋(dei6) 一(jat1) 家(gaa1) 人(jan4) 成(sing4) 日(jat6) 都(dou1) 會(wui5) 一(jat1) 齊(cai4) 去(heoi3) 食(sik6) 飯(faan6)。我(ngo5) 最(zeoi3) 鍾(zung1) 意(ji3) 嘅(ge3) 幾(gei2) 樣(joeng6) 嘢(je5)，就(zau6) 係(hai6) 皮(pei4) 蛋(daan2) 瘦(sau3) 肉(juk6) 粥(zuk1)、炒(caau2) 牛(ngau4) 河(ho4)、蝦(haa1) 餃(gaau2) 同(tung4) 埋(maai4) 流(lau4) 沙(saa1) 包(baau1)。雖(seoi1) 然(jin4) 嗰(go2) 陣(zan6) 我(ngo5) 仲(zung6) 細(sai3) 個(go3)，但(daan6) 係(hai6) 呢(ni1) 啲(di1) 味(mei6) 道(dou6) 一(jat1) 直(zik6) 留(lau4) 喺(hai2) 我(ngo5) 嘅(ge3) 記(gei3) 憶(jik1) 入(jap6) 面(min6)。`,
+      `不(bat1) 過(gwo3)，嗰(go2) 個(go3) 年(nin4) 代(doi6)，內(noi6) 陸(luk6) 地(dei6) 區(keoi1) 嘅(ge3) 經(ging1) 濟(zai3) 發(faat3) 展(zin2) 冇(mou5) 沿(jyun4) 海(hoi2) 地(dei6) 區(keoi1) 咁(gam3) 發(faat3) 達(daat6)，四(sei3) 川(cyun1) 嘅(ge3) 粵(jyut6) 菜(coi3) 餐(caan1) 廳(teng1) 其(kei4) 實(sat6) 都(dou1) 唔(m4) 算(syun3) 太(taai3) 正(zing3) 宗(zung1)。到(dou3) 咗(zo2) 中(zung1) 學(hok6) 嘅(ge3) 時(si4)，我(ngo5) 第(dai6) 一(jat1) 次(ci3) 去(heoi3) 廣(gwong2) 東(dung1) 旅(leoi5) 行(hang4)，終(zung1) 於(jyu1) 食(dou2) 到(dou2) 正(zing3) 宗(zung1) 嘅(ge3) 粵(jyut6) 式(sik1) 早(zou2) 茶(caa4)，真(zan1) 係(hai6) 令(ling6) 我(ngo5) 大(daai6) 開(hoi1) 眼(ngaan5) 界(gaai3)。`,
+      `我(ngo5) 記(gei3) 得(dak1) 當(dong1) 時(si4) 酒(zau2) 樓(lau4) 入(jap6) 面(min6) 非(fei1) 常(soeng4) 熱(jit6) 鬧(naau6)，好(hou2) 多(do1) 人(jan4) 一(jat1) 邊(bin1) 飲(jam2) 茶(caa4)，一(jat1) 邊(bin1) 傾(king1) 計(gai3)。服(fuk6) 務(mou6) 員(jyun4) 推(teoi1) 住(zyu6) 點(dim2) 心(sam1) 車(ce1) 四(sei3) 圍(wai4) 行(haang4)，客(haak3) 人(jan4) 可(ho2) 以(ji5) 即(zik1) 場(coeng4) 揀(gaan2) 自(zi6) 己(gei2) 鍾(zung1) 意(ji3) 嘅(ge3) 點(dim2) 心(sam1)。蝦(haa1) 餃(gaau2)、燒(siu1) 賣(maai6)、鳳(fung6) 爪(zaau2)、腸(coeng4) 粉(fan2)、蛋(daan6) 撻(taat3)、叉(caa1) 燒(siu1) 包(baau1) 等(dang2) 等(dang2)，款(fun2) 式(sik1) 多(do1) 到(dou3) 我(ngo5) 根(gan1) 本(bun2) 唔(m4) 知(zi1) 道(dou6) 應(jing1) 該(goi1) 揀(gaan2) 邊(bin1) 樣(joeng6)。每(mui5) 一(jat1) 款(fun2) 都(dou1) 做(zou6) 得(dak1) 好(hou2) 精(zing1) 緻(zi3)，無(mou4) 論(leon6) 係(hai6) 賣(maai6) 相(soeng3) 定(ding6) 係(hai6) 味(mei6) 道(dou6) 都(dou1) 好(hou2) 有(jau5) 特(dak6) 色(sik1)。`,
+      `我(ngo5) 覺(gok3) 得(dak1)，飲(jam2) 茶(caa4) 唔(m4) 單(daan1) 止(zi2) 係(hai6) 食(sik6) 嘢(je5)，仲(zung6) 代(doi6) 表(biu2) 咗(zo2) 一(jat1) 種(zung2) 生(saang1) 活(wut6) 文(man4) 化(faa3)。大(daai6) 家(gaa1) 聚(zeoi6) 埋(maai4) 一(jat1) 齊(cai4)，慢(maan6) 慢(maan6) 嘆(taan3) 茶(caa4)，慢(maan6) 慢(maan6) 傾(king1) 計(gai3)，氣(hei3) 氛(fan1) 十(sap6) 分(fan1) 輕(hing1) 鬆(sung1)。到(dou3) 而(ji4) 家(gaa1)，我(ngo5) 仲(zung6) 係(hai6) 好(hou2) 鍾(zung1) 意(ji3) 食(sik6) 冰(bing1) 火(fo2) 菠(bo1) 蘿(lo4) 油(jau4)。我(ngo5) 覺(gok3) 得(dak1) 呢(ni1) 個(go3) 名(ming4) 字(zi6) 好(hou2) 有(jau5) 意(ji3) 思(si1)，因(jan1) 為(wai6) 熱(jit6) 烘(hung1) 烘(hung1) 嘅(ge3) 菠(bo1) 蘿(lo4) 包(baau1) 入(jap6) 面(min6) 夾(gaap3) 住(zyu6) 一(jat1) 塊(faai3) 凍(dung3) 牛(ngau4) 油(jau4)，冷(laang5) 熱(jit6) 對(deoi3) 比(bei2) 十(sap6) 分(fan1) 強(koeng4) 烈(lit6)。`,
+      `總(zung2) 括(kut3) 嚟(lai4) 講(gong2)，粵(jyut6) 菜(coi3) 唔(m4) 單(daan1) 止(zi2) 好(hou2) 食(sik6)，仲(zung6) 承(sing4) 載(zoi3) 咗(zo2) 我(ngo5) 好(hou2) 多(do1) 童(tung4) 年(nin4) 回(wui4) 憶(jik1)。所(so2) 以(ji5) 佢(keoi5) 一(jat1) 直(zik6) 都(dou1) 係(hai6) 我(ngo5) 最(zeoi3) 喜(hei2) 歡(fun1) 嘅(ge3) 中(zung1) 國(gwok3) 菜(coi3) 系(hai6) 之(zi1) 一(jat1)。`
+    ],
+    englishParagraphs: [
+      `Although I'm from Sichuan, I'm actually not a big fan of spicy food. That's one of the reasons why I really enjoy Cantonese cuisine. Compared with many other regional Chinese cuisines, Cantonese food is lighter and more delicate, allowing the natural flavors of the ingredients to shine through.`,
+      `When I was growing up, there was a Cantonese restaurant near my home. My family often went there together, and some of my favorite dishes were century egg and pork congee, beef chow fun, shrimp dumplings, and lava custard buns. Those meals became some of my favorite childhood memories.`,
+      `However, back then, inland cities like those in Sichuan were not as economically developed as China's coastal regions, and authentic Cantonese food was relatively hard to find. Many Cantonese restaurants were adapted to local tastes, so they weren't always truly authentic.`,
+      `That is why my first trip to Guangdong during middle school left such a strong impression on me. For the first time, I experienced authentic Cantonese yum cha and dim sum culture. It was completely eye-opening.`,
+      `The restaurants were lively and full of energy. Families and friends gathered around large tables, chatting over tea while servers pushed dim sum carts through the dining hall. There seemed to be an endless variety of dishes, including shrimp dumplings, siu mai, chicken feet, rice noodle rolls, egg tarts, and barbecue pork buns. Everything looked beautifully crafted and incredibly appetizing. There were so many options that I didn't even know where to start.`,
+      `What impressed me most was that yum cha is much more than just a meal. It's a social tradition and an important part of Cantonese culture. People take their time, drink tea, catch up with family and friends, and enjoy a relaxed atmosphere together.`,
+      `Even today, one of my favorite Cantonese snacks is the famous "Ice and Fire Pineapple Bun." I think the name itself is fascinating. A freshly baked hot pineapple bun is served with a thick slice of cold butter inside, creating a wonderful contrast in both temperature and texture. As the butter slowly melts, it blends perfectly with the sweet and crispy bun, making every bite rich and satisfying.`,
+      `Overall, Cantonese cuisine means much more to me than simply good food. It reminds me of my childhood, introduced me to a different culinary culture, and gave me some unforgettable experiences. That's why it remains one of my favorite types of Chinese cuisine today.`
+    ]
+  },
+  {
+    title: '成都天气',
+    cantoneseParagraphs: [
+      `我(ngo5) 住(zyu6) 喺(hai2) 成(sing4) 都(dou1)，成(sing4) 都(dou1) 嘅(ge3) 天(tin1) 氣(hei3) 一(jat1) 年(nin4) 四(sei3) 季(gwai3) 都(dou1) 有(jau5) 唔(m4) 同(tung4) 特(dak6) 點(dim2)，而(ji4) 我(ngo5) 最(zeoi3) 鍾(zung1) 意(ji3) 嘅(ge3) 季(gwai3) 節(zit3) 係(hai6) 春(ceon1) 天(tin1)。`,
+      `春(ceon1) 天(tin1) 嚟(lai4) 到(dou3) 嘅(ge3) 時(si4) 候(hau6)，天(tin1) 氣(hei3) 開(hoi1) 始(ci2) 回(wui4) 暖(nyun5)，溫(wan1) 度(dou6) 慢(maan6) 慢(maan6) 升(sing1) 高(gou1)。公(gung1) 園(jyun4) 同(tung4) 街(gaai1) 道(dou6) 旁(pong4) 邊(bin1) 好(hou2) 多(do1) 花(faa1) 開(hoi1) 晒(saai3)，周(zau1) 圍(wai4) 一(jat1) 片(pin3) 生(saang1) 機(gei1)。有(jau5) 時(si4) 候(hau6) 仲(zung6) 會(wui5) 出(cet1) 太(taai3) 陽(joeng4)，唔(m4) 會(wui5) 太(taai3) 熱(jit6)，曬(saai3) 吓(haa5) 太(taai3) 陽(joeng4) 好(hou2) 舒(syu1) 服(fuk6)。春(ceon1) 天(tin1) 亦(jik6) 都(dou1) 係(hai6) 最(zeoi3) 啱(ngaam1) 出(cet1) 去(heoi3) 散(saan3) 步(bou6) 同(tung4) 郊(gaau1) 遊(jau4) 嘅(ge3) 季(gwai3) 節(zit3)。`,
+      `不(bat1) 過(gwo3)，春(ceon1) 天(tin1) 有(jau5) 時(si4) 候(hau6) 天(tin1) 氣(hei3) 變(bin3) 化(faa3) 都(dou1) 幾(gei2) 快(faai3)，朝(ziu1) 早(zou2) 出(cet1) 太(taai3) 陽(joeng4)，下(haa6) 晝(zau3) 可(ho2) 能(nang4) 就(zau6) 落(lok6) 雨(jyu5)。所(so2) 以(ji5) 我(ngo5) 出(cet1) 門(mun4) 之(zi1) 前(cin4)，通(tung1) 常(soeng4) 都(dou1) 會(wui5) 睇(tai2) 天(tin1) 氣(hei3) 預(jyu6) 報(bou3)，如(jyu4) 果(gwo2) 有(jau5) 機(gei1) 會(wui5) 落(lok6) 雨(jyu5)，我(ngo5) 就(zau6) 會(wui5) 帶(daai3) 把(baa2) 遮(ze1) 出(cet1) 門(mun4)。`,
+      `夏(haa6) 天(tin1) 就(zau6) 係(hai6) 一(jat1) 年(nin4) 入(jap6) 面(min6) 最(zeoi3) 熱(jit6) 嘅(ge3) 時(si4) 候(hau6)。近(gan6) 幾(gei2) 年(nin4) 嚟(lai4)，由(jau4) 於(jyu1) 全(cyun4) 球(kau4) 暖(nyun5) 化(faa3)，我(ngo5) 覺(gok3) 得(dak1) 夏(haa6) 天(tin1) 比(bei2) 我(ngo5) 細(sai3) 個(go3) 嘅(ge3) 時(si4) 候(hau6) 熱(jit6) 咗(zo2) 好(hou2) 多(do1)。有(jau5) 啲(di1) 日(jat6) 子(zi2) 溫(wan1) 度(dou6) 超(ciu1) 過(gwo3) 三(saam1) 十(sap6) 五(ng5) 度(dou6)，太(taai3) 陽(joeng4) 又(jau6) 特(dak6) 別(bit6) 猛(maang5)，光(gwong1) 線(sin3) 好(hou2) 強(koeng4)。`,
+      `如(jyu4) 果(gwo2) 出(cet1) 去(heoi3) 行(haang4)，我(ngo5) 一(jat1) 定(ding6) 會(wui5) 打(daa2) 遮(ze1) 遮(ze1) 陽(joeng4)，同(tung4) 埋(maai4) 飲(jam2) 多(do1) 啲(di1) 水(seoi2)。而(ji4) 家(gaa1) 我(ngo5) 有(jau5) 小(siu2) 朋(pang4) 友(jau5)，夏(haa6) 天(tin1) 帶(daai3) 佢(keoi5) 出(cet1) 去(heoi3) 玩(waan2) 真(zan1) 係(hai6) 好(hou2) 難(naan4)。下(haa6) 晝(zau3) 太(taai3) 熱(jit6)，公(gung1) 園(jyun4) 基(gei1) 本(bun2) 上(soeng6) 冇(mou5) 乜(mat1) 人(jan4)。所(so2) 以(ji5) 我(ngo5) 哋(dei6) 大(daai6) 多(do1) 數(sou3) 時(si4) 間(gaan1) 都(dou1) 係(hai6) 喺(hai2) 屋(uk1) 企(kei2) 開(hoi1) 冷(laang5) 氣(hei3)，或(waak6) 者(ze2) 去(heoi3) 商(soeng1) 場(coeng4) 行(haang4) 吓(haa5)。`,
+      `到(dou3) 咗(zo2) 秋(cau1) 天(tin1)，天(tin1) 氣(hei3) 就(zau6) 好(hou2) 似(ci5) 一(jat1) 下(haa6) 子(zi2) 涼(loeng4) 爽(song2) 咗(zo2)。成(sing4) 都(dou1) 嘅(ge3) 秋(cau1) 天(tin1) 好(hou2) 舒(syu1) 服(fuk6)，唔(m4) 會(wui5) 太(taai3) 熱(jit6)，亦(jik6) 唔(m4) 會(wui5) 太(taai3) 凍(dung3)。有(jau5) 時(si4) 候(hau6) 仲(zung6) 會(wui5) 吹(ceoi1) 啲(di1) 涼(loeng4) 風(fung1)，令(ling6) 人(jan4) 覺(gok3) 得(dak1) 特(dak6) 別(bit6) 舒(syu1) 服(fuk6)。`,
+      `呢(ni1) 個(go3) 季(gwai3) 節(zit3) 最(zeoi3) 啱(ngaam1) 帶(daai3) 小(siu2) 朋(pang4) 友(jau5) 去(heoi3) 公(gung1) 園(jyun4)、戶(wu6) 外(ngoi6) 遊(jau4) 樂(lok6) 場(coeng4) 或(waak6) 者(ze2) 郊(gaau1) 外(ngoi6) 玩(waan2)。我(ngo5) 哋(dei6) 可(ho2) 以(ji5) 一(jat1) 齊(cai4) 散(saan3) 步(bou6)、踩(caai2) 單(daan1) 車(ce1)、踢(tek3) 波(bo1)，享(hoeng2) 受(sau6) 戶(wu6) 外(ngoi6) 活(wut6) 動(dung6)。`,
+      `冬(dung1) 天(tin1) 就(zau6) 係(hai6) 我(ngo5) 最(zeoi3) 唔(m4) 鍾(zung1) 意(ji3) 嘅(ge3) 季(gwai3) 節(zit3)。雖(seoi1) 然(jin4) 成(sing4) 都(dou1) 冇(mou5) 北(bak1) 方(fong1) 城(sing4) 市(si5) 咁(gam3) 凍(dung3)，但(daan6) 係(hai6) 空(hung1) 氣(hei3) 好(hou2) 潮(ciu4) 濕(sap1)，所(so2) 以(ji5) 啲(di1) 凍(dung3) 氣(hei3) 好(hou2) 容(jung4) 易(ji6) 入(jap6) 骨(gwat1)。冬(dung1) 天(tin1) 經(ging1) 常(soeng4) 都(dou1) 係(hai6) 陰(jam1) 天(tin1)，有(jau5) 時(si4) 候(hau6) 仲(zung6) 會(wui5) 落(lok6) 雨(jyu5)，天(tin1) 色(sik1) 灰(fui1) 濛(mung4) 濛(mung4)，令(ling6) 人(jan4) 好(hou2) 想(soeng2) 留(lau4) 喺(hai2) 屋(uk1) 企(kei2) 唔(m4) 出(cet1) 門(mun4)。`,
+      `總(zung2) 括(kut3) 嚟(lai4) 講(gong2)，我(ngo5) 最(zeoi3) 喜(hei2) 歡(fun1) 春(ceon1) 天(tin1) 同(tung4) 秋(cau1) 天(tin1)，因(jan1) 為(wai6) 天(tin1) 氣(hei3) 舒(syu1) 服(fuk6)，又(jau6) 方(fong1) 便(bin6) 同(tung4) 屋(uk1) 企(kei2) 人(jan4) 一(jat1) 齊(cai4) 出(cet1) 去(heoi3) 玩(waan2)。至(zi3) 於(jyu1) 夏(haa6) 天(tin1) 同(tung4) 冬(dung1) 天(tin1)，我(ngo5) 就(zau6) 冇(mou5) 咁(gam3) 鍾(zung1) 意(ji3) 喇(laa3)。`
+    ],
+    englishParagraphs: [
+      `I live in Chengdu, and among the four seasons, spring is my favorite.`,
+      `When spring arrives, the weather gradually becomes warmer and flowers begin blooming everywhere. The parks become colorful and full of life. On sunny days, it's very pleasant to be outside and enjoy the sunshine. Spring is also a great season for walking, sightseeing, and spending time outdoors with family.`,
+      `However, spring weather can change quickly. It may be sunny in the morning and rainy in the afternoon. That's why I usually check the weather forecast before leaving home. If rain is expected, I always bring an umbrella with me.`,
+      `Summer is probably the most difficult season. Because of global warming, summers in Chengdu have become much hotter than when I was a child. Temperatures often exceed 35 degrees Celsius, and the sunlight can be extremely strong. Whenever I go outside, I make sure to use an umbrella for sun protection and drink plenty of water.`,
+      `As a parent, summer can be particularly challenging. Taking my child outdoors in the afternoon is often not practical because of the heat. Most of the time, we either stay at home with the air conditioning on or spend time in shopping malls where it's cooler and more comfortable.`,
+      `Autumn is my second favorite season. After the long hot summer, the weather suddenly becomes cool and pleasant. Gentle breezes make outdoor activities much more enjoyable. It's the perfect time to take my child to parks and playgrounds. We can walk, ride bikes, play sports, and enjoy nature together.`,
+      `Winter is my least favorite season. Although Chengdu is not as cold as northern China, the high humidity makes the cold feel much worse. Winter is often cloudy, rainy, and gray. On those days, I would rather stay indoors than go outside.`,
+      `Overall, I love spring and autumn because the weather is comfortable and ideal for family activities. Summer is too hot, and winter is too damp and chilly for my taste.`
+    ]
+  },
+  {
+    title: '交通工具',
+    cantoneseParagraphs: [
+      `如(jyu4) 果(gwo2) 講(gong2) 交(gaau1) 通(tung1)，我(ngo5) 平(ping4) 時(si4) 最(zeoi3) 常(soeng4) 用(jung6) 嘅(ge3) 交(gaau1) 通(tung1) 工(gung1) 具(geoi6) 係(hai6) 地(dei6) 鐵(tit3)。`,
+      `我(ngo5) 每(mui5) 日(jat6) 返(faan1) 工(gung1) 都(dou1) 係(hai6) 搭(daap3) 一(jat1) 號(hou6) 線(sin3)。地(dei6) 鐵(tit3) 最(zeoi3) 大(daai6) 嘅(ge3) 好(hou2) 處(cyu3) 就(zau6) 係(hai6) 準(zeon2) 時(si4)，而(ji4) 且(ce2) 唔(m4) 怕(paa3) 塞(sak1) 車(ce1)，所(so2) 以(ji5) 返(faan1) 工(gung1) 搭(daap3) 地(dei6) 鐵(tit3) 真(zan1) 係(hai6) 幾(gei2) 方(fong1) 便(bin6)。`,
+      `不(bat1) 過(gwo3)，朝(ziu1) 早(zou2) 返(faan1) 工(gung1) 同(tung4) 放(fong3) 工(gung1) 嗰(go2) 陣(zan6) 真(zan1) 係(hai6) 好(hou2) 擠(zai1) 迫(bik1)。有(jau5) 時(si4) 候(hau6) 月(jyut6) 台(toi4) 已(ji5) 經(ging1) 企(kei5) 滿(mun5) 人(jan4)，上(soeng5) 到(dou3) 車(ce1) 之(zi1) 後(hau6)，連(lin4) 轉(zyun2) 個(go3) 身(san1) 都(dou1) 有(jau5) 啲(di1) 難(naan4)。有(jau5) 時(si4) 候(hau6) 想(soeng2) 攞(lo2) 電(din6) 話(waa2) 出(cet1) 嚟(lai4) 睇(tai2) 吓(haa5)，都(dou1) 冇(mou5) 咁(gam3) 容(jung4) 易(ji6)。`,
+      `除(ceoi4) 咗(zo2) 地(dei6) 鐵(tit3) 之(zi1) 外(ngoi6)，我(ngo5) 有(jau5) 時(si4) 候(hau6) 都(dou1) 會(wui5) 搭(daap3) 巴(baa1) 士(si2) 或(waak6) 者(ze2) 搭(daap3) 的(dik1) 士(si2)。如(jyu4) 果(gwo2) 去(heoi3) 嘅(ge3) 地(dei6) 方(fong1) 離(lei4) 地(dei6) 鐵(tit3) 站(zaam6) 比(bei2) 較(gaau3) 遠(jyun5)，巴(baa1) 士(si2) 會(wui5) 方(fong1) 便(bin6) 啲(di1)。如(jyu4) 果(gwo2) 趕(gon2) 時(si4) 間(gaan1)，我(ngo5) 就(zau6) 多(do1) 數(sou3) 會(wui5) 搭(daap3) 的(dik1) 士(si2)。`,
+      `到(dou3) 咗(zo2) 週(zau1) 末(mut6)，我(ngo5) 一(jat1) 般(bun1) 都(dou1) 會(wui5) 自(zi6) 己(gei2) 揸(zaa1) 車(ce1)。因(jan1) 為(wai6) 我(ngo5) 而(ji4) 家(gaa1) 有(jau5) 個(go3) 仔(zai2)，帶(daai3) 住(zyu6) 佢(keoi5) 出(cet1) 街(gaai1)，揸(zaa1) 車(ce1) 會(wui5) 方(fong1) 便(bin6) 好(hou2) 多(do1)。我(ngo5) 哋(dei6) 可(ho2) 以(ji5) 去(heoi3) 公(gung1) 園(jyun4)、行(haang4) 商(soeng1) 場(coeng4)，或(waak6) 者(ze2) 去(heoi3) 郊(gaau1) 遊(jau4)。而(ji4) 且(ce2) 可(ho2) 以(ji5) 帶(daai3) 埋(maai4) 玩(waan2) 具(geoi6)、水(seoi2) 同(tung4) 零(ling4) 食(sik6)，唔(m4) 使(sai2) 拎(ling1) 住(zyu6) 一(jat1) 大(daai6) 堆(deoi1) 嘢(je5) 周(zau1) 圍(wai4) 行(haang4)。`,
+      `不(bat1) 過(gwo3)，假(gaa3) 期(kei4) 揸(zaa1) 車(ce1) 最(zeoi3) 麻(maa4) 煩(faan4) 嘅(ge3) 地(dei6) 方(fong1)，就(zau6) 係(hai6) 塞(sak1) 車(ce1)。有(jau5) 時(si4) 候(hau6) 明(ming4) 明(ming4) 平(ping4) 時(si4) 一(jat1) 個(go3) 鐘(zung1) 頭(tau4) 可(ho2) 以(ji5) 去(heoi3) 到(dou2) 嘅(ge3) 地(dei6) 方(fong1)，到(dou3) 咗(zo2) 假(gaa3) 期(kei4) 可(ho2) 能(nang4) 要(jiu3) 開(hoi1) 兩(loeng5) 個(go3) 鐘(zung1) 頭(tau4)。`,
+      `如(jyu4) 果(gwo2) 同(tung4) 屋(uk1) 企(kei2) 人(jan4) 去(heoi3) 附(fu6) 近(gan6) 城(sing4) 市(si5) 玩(waan2)，我(ngo5) 其(kei4) 實(sat6) 幾(gei2) 鍾(zung1) 意(ji3) 搭(daap3) 高(gou1) 鐵(tit3)。高(gou1) 鐵(tit3) 又(jau6) 快(faai3) 又(jau6) 舒(syu1) 服(fuk6)，唔(m4) 使(sai2) 自(zi6) 己(gei2) 揸(zaa1) 車(ce1)，仲(zung6) 可(ho2) 以(ji5) 喺(hai2) 車(ce1) 上(soeng6) 休(jau1) 息(sik1) 吓(haa5)。`,
+      `如(jyu4) 果(gwo2) 去(heoi3) 北(bak1) 京(ging1)、上(soeng6) 海(hoi2) 或(waak6) 者(ze2) 再(zoi3) 遠(jyun5) 啲(di1) 嘅(ge3) 地(dei6) 方(fong1)，我(ngo5) 就(zau6) 會(wui5) 選(syun2) 擇(zaak6) 搭(daap3) 飛(fei1) 機(gei1)。雖(seoi1) 然(jin4) 機(gei1) 票(piu3) 有(jau5) 時(si4) 候(hau6) 唔(m4) 平(peng4)，但(daan6) 係(hai6) 的(dik1) 確(kok3) 可(ho2) 以(ji5) 慳(haan1) 返(faan1) 好(hou2) 多(do1) 時(si4) 間(gaan1)。`,
+      `另(ling6) 外(ngoi6)，而(ji4) 家(gaa1) 共(gung6) 享(hoeng2) 單(daan1) 車(ce1) 都(dou1) 好(hou2) 方(fong1) 便(bin6)。如(jyu4) 果(gwo2) 只(zi2) 係(hai6) 去(heoi3) 附(fu6) 近(gan6) 買(maai5) 嘢(je5) 或(waak6) 者(ze2) 食(sik6) 飯(faan6)，踩(caai2) 單(daan1) 車(ce1) 比(bei2) 搭(daap3) 車(ce1) 仲(zung6) 方(fong1) 便(bin6)。`,
+      `總(zung2) 括(kut3) 嚟(lai4) 講(gong2)，唔(m4) 同(tung4) 嘅(ge3) 交(gaau1) 通(tung1) 工(gung1) 具(geoi6) 都(dou1) 有(jau5) 自(zi6) 己(gei2) 嘅(ge3) 優(jau1) 點(dim2)。返(faan1) 工(gung1) 我(ngo5) 會(wui5) 搭(daap3) 地(dei6) 鐵(tit3)，週(zau1) 末(mut6) 帶(daai3) 個(go3) 仔(zai2) 出(cet1) 街(gaai1) 我(ngo5) 會(wui5) 揸(zaa1) 車(ce1)，去(heoi3) 旅(leoi5) 行(hang4) 就(zau6) 視(si6) 乎(fu4) 距(keoi5) 離(lei4) 選(syun2) 擇(zaak6) 高(gou1) 鐵(tit3) 或(waak6) 者(ze2) 飛(fei1) 機(gei1)。`
+    ],
+    englishParagraphs: [
+      `When it comes to transportation, the one I use most often is the metro.`,
+      `I take Line 1 to work every day. The biggest advantage is that it's reliable, punctual, and not affected by traffic jams. However, rush hour can be pretty intense. The platforms are often packed, and once you're on the train, it's sometimes difficult even to turn around. On particularly crowded days, I can barely take my phone out of my pocket.`,
+      `Besides the metro, I occasionally take buses or taxis. If I'm going somewhere that isn't close to a metro station, a bus is usually more convenient. When I'm in a hurry, I'll simply take a taxi.`,
+      `On weekends, I usually drive. Since I have a young son, having a car makes family outings much easier. We can bring toys, snacks, drinks, and everything else we might need without carrying lots of bags around. We often drive to parks, shopping malls, or places outside the city for a day trip.`,
+      `Of course, driving also has its downsides. During public holidays, traffic can be terrible. A trip that normally takes an hour can easily turn into a two-hour journey because of congestion.`,
+      `For trips to nearby cities, I actually prefer taking high-speed rail. It's fast, comfortable, and much less stressful than driving. I can sit back, relax, and use my phone during the journey.`,
+      `For longer trips to cities like Beijing or Shanghai, I usually fly. Air tickets can be expensive, but flying saves a lot of time.`,
+      `I also use shared bikes for short distances. If I'm just going to a nearby restaurant or store, cycling is often the quickest and most convenient option.`,
+      `Overall, different transportation methods suit different situations. I take the metro for work, drive for family activities on weekends, use high-speed rail for regional travel, and fly for longer journeys. That's usually the most practical approach for me.`
+    ]
+  }
+];
+
+const synth = window.speechSynthesis;
+const app = document.querySelector('#app');
+const toc = document.querySelector('#toc');
+const cantoneseVoiceSelect = document.querySelector('#cantoneseVoice');
+const englishVoiceSelect = document.querySelector('#englishVoice');
+const rate = document.querySelector('#rate');
+const rateValue = document.querySelector('#rateValue');
+let voices = [];
+let activeLoop = null;
+
+function loadVoices(){
+  voices = synth.getVoices();
+  fillVoiceSelect(cantoneseVoiceSelect, voices.filter(v => /^(yue|zh-HK)/i.test(v.lang) || /cantonese|hong kong|粵|粤|廣東|广东/i.test(v.name)), '粤语声音');
+  fillVoiceSelect(englishVoiceSelect, voices.filter(v => /^en/i.test(v.lang)), '英语声音');
+}
+
+function fillVoiceSelect(select, matches, label){
+  const list = matches.length ? matches : voices;
+  select.innerHTML = '';
+  list.forEach(v=>{ const o=document.createElement('option'); o.value=voices.indexOf(v); o.textContent=`${v.name} (${v.lang})`; select.appendChild(o); });
+  if(!list.length){ const o=document.createElement('option'); o.textContent=`使用系统默认${label}`; o.value=''; select.appendChild(o); }
+}
+loadVoices();
+if ('onvoiceschanged' in synth) synth.onvoiceschanged = loadVoices;
+
+rate.addEventListener('input',()=>rateValue.textContent=Number(rate.value).toFixed(1));
+document.querySelector('#stop').addEventListener('click', stopPlayback);
+
+function stopPlayback(){
+  synth.cancel();
+  if(activeLoop?.button) activeLoop.button.textContent = activeLoop.defaultLabel;
+  activeLoop = null;
+  document.querySelectorAll('.speaking').forEach(x=>x.classList.remove('speaking'));
+}
+
+function speak(text, element, lang='yue-HK', onend=null, fromLoop=false){
+  if(!fromLoop && activeLoop?.button){
+    activeLoop.button.textContent = activeLoop.defaultLabel;
+    activeLoop = null;
+  }
+  synth.cancel();
+  document.querySelectorAll('.speaking').forEach(x=>x.classList.remove('speaking'));
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = lang; u.rate = Number(rate.value);
+  const select = lang.startsWith('en') ? englishVoiceSelect : cantoneseVoiceSelect;
+  const selected = voices[Number(select.value)];
+  if(selected) u.voice = selected;
+  if(element) element.classList.add('speaking');
+  u.onend=()=>{ if(element) element.classList.remove('speaking'); if(onend) onend(); };
+  u.onerror=()=>{ if(element) element.classList.remove('speaking'); if(activeLoop) stopPlayback(); };
+  synth.speak(u);
+}
+
+function toggleTopicLoop(topic, button){
+  if(activeLoop?.button === button){
+    stopPlayback();
+    return;
+  }
+  stopPlayback();
+  if(!topic.paragraphs.length) return;
+  activeLoop = { topic, button, index: 0, paragraphs: topic.paragraphs, lang: topic.lang, defaultLabel: topic.defaultLabel };
+  button.textContent = '停止循环播放';
+  playNextTopicParagraph();
+}
+
+function playNextTopicParagraph(){
+  if(!activeLoop) return;
+  const paragraph = activeLoop.paragraphs[activeLoop.index];
+  const spoken = activeLoop.lang.startsWith('en') ? paragraph : parseLine(paragraph).map(x=>x.char).join('');
+  speak(spoken, null, activeLoop.lang, ()=>{
+    if(!activeLoop) return;
+    activeLoop.index = (activeLoop.index + 1) % activeLoop.paragraphs.length;
+    playNextTopicParagraph();
+  }, true);
+}
+
+function parseLine(line){
+  const items=[];
+  const re=/([^\s()])(?:\(([^()]+)\))?/gu;
+  let m;
+  while((m=re.exec(line))!==null) items.push({char:m[1], jyut:m[2]||''});
+  return items;
+}
+
+function parseEnglishParagraph(text){
+  const items=[];
+  const re=/([A-Za-z]+(?:['-][A-Za-z]+)*)|([^A-Za-z\s]+)|(\s+)/g;
+  let m;
+  while((m=re.exec(text))!==null){
+    if(m[1]) items.push({type:'word', value:m[1]});
+    else if(m[2]) items.push({type:'punct', value:m[2]});
+    else if(m[3]) items.push({type:'space', value:m[3]});
+  }
+  return items;
+}
+
+function slugify(value){
+  return value.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]+/g, '-').replace(/^-+|-+$/g, '') || 'topic';
+}
+
+function renderToc(){
+  toc.innerHTML='';
+  const title=document.createElement('h2');
+  title.className='toc-title';
+  title.textContent='目录';
+  const list=document.createElement('div');
+  list.className='toc-list';
+  const practiceLink=document.createElement('a');
+  practiceLink.className='toc-link';
+  practiceLink.href='#practice';
+  practiceLink.textContent='练习短句';
+  list.appendChild(practiceLink);
+  TOPICS.forEach((topic,index)=>{
+    const link=document.createElement('a');
+    link.className='toc-link';
+    link.href=`#topic-${index+1}-${slugify(topic.title)}`;
+    link.textContent=`Topic ${index+1}：${topic.title}`;
+    list.appendChild(link);
+  });
+  toc.append(title,list);
+}
+
+function render(){
+  app.innerHTML='';
+  renderToc();
+  const lines=CONTENT.map(x=>x.trim()).filter(Boolean);
+  if(lines.length){
+    const practiceSection=document.createElement('section');
+    practiceSection.className='topic';
+    practiceSection.id='practice';
+    const practiceTitle=document.createElement('h2');
+    practiceTitle.className='topic-title';
+    practiceTitle.textContent='练习短句';
+    practiceSection.appendChild(practiceTitle);
+    lines.forEach((line,index)=>{
+      const items=parseLine(line);
+      const spoken=items.map(x=>x.char).join('');
+      const row=document.createElement('section'); row.className='sentence';
+      const play=document.createElement('button'); play.className='play'; play.type='button'; play.textContent='▶'; play.title=`播放第 ${index+1} 句`; play.setAttribute('aria-label',play.title); play.onclick=()=>speak(spoken,play);
+      const tokens=document.createElement('div'); tokens.className='tokens';
+      items.forEach(item=>{
+        if(item.jyut){
+          const b=document.createElement('button'); b.type='button'; b.className='token'; b.title=`${item.char} ${item.jyut}`;
+          const han=document.createElement('span'); han.className='han'; han.textContent=item.char;
+          const jyut=document.createElement('span'); jyut.className='jyut'; jyut.textContent=item.jyut;
+          b.append(han,jyut); b.onclick=()=>speak(item.char,b); tokens.appendChild(b);
+        }else{
+          const s=document.createElement('span'); s.className='punct'; s.textContent=item.char; tokens.appendChild(s);
+        }
+      });
+      row.append(play,tokens); practiceSection.appendChild(row);
+    });
+    app.appendChild(practiceSection);
+  } else {
+    app.innerHTML='<div class="error">CONTENT 里还没有内容。</div>';
+  }
+  TOPICS.forEach((topic,index)=>renderTopic(topic,index));
+}
+
+function renderTopic(topic,index){
+  const section=document.createElement('section'); section.className='topic';
+  section.id = `topic-${index+1}-${slugify(topic.title)}`;
+  const header=document.createElement('div'); header.className='topic-header';
+  const title=document.createElement('h2'); title.className='topic-title'; title.textContent=`Topic ${index+1}：${topic.title}`;
+  const actions=document.createElement('div'); actions.className='topic-actions';
+  const cantoneseLoopButton=document.createElement('button'); cantoneseLoopButton.className='loop-topic'; cantoneseLoopButton.type='button'; cantoneseLoopButton.textContent='循环播放本 topic 粤语'; cantoneseLoopButton.onclick=()=>toggleTopicLoop({ paragraphs: topic.cantoneseParagraphs, lang: 'yue-HK', defaultLabel: '循环播放本 topic 粤语' }, cantoneseLoopButton);
+  const englishLoopButton=document.createElement('button'); englishLoopButton.className='loop-topic'; englishLoopButton.type='button'; englishLoopButton.textContent='循环播放本 topic 英语'; englishLoopButton.onclick=()=>toggleTopicLoop({ paragraphs: topic.englishParagraphs, lang: 'en-US', defaultLabel: '循环播放本 topic 英语' }, englishLoopButton);
+  actions.append(cantoneseLoopButton, englishLoopButton);
+  header.append(title,actions);
+  section.appendChild(header);
+  const cantoneseTitle = document.createElement('h2'); cantoneseTitle.textContent='粤语文章（按段播放）';
+  section.appendChild(cantoneseTitle);
+  topic.cantoneseParagraphs.forEach((paragraph,paragraphIndex)=>renderCantoneseParagraph(section, paragraph, paragraphIndex));
+  const englishTitle = document.createElement('h2'); englishTitle.textContent='American Native English Version（按段播放）';
+  section.appendChild(englishTitle);
+  topic.englishParagraphs.forEach((paragraph,paragraphIndex)=>renderEnglishParagraph(section, paragraph, paragraphIndex));
+  app.appendChild(section);
+}
+
+function renderCantoneseParagraph(container, paragraph,index){
+  const row=document.createElement('section'); row.className='paragraph';
+  const play=document.createElement('button'); play.className='play'; play.type='button'; play.textContent='▶'; play.title=`播放粤语第 ${index+1} 段`; play.setAttribute('aria-label',play.title);
+  const items=parseLine(paragraph); const spoken=items.map(x=>x.char).join(''); play.onclick=()=>speak(spoken,play,'yue-HK');
+  const tokens=document.createElement('div'); tokens.className='tokens paragraph-text';
+  items.forEach(item=>{ if(item.jyut){ const b=document.createElement('button'); b.type='button'; b.className='token'; b.title=`${item.char} ${item.jyut}`; const han=document.createElement('span'); han.className='han'; han.textContent=item.char; const jyut=document.createElement('span'); jyut.className='jyut'; jyut.textContent=item.jyut; b.append(han,jyut); b.onclick=()=>speak(item.char,b,'yue-HK'); tokens.appendChild(b); } else { const s=document.createElement('span'); s.className='punct'; s.textContent=item.char; tokens.appendChild(s); } });
+  row.append(play,tokens); container.appendChild(row);
+}
+
+function renderEnglishParagraph(container, paragraph,index){
+  const row=document.createElement('section'); row.className='paragraph';
+  const play=document.createElement('button'); play.className='play'; play.type='button'; play.textContent='▶'; play.title=`Play English paragraph ${index+1}`; play.setAttribute('aria-label',play.title); play.onclick=()=>speak(paragraph,play,'en-US');
+  const tokens=document.createElement('div'); tokens.className='tokens english-text';
+  parseEnglishParagraph(paragraph).forEach(item=>{
+    if(item.type === 'word'){
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='token english-token';
+      b.textContent=item.value;
+      b.title=`${item.value}`;
+      b.onclick=()=>speak(item.value,b,'en-US');
+      tokens.appendChild(b);
+    }else{
+      const span=document.createElement('span');
+      span.className='punct';
+      span.style.fontSize='15px';
+      span.textContent=item.value;
+      tokens.appendChild(span);
+    }
+  });
+  row.append(play,tokens); container.appendChild(row);
+}
+render();
+</script>
+</body>
+</html>
